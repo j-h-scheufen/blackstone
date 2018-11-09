@@ -40,8 +40,10 @@ contract DefaultContractManager is Versioned(1,0,0), SystemOwned, AbstractDbUpgr
      */
     function addContract(string _name, address _contract) pre_onlyBySystemOwner public returns (uint size) {
         // TODO since we're calling into the added contract, this function needs a re-entrancy guard
-        require(bytes(_name).length > 0, "TODO ERR CODE");
-        require(_contract != 0x0, "TODO ERR CODE");
+        ErrorsLib.revertIf(bytes(_name).length == 0,
+            ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultContractsManager.addContract", "The name parameter must not be empty");
+        ErrorsLib.revertIf(_contract == address(0),
+            ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultContractsManager.addContract", "The contract address parameter must not be empty");
         // setting contract locator gives the contract the chance to bootstrap, load dependencies, and initialize
         if (ERC165Utils.implementsInterface(_contract, ERC165_ID_ContractLocatorEnabled)) {
             ContractLocatorEnabled(_contract).setContractLocator(this);

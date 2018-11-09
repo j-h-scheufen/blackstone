@@ -28,6 +28,9 @@ jobs:
   - name: DougProxyTest
     build:
       contract: commons-management/test/DougProxyTest.sol
+  - name: ObjectProxyTest
+    build:
+      contract: commons-management/test/ObjectProxyTest.sol
   - name: ContractManagerDb
     build:
       contract: commons-management/ContractManagerDb.sol

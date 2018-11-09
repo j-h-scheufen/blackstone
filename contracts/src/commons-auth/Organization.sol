@@ -123,7 +123,16 @@ contract Organization is EventEmitter, ERC165 {
 	 */
 	function authorizeUser(address _userAccount, bytes32 _department) external view returns (bool);
 
+	/**
+	 * @dev Returns the organization key of this Organization.
+	 * @return a globaly unique identifier for the Organization
+	 */
 	function getOrganizationKey() public view returns (bytes32);
 
-  function getOrganizationDetails() external view returns (uint numberOfApprovers, bytes32 organizationKey);
+	/**
+	 * @dev Returns detailed information about this Organization
+	 * @return numberOfApprovers - the number of approvers in the organization
+	 * @return organizationKey - a globaly unique identifier for the organization
+	 */
+	function getOrganizationDetails() external view returns (uint numberOfApprovers, bytes32 organizationKey);
 }

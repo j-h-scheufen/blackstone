@@ -162,9 +162,9 @@ jobs:
     binpath: ../../docs/docdev/commons-management
     instance: all
 
-- name: DelegateProxy
+- name: DefaultDelegateProxy
   build:
-    contract: commons-management/DelegateProxy.sol
+    contract: commons-management/DefaultDelegateProxy.sol
     binpath: ../../docs/docdev/commons-management
     instance: all
 

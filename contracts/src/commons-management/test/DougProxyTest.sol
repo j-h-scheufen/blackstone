@@ -12,6 +12,8 @@ import "commons-management/test/TestService.sol";
 
 contract DougProxyTest {
 
+    string constant SUCCESS = "success";
+
     function testProxyDelegation() external returns (string) {
 
         ContractManagerDb contractsDb = new ContractManagerDb();
@@ -21,7 +23,7 @@ contract DougProxyTest {
 
         DefaultDoug doug = new DefaultDoug();
         DougProxy proxy = new DougProxy(doug);
-        if (proxy.getProxied() != address(doug)) return "Doug should be set in the proxy";
+        if (proxy.getDelegate() != address(doug)) return "Doug should be set in the proxy";
         if (DefaultDoug(proxy).getOwner() != doug.getOwner()) return "DougProxy and Doug should point to the same owner";
         if (DefaultDoug(proxy).getOwner() != address(this)) return "The proxy owner should be set to this contract";
 
@@ -41,10 +43,8 @@ contract DougProxyTest {
         if (contractsDb.getNumberOfContracts() != currentSize+2) return "ContractsDb size should be +2 after adding service via proxy";
         if (DOUG(proxy).lookupContract("io.monax/agreements-network/services/ProxyDelegateTest1") != address(s1)) return "service should be retrievable via the proxy";
 
-        return "success";
+        return SUCCESS;
     }
-
-
 
 }
 

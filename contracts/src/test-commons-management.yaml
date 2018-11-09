@@ -109,6 +109,28 @@ jobs:
 
 
 #####
+# ObjectProxyTest
+############################################################################################
+- name: ObjectProxyTest
+  deploy:
+    contract: ObjectProxyTest.bin
+    instance: ObjectProxyTest
+    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, TypeUtilsAPI:$TypeUtilsAPI, MappingsLib:$MappingsLib, ERC165Utils:$ERC165Utils
+
+- name: testProxyHandling
+  call:
+    destination: $ObjectProxyTest
+    bin: ObjectProxyTest
+    function: testProxyHandling
+
+- name: assertProxyHandling
+  assert:
+    key: $testProxyHandling
+    relation: eq
+    val: success
+
+
+#####
 # DOUG + Proxy setup via EPM (This tests the typical EPM DOUG setup in projects)
 ############################################################################################
 - name: ContractManagerDb
