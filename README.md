@@ -365,7 +365,8 @@ Finally, if you'd like to run the commands one by one to debug, you can go into 
 Create a new docker container and open bash
 
 ```bash
-docker-compose run --service-ports chain bash
+make run
+docker-compose exec chain bash
 ```
 
 Prerequisites, if running for the first time:
@@ -393,16 +394,11 @@ When you're finished working, then run the clean functions (note, this should be
 docker-compose rm --force --stop
 ```
 
-From the project root directory, you can also run the tests, e.g.
-
-```
-./test/test_api.sh deploy
-```
-
-deploys the AN contracts, and leaves the contracts and chain intact. Afterwards:
+You can also run the tests, e.g.
 
 ```
 cd api
+ps -ef | grep node
+kill -9 <pid>
 npm run test
 ```
-

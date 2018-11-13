@@ -1,6 +1,5 @@
 pragma solidity ^0.4.23;
 
-import "commons-events/EventListener.sol";
 import "commons-management/Upgradeable.sol";
 
 /**
@@ -8,17 +7,7 @@ import "commons-management/Upgradeable.sol";
  * @dev Manages organizational structures.
  */
 
-contract ParticipantsManager is EventListener, Upgradeable {
-  // SQLsol Events
-    event UpdateUserAccount(string name, address key1);
-    event UpdateOrganization(string name, address key1);
-    event UpdateOrganizationUser(string name, address key1, address key2);
-    event RemoveOrganizationUser(string name, address key1, address key2);
-    event UpdateOrganizationApprover(string name, address key1, address key2);
-    event UpdateOrganizationDepartment(string name, address key1, bytes32 key2);
-    event RemoveOrganizationDepartment(string name, address key1, bytes32 key2);
-    event UpdateDepartmentUser(string name, address key1, bytes32 key2, address key3);
-    event RemoveDepartmentUser(string name, address key1, bytes32 key2, address key3);
+contract ParticipantsManager is Upgradeable {
 
     event LogUserCreation(
         bytes32 indexed eventId,
@@ -27,68 +16,7 @@ contract ParticipantsManager is EventListener, Upgradeable {
         address owner
     );
 
-    event LogOrganizationCreation(
-        bytes32 indexed eventId,
-        address organization_address,
-        uint approver_count,
-        bytes32 organization_id
-    );
-
-    event LogOrganizationApproverUpdate(
-        bytes32 indexed eventId,
-        address organization_address,
-        address approver_address
-    );
-
-    event LogOrganizationUserUpdate(
-        bytes32 indexed eventId,
-        address organization_address,
-        address user_address
-    );
-
-    event LogOrganizationUserRemoval(
-        bytes32 indexed eventId,
-        bytes32 CRUD_ACTION,
-        address organization_address,
-        address user_address
-    ); 
-
-    event LogOrganizationDepartmentUpdate(
-        bytes32 indexed eventId,
-        address organization_address,
-        bytes32 department_id,
-        uint user_count,
-        string name        
-    );
-
-    event LogOrganizationDepartmentRemoval(
-        bytes32 indexed eventId,
-        bytes32 CRUD_ACTION,
-        address organization_address,
-        bytes32 department_id
-    );
-
-    event LogDepartmentUserUpdate(
-        bytes32 indexed eventId,
-        address organization_address,
-        bytes32 department_id,
-        address user_address
-    );
-
-    event LogDepartmentUserRevomal(
-        bytes32 indexed eventId,
-        bytes32 CRUD_ACTION,
-        address organization_address,
-        bytes32 department_id,
-        address user_address
-    );
-    
     bytes32 public constant EVENT_ID_USER_ACCOUNTS = "AN://user-accounts";
-    bytes32 public constant EVENT_ID_ORGANIZATION_ACCOUNTS = "AN://organization-accounts";
-    bytes32 public constant EVENT_ID_ORGANIZATION_APPROVERS = "AN://organizations/approvers";
-    bytes32 public constant EVENT_ID_ORGANIZATION_USERS = "AN://organizations/users";
-    bytes32 public constant EVENT_ID_ORGANIZATION_DEPARTMENTS = "AN://organizations/departments";
-    bytes32 public constant EVENT_ID_DEPARTMENT_USERS = "AN://departments/users";
 
     /**
      * @dev Creates and adds a user account, and optionally registers the user with an ecosystem if an address is provided
@@ -100,13 +28,6 @@ contract ParticipantsManager is EventListener, Upgradeable {
     function createUserAccount(bytes32 _id, address _owner, address _ecosystem) external returns (address userAccount);
 
 	/**
-	 * @dev Adds the organization at the specified address
-	 * @param _address the Organization contract's address
-	 * @return error code
-	 */
-    function addOrganization(address _address) external returns (uint);
-
-	/**
 	 * @dev Creates and adds a new Organization with the specified parameters
 	 * @param _initialApprovers the initial owners/admins of the Organization.
 	 * @param _defaultDepartmentName an optional custom name/label for the default department of this organization.
@@ -114,20 +35,20 @@ contract ParticipantsManager is EventListener, Upgradeable {
 	 */
     function createOrganization(address[] _initialApprovers, string _defaultDepartmentName) external returns (uint, address);
 
-	/**
-		* @dev Indicates whether the specified organization exists for the given organization id
-		* @param _address organization address
-		* @return bool exists
-		*/
-    function organizationExists(address _address) external view returns (bool);
+    /**
+     * @dev Indicates whether the specified UserAccount exists in this ParticipantsManager
+     * @param _userAccount user account address
+     * @return true if the given address belongs to a known UserAccount, false otherwise
+     */
+    function userAccountExists(address _userAccount) external view returns (bool);
 
 	/**
-	 * @dev Returns the address of the organization with the specified ID, if it exists
-	 * @param _address the organization's address
-	 * @return the organization's address, if it exists
+     * @dev Indicates whether the specified organization in this ParticipantsManager
+	 * @param _address organization address
+	 * @return true if the given address belongs to a known Organization, false otherwise
 	 */
-    function getOrganization(address _address) external view returns (bool);
-	
+    function organizationExists(address _address) external view returns (bool);
+
 	/**
 	 * @dev Returns the number of registered organizations.
 	 * @return the number of organizations
@@ -206,13 +127,6 @@ contract ParticipantsManager is EventListener, Upgradeable {
 	 * @return userAddress - address of the user
 	 */
     function getUserData(address _organization, address _user) external view returns (address userAddress);
-
-    /**
-     * @dev Indicates whether the specified user account exists for the given userAccount ID
-     * @param _userAccount user account address
-     * @return bool exists
-     */
-    function userAccountExists(address _userAccount) external view returns (bool);
 
     /**
      * SQLSOL support functions

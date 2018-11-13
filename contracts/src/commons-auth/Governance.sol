@@ -10,7 +10,6 @@ import "commons-collections/MappingsLib.sol";
 
 library Governance {
 
-
     struct Organization {
         bytes20 lei;
         bytes3 countryCode;

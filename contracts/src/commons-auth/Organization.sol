@@ -1,20 +1,94 @@
 pragma solidity ^0.4.23;
 
 import "commons-standards/ERC165.sol";
-import "commons-events/EventEmitter.sol";
 
 /**
  * @title Organization Interface
  * @dev Describes functionality of a contract representing an organization in an ecosystem application.
  * Also provides access to constants required when dealing with organizations.
  */
-contract Organization is EventEmitter, ERC165 {
+contract Organization is ERC165 {
+
+    event LogOrganizationCreation(
+        bytes32 indexed eventId,
+        address organization_address,
+        uint approver_count,
+        bytes32 organization_id
+    );
+
+    event LogOrganizationUserUpdate(
+        bytes32 indexed eventId,
+        address organization_address,
+        address user_address
+    );
+
+    event LogOrganizationUserRemoval(
+        bytes32 indexed eventId,
+        bytes32 CRUD_ACTION,
+        address organization_address,
+        address user_address
+    ); 
+
+    event LogDepartmentUserUpdate(
+        bytes32 indexed eventId,
+        address organization_address,
+        bytes32 department_id,
+        address user_address
+    );
+
+    event LogDepartmentUserRemoval(
+        bytes32 indexed eventId,
+        bytes32 CRUD_ACTION,
+        address organization_address,
+        bytes32 department_id,
+        address user_address
+    );
+
+    event LogOrganizationDepartmentUpdate(
+        bytes32 indexed eventId,
+        address organization_address,
+        bytes32 department_id,
+        uint user_count,
+        string name        
+    );
+
+    event LogOrganizationDepartmentRemoval(
+        bytes32 indexed eventId,
+        bytes32 CRUD_ACTION,
+        address organization_address,
+        bytes32 department_id
+    );
+
+    event LogOrganizationApproverUpdate(
+        bytes32 indexed eventId,
+        address organization_address,
+        address approver_address
+    );
+
+    event LogOrganizationApproverRemoval(
+        bytes32 indexed eventId,
+        bytes32 CRUD_ACTION,
+        address organization_address,
+        address approver_address
+    );
+
+	/**
+	 * @dev Event IDs
+	 */
+    bytes32 public constant EVENT_ID_ORGANIZATION_ACCOUNTS = "AN://organization-accounts";
+    bytes32 public constant EVENT_ID_ORGANIZATION_USERS = "AN://organizations/users";
+    bytes32 public constant EVENT_ID_DEPARTMENT_USERS = "AN://departments/users";
+    bytes32 public constant EVENT_ID_ORGANIZATION_DEPARTMENTS = "AN://organizations/departments";
+    bytes32 public constant EVENT_ID_ORGANIZATION_APPROVERS = "AN://organizations/approvers";
 
 	// The ERC165 ID only comprises the core Organization functions
 	bytes4 public constant ERC165_ID_Organization = bytes4(keccak256(abi.encodePacked("addUser(address)"))) ^
 													bytes4(keccak256(abi.encodePacked("removeUser(address)"))) ^
 													bytes4(keccak256(abi.encodePacked("authorizeUser(address,bytes32)")));
 
+	/**
+	 * @dev The reserved ID of the "default department" of an organization
+	 */
 	bytes32 public constant DEFAULT_DEPARTMENT_ID = "DEFAULT_DEPARTMENT";
 	
 	/**

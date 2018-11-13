@@ -175,8 +175,10 @@ contract ParticipantsManagerTest {
         bytes32 dep1Id = "dep1Id";
         string memory dep1Name = "Department 1 Name";
 		
-		// externally created organizations
-		Organization org1 = new DefaultOrganization(emptyAdmins, "Unassigned");
+		// 1. Create organization with empty admins
+        
+        (error, addr) = participantsManager.createOrganization(emptyAdmins, "Unassigned");
+        Organization org1 = Organization(addr);
 
         UserAccount user1 = new DefaultUserAccount(participantsManager, 0x0);
         UserAccount user2 = new DefaultUserAccount(participantsManager, 0x0);
@@ -189,20 +191,11 @@ contract ParticipantsManagerTest {
         if (org1.removeDepartment(org1.DEFAULT_DEPARTMENT_ID()))
             return "It should not be possible to remove the default department";
 
-		// 1. Test adding existing organization contract
-
-		error = participantsManager.addOrganization(org1);
-		if (error != BaseErrors.NO_ERROR()) return "Unexpected error adding org1.";
 		if (participantsManager.getNumberOfOrganizations() != 1) return "Number of Orgs in participantsManager should be 1";
 		if (org1.getNumberOfApprovers() != 1) return "Number of approvers in org1 not correct";
 		if (org1.getApproverAtIndex(0) != address(this)) return "Approver in org1 should be 'this'";
-		if (!participantsManager.getOrganization(address(org1))) return "Failed retrieving org1 by its ID";
+		if (!participantsManager.organizationExists(address(org1))) return "org1 should exist in the the ParticipantsManager";
 
-		// double-adding org1 should return error
-		error = participantsManager.addOrganization(org1);
-		if (error != BaseErrors.RESOURCE_ALREADY_EXISTS()) return "Expected error for adding already registered org1.";
-		if (participantsManager.getNumberOfOrganizations() != 1) return "Number of Orgs in participantsManager should be 1";
-    
         // departments
         if (!org1.addDepartment(dep1Id, dep1Name)) return "Adding department1 to org1 should be successful";
         // reminder: number of deps is +1 due to the default department
@@ -214,7 +207,7 @@ contract ParticipantsManagerTest {
         if (keccak256(abi.encodePacked(retDepName)) != keccak256(abi.encodePacked(dep1Name))) return "Failed to get department data (name) for dep1 in org1";
 		address orgAddr = participantsManager.getOrganizationAtIndex(0);
 		if (orgAddr != address(org1)) return "Expected org1 address";
-    (retUserCount, ) = participantsManager.getOrganizationData(orgAddr);
+        (retUserCount, ) = participantsManager.getOrganizationData(orgAddr);
 		if (retUserCount != 1) return "Expected number of approvers for orgAddr to be 1";
 
         // department users
@@ -232,7 +225,7 @@ contract ParticipantsManagerTest {
 		// 0x0 address for non-existent index
 		if (participantsManager.getOrganizationAtIndex(1) != 0x0) return "Expected 0x0";
 
-		// 2. Test factory function
+		// 2. Create organization with known admins
 
 		// create with known admins
    		address[] memory knownAdmins = new address[](2);
@@ -245,20 +238,20 @@ contract ParticipantsManagerTest {
 		if (Organization(orgAddress2).getNumberOfApprovers() != 2) return "Number of approvers in organization 2 not correct";
 		if (Organization(orgAddress2).getApproverAtIndex(0) != tx.origin) return "Approver 1 in organization 2 should be tx.origin";
 		if (Organization(orgAddress2).getApproverAtIndex(1) != address(org1)) return "Approver 2 in organization 2 should be org1";
-		if (participantsManager.getOrganization(orgAddress2) != true) return "Failed retrieving organization 2 by its address";
+		if (participantsManager.organizationExists(orgAddress2) != true) return "Organization 2 should exist in the ParticipantsManager";
 		// create with emptyAdmins again, so that msg.sender is automatically used for approver
 		address orgAddress3;
         (error, orgAddress3) = participantsManager.createOrganization(emptyAdmins, EMPTY_STRING);
         if (BaseErrors.NO_ERROR() != error) return "Unexpected error creating organization 3 (empty admins)";
 		if (Organization(orgAddress3).getNumberOfApprovers() != 1) return "Number of approvers in organization 3 not correct";
 		if (Organization(orgAddress3).getApproverAtIndex(0) != address(this)) return "Approver in organization 3 should be the test contract as the creator.";
-		if (participantsManager.getOrganization(orgAddress3) != true) return "Failed retrieving organization 3 by its address";
+		if (participantsManager.organizationExists(orgAddress3) != true) return "Organization 3 should exist in the ParticipantsManager";
 
 		if (participantsManager.getNumberOfOrganizations() != 3) return "Number of Orgs in participantsManager should be 3 at this point.";
 
 		orgAddr = participantsManager.getOrganizationAtIndex(2);
 		if (orgAddr != orgAddress3) return "Expected orgAddress3";
-    (retUserCount, ) = participantsManager.getOrganizationData(orgAddress3);
+        (retUserCount, ) = participantsManager.getOrganizationData(orgAddress3);
 		if (retUserCount != 1) return "Expected number of approvers for orgAddress3 to be 1";
 
 		return SUCCESS;

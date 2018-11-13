@@ -57,10 +57,6 @@ contract ParticipantsManagerDb is SystemOwned {
     return organizations.keys.length;
   }
 
-  function getOrganization(address _address) external view returns (bool) {
-    return organizations.get(_address);
-  }
-
   function getOrganizationAtIndex(uint _index) external view returns (address) {
     ( , address key) = organizations.keyAtIndex(_index);
     return key;

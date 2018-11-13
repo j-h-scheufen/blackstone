@@ -3,7 +3,6 @@ pragma solidity ^0.4.23;
 import "commons-base/ErrorsLib.sol";
 import "commons-utils/ArrayUtilsAPI.sol";
 import "commons-standards/AbstractERC165.sol";
-import "commons-events/DefaultEventEmitter.sol";
 
 import "commons-auth/Governance.sol";
 import "commons-auth/Organization.sol";
@@ -13,17 +12,10 @@ import "commons-auth/UserAccount.sol";
  * @title DefaultOrganization
  * @dev the default implementation of the Organization interface.
  */
-contract DefaultOrganization is Organization, DefaultEventEmitter, AbstractERC165 {
+contract DefaultOrganization is Organization, AbstractERC165 {
 	
 	using MappingsLib for Mappings.AddressBoolMap;
 	using ArrayUtilsAPI for address[];
-
-    bytes32 constant EVENT_UPDATE_ORGANIZATION_USER = "UpdateOrganizationUser";
-    bytes32 constant EVENT_REMOVE_ORGANIZATION_USER = "RemoveOrganizationUser";
-    bytes32 constant EVENT_UPDATE_ORGANIZATION_DEPARTMENT = "UpdateOrganizationDepartment";
-    bytes32 constant EVENT_REMOVE_ORGANIZATION_DEPARTMENT = "RemoveOrganizationDepartment";
-    bytes32 constant EVENT_UPDATE_DEPARTMENT_USER = "UpdateDepartmentUser";
-    bytes32 constant EVENT_REMOVE_DEPARTMENT_USER = "RemoveDepartmentUser";
 
 	Governance.Organization self;
 
@@ -65,6 +57,19 @@ contract DefaultOrganization is Organization, DefaultEventEmitter, AbstractERC16
 		}
 		addDepartment(DEFAULT_DEPARTMENT_ID, defaultDepartmentName);
 		addInterfaceSupport(ERC165_ID_Organization);
+		emit LogOrganizationCreation(
+			EVENT_ID_ORGANIZATION_ACCOUNTS,
+			address(this),
+			approvers.length,
+			getOrganizationKey()
+		);
+        for (uint i=0; i<approvers.length; i++) {
+            emit LogOrganizationApproverUpdate(
+                EVENT_ID_ORGANIZATION_APPROVERS,
+                address(this),
+                approvers[i]
+            );
+        }
 	}
 
 	/**
@@ -81,8 +86,38 @@ contract DefaultOrganization is Organization, DefaultEventEmitter, AbstractERC16
 		self.departments[_id].id = _id;
 		self.departments[_id].name = _name;
 		self.departments[_id].exists = true;
-		emitEvent(EVENT_UPDATE_ORGANIZATION_DEPARTMENT, this, _id);
+		emit LogOrganizationDepartmentUpdate(
+			EVENT_ID_ORGANIZATION_DEPARTMENTS,
+			address(this),
+			_id,
+			self.departments[_id].users.keys.length,
+			self.departments[_id].name
+		);
 		return true;
+	}
+
+	/**
+	 * @dev Removes the department with the specified ID, if it exists and is not the DEFAULT_DEPARTMENT_ID.
+	 * @param _depId a department ID
+	 * @return true if a department with that ID existed and was successfully removed, false otherwise
+	 */
+	function removeDepartment(bytes32 _depId) external returns (bool) {
+		if (self.departments[_depId].exists && _depId != DEFAULT_DEPARTMENT_ID) {
+			uint256 depKeyIdx = self.departments[_depId].keyIdx;
+			bytes32 swapKey = Mappings.deleteInKeys(self.departmentKeys, depKeyIdx);
+			if (swapKey != "") {
+				self.departments[swapKey].keyIdx = self.departments[_depId].keyIdx;
+			}
+			delete self.departments[_depId];
+            emit LogOrganizationDepartmentRemoval(
+                EVENT_ID_ORGANIZATION_DEPARTMENTS, 
+                bytes32("delete"), 
+                address(this), 
+                _depId
+            );
+			return true;
+		}
+		return false;
 	}
 
 	function getNumberOfDepartments() external view returns (uint size) {
@@ -160,7 +195,7 @@ contract DefaultOrganization is Organization, DefaultEventEmitter, AbstractERC16
 	}
 
 	/**
-	 * @dev Adds the specified user to this organization. This function guarantees that the user is part of this organization, if it returns true.
+	 * @dev Adds the specified user to this Organization. This function guarantees that the user is part of this organization, if it returns true.
 	 * @param _userAccount the user to add
 	 * @return true if the user is successfully added to the organization, false otherwise (e.g. if the user account address was empty)
 	 */
@@ -169,9 +204,36 @@ contract DefaultOrganization is Organization, DefaultEventEmitter, AbstractERC16
 			return false;
 		if(!users.exists(_userAccount)) {
 			users.insert(_userAccount, true);
-			emitEvent(EVENT_UPDATE_ORGANIZATION_USER, this, _userAccount);
+            emit LogOrganizationUserUpdate(
+                EVENT_ID_ORGANIZATION_USERS,
+                address(this),
+				_userAccount
+            );
 		}
 		return true;
+	}
+
+	/**
+	 * @dev Removes the user from this Organization and all departments they were in.
+	 * @param _userAccount the account to remove
+	 * @return bool true if user is removed successfully
+	 */
+	function removeUser(address _userAccount) external returns (bool) {
+		for (uint i = 0; i < self.departmentKeys.length; i++) {
+			bytes32 depId = self.departmentKeys[i];
+			removeUserFromDepartment(_userAccount, depId);
+		}
+		if (users.exists(_userAccount)) {
+			users.remove(_userAccount);
+            emit LogOrganizationUserRemoval(
+                EVENT_ID_ORGANIZATION_USERS,
+                bytes32("delete"),
+                address(this),
+				_userAccount
+            );
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -190,52 +252,31 @@ contract DefaultOrganization is Organization, DefaultEventEmitter, AbstractERC16
 		addUser(_userAccount);
 		if (!self.departments[targetDepartment].users.exists(_userAccount)) {
 			self.departments[targetDepartment].users.insert(_userAccount, true);
-			emitEvent(EVENT_UPDATE_DEPARTMENT_USER, this, targetDepartment, _userAccount);
+			emit LogDepartmentUserUpdate(
+                EVENT_ID_DEPARTMENT_USERS,
+                address(this),
+				targetDepartment,
+				_userAccount
+            );
 		}
 		return true;
 	}
 
 	/**
-	 * @dev Removes the user in this organization and all departments they were in.
-	 * @param _userAccount the account to remove
-	 * @return bool true if user is removed successfully
+	 * @dev Removes the user from the department in this organization
+	 * @param _userAccount the user to remove
+	 * @param _depId the department to remove the user from
+	 * @return bool indicating success or failure
 	 */
-	function removeUser(address _userAccount) external returns (bool) {
-		for (uint i = 0; i < self.departmentKeys.length; i++) {
-			bytes32 depId = self.departmentKeys[i];
-			removeUserFromDepartment(_userAccount, depId);
-		}
-		if (users.exists(_userAccount)) {
-			users.remove(_userAccount);
-			emitEvent(EVENT_REMOVE_ORGANIZATION_USER, this, _userAccount);
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * @dev Removes the department with the specified ID, if it exists and is not the DEFAULT_DEPARTMENT_ID.
-	 * @param _depId a department ID
-	 * @return true if a department with that ID existed and was successfully removed, false otherwise
-	 */
-	function removeDepartment(bytes32 _depId) external returns (bool) {
-		if (self.departments[_depId].exists && _depId != DEFAULT_DEPARTMENT_ID) {
-			uint256 depKeyIdx = self.departments[_depId].keyIdx;
-			bytes32 swapKey = Mappings.deleteInKeys(self.departmentKeys, depKeyIdx);
-			if (swapKey != "") {
-				self.departments[swapKey].keyIdx = self.departments[_depId].keyIdx;
-			}
-			delete self.departments[_depId];
-			emitEvent(EVENT_REMOVE_ORGANIZATION_DEPARTMENT, this, _depId);
-			return true;
-		}
-		return false;
-	}
-
 	function removeUserFromDepartment(address _userAccount, bytes32 _depId) public returns (bool) {
 		if (self.departments[_depId].users.exists(_userAccount)) {
 			self.departments[_depId].users.remove(_userAccount);
-			emitEvent(EVENT_REMOVE_DEPARTMENT_USER, this, _depId, _userAccount);
+            emit LogDepartmentUserRemoval(
+				EVENT_ID_DEPARTMENT_USERS,
+				bytes32("delete"),
+				address(this),
+				_depId,
+				_userAccount);
 			return true;
 		}
 		return false;
@@ -245,9 +286,9 @@ contract DefaultOrganization is Organization, DefaultEventEmitter, AbstractERC16
 	 * @dev Returns whether the given user account is authorized within this Organization.
 	 * The optional department/role identifier can be used to provide an additional authorization scope
 	 * against which to authorize the user. The following special cases exist:
-	 * - If the provided department matches the keccak256 hash of the address of this organization, the user
+	 * 1. If the provided department matches the keccak256 hash of the address of this organization, the user
 	 * is regarded as authorized, if belonging to this organization (without having to be associated with a
-	 * - If the department is empty or if it is an unknown (non-existent) department, the user will be evaluated
+	 * 2. If the department is empty or if it is an unknown (non-existent) department, the user will be evaluated
 	 * against the DEFAULT department.
 	 * particular department).
 	 * @param _userAccount the user account

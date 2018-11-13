@@ -8,7 +8,6 @@ interface ContractLocator {
 	
 	/**
 	 * @dev returns the address of the contract registered under the specified name.
-	 * TODO can be extended in the future to include version!
 	 * @param _name the registered name
 	 * @return the address of the contract or 0x0
 	 */
