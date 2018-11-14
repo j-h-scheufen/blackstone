@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.25;
 
 import "commons-base/SystemOwned.sol";
 import "commons-base/Versioned.sol";

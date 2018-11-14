@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.25;
 
 import "commons-base/OwnerTransferable.sol";
 import "commons-collections/DataStorage.sol";

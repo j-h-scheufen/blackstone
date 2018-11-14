@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.25;
 
 import "documents-commons/Agreement.sol";
 import "documents-commons/test/SignatoryProxy.sol";

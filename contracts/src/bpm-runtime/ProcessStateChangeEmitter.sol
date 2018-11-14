@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.25;
 
 import "bpm-runtime/ProcessInstance.sol";
 import "bpm-runtime/ProcessStateChangeListener.sol";

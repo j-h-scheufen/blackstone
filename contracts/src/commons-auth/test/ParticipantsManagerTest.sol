@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.25;
 
 import "commons-utils/TypeUtilsAPI.sol";
 import "commons-base/SystemOwned.sol";

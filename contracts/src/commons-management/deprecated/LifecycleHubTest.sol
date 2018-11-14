@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.25;
 
 import "../contracts/LifecycleModule.sol";
 import "../contracts/DefaultLifecycleModule.sol";

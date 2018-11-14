@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.25;
 
 /**
  * @dev Provides the storage layout for database-owning contracts.

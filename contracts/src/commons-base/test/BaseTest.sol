@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.25;
 
 import "commons-base/NamedElement.sol";
 import "commons-base/AbstractNamedElement.sol";
