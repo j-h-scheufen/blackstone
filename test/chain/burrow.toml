@@ -83,13 +83,20 @@ ValidatorAddress = "0201EF325305ABD75E1FB8A8F539730F71547484"
 
 [Tendermint]
   Seeds = ""
+  SeedMode = false
   PersistentPeers = ""
   ListenAddress = "tcp://0.0.0.0:26656"
   ExternalAddress = ""
   Moniker = ""
   TendermintRoot = ".burrow"
+  AuthorizedPeers = ""
+  CreateEmptyBlocks = true
+  CreateEmptyBlocksInterval = 0
 
 [Execution]
+  CallStackMaxDepth = 0
+  DataStackInitialCapacity = 1024
+  DataStackMaxDepth = 0
 
 [Keys]
   GRPCServiceEnabled = true
