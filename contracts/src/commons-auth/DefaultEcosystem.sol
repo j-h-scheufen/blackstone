@@ -41,6 +41,8 @@ contract DefaultEcosystem is Ecosystem {
         return publicKeys[_address];
     }
 
+    // TODO protect function with modifier for owner or public key only
+
     function addUserAccount(bytes32 _id, address _userAccount) 
         external
     {

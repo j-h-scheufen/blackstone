@@ -316,7 +316,7 @@ const getAgreementData = (agreementAddress, userAccount) => {
 };
 
 const getAgreementParties = (agreementAddress) => {
-  const queryString = 'SELECT parties.party AS address, parties.signature_timestamp::integer as "signatureTimestamp", parties.signed_by as "signedBy", encode(user_accounts.id::bytea, \'hex\') as id ' +
+  const queryString = 'SELECT parties.party AS address, parties.signature_timestamp::integer as "signatureTimestamp", parties.signed_by as "signedBy", user_accounts.user_account_address ' +
     'FROM agreement_to_party parties ' +
     'LEFT JOIN user_accounts ON parties.party = user_accounts.user_account_address WHERE parties.agreement_address = $1;';
   return runChainDbQuery(queryString, [agreementAddress])
@@ -325,7 +325,7 @@ const getAgreementParties = (agreementAddress) => {
         let users = [];
         let organizations = [];
         data.forEach((_party) => {
-          if (_party.id) users.push(_party);
+          if (_party.user_account_address) users.push(_party);
           else organizations.push(_party);
         });
         users = await setUserIds(users);

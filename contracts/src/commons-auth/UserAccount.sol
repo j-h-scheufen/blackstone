@@ -8,6 +8,17 @@ import "commons-base/Owned.sol";
  */
 contract UserAccount is Owned {
 
+   event LogUserCreation(
+        bytes32 indexed eventId,
+        address user_account_address,
+        address owner
+    );
+
+	/**
+	 * @dev Event IDs
+	 */
+    bytes32 public constant EVENT_ID_USER_ACCOUNTS = "AN://user-accounts";
+
     /**
      * @dev Forwards a call to the specified target using the given bytes message.
      * @param _target the address to call

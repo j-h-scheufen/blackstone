@@ -35,12 +35,6 @@ contract DefaultParticipantsManager is Versioned(1,0,0), ParticipantsManager, Ab
             if (_id != "" && _ecosystem != 0x0) {
                 Ecosystem(_ecosystem).addUserAccount(_id, userAccount);
             }
-            emit LogUserCreation(
-                EVENT_ID_USER_ACCOUNTS,
-                userAccount,
-                _id,
-                _owner
-            );
         }
     }
 

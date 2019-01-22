@@ -86,9 +86,15 @@ module.exports = (passport) => {
       const {
         username, password_digest: pwDigest, address: addressFromPg, created_at: createdAt,
       } = rows[0];
+
+      // The following section is an additional security measure.
+      // The UserAccount address for the user logging in is retrieved from the the Ecosystem smart contract
+      // and compared to the addresses found in the USER_ACCOUNTS Vent table as well as the
+      // USERS table in the customers DB. This makes sure that we're using the correct UserAccount
+      // for this user!
       const hashedId = getSHA256Hash(username);
       const { address: addressFromChain } = await contracts.getUserById(hashedId);
-      const data = (await sqlCache.getUsers({ id: hashedId }))[0];
+      const data = (await sqlCache.getUsers({ user_account_address: addressFromChain }))[0];
       if (!data) return done(null, false, { message: 'Invalid login credentials' });
       const isPassword = await bcrypt.compare(password, pwDigest);
       if (isPassword) {

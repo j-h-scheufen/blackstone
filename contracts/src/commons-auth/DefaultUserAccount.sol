@@ -53,6 +53,12 @@ contract DefaultUserAccount is UserAccount {
             account.ecosystems.insertOrUpdate(_ecosystem, true);
         }
         account.exists = true;
+        emit LogUserCreation(
+            EVENT_ID_USER_ACCOUNTS,
+            address(this),
+            _owner
+        );
+
     }
     
     /**

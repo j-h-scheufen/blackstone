@@ -6,17 +6,7 @@ import "commons-management/Upgradeable.sol";
  * @title ParticipantsManager Interface
  * @dev Manages organizational structures.
  */
-
 contract ParticipantsManager is Upgradeable {
-
-    event LogUserCreation(
-        bytes32 indexed eventId,
-        address user_account_address,
-        bytes32 id,
-        address owner
-    );
-
-    bytes32 public constant EVENT_ID_USER_ACCOUNTS = "AN://user-accounts";
 
     /**
      * @dev Creates and adds a user account, and optionally registers the user with an ecosystem if an address is provided
