@@ -2,7 +2,8 @@ pragma solidity ^0.4.25;
 
 import "commons-base/ErrorsLib.sol";
 import "commons-base/BaseErrors.sol";
-import "commons-events/AbstractEventListener.sol";
+import "commons-management/AbstractObjectFactory.sol";
+import "commons-management/ObjectProxy.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
 
 import "commons-auth/Ecosystem.sol";
@@ -11,13 +12,20 @@ import "commons-auth/ParticipantsManagerDb.sol";
 import "commons-auth/UserAccount.sol";
 import "commons-auth/DefaultUserAccount.sol";
 import "commons-auth/Organization.sol";
-import "commons-auth/DefaultOrganization.sol";
 
 /**
  * @title DefaultParticipantsManager
  * @dev Default implementation of the ParticipantsManager interface.
  */
-contract DefaultParticipantsManager is Versioned(1,0,0), ParticipantsManager, AbstractDbUpgradeable {
+contract DefaultParticipantsManager is Versioned(1,0,0), ParticipantsManager, AbstractObjectFactory, AbstractDbUpgradeable {
+
+    string public constant OBJECT_CLASS_ORGANIZATION = "commons.auth.Organization";
+
+    // TODO need to set DOUG here?? or call setDoug() extra, but that creates risk for missing the initialization; the constructor makes it explicit ... ?
+
+    constructor () public {
+        addInterfaceSupport(ERC165_ID_ObjectFactory);
+    }
 
     /**
      * @dev Creates and registers a UserAccount, and optionally establishes the connection of the user to an ecosystem, if an address is provided
@@ -56,7 +64,9 @@ contract DefaultParticipantsManager is Versioned(1,0,0), ParticipantsManager, Ab
         else {
             approvers = _initialApprovers;
         }
-        organization = new DefaultOrganization(approvers, _defaultDepartmentName);
+
+        organization = new ObjectProxy(doug, OBJECT_CLASS_ORGANIZATION);
+        Organization(address(organization)).initialize(approvers, _defaultDepartmentName);
         error = ParticipantsManagerDb(database).addOrganization(organization);
         ErrorsLib.revertIf(error != BaseErrors.NO_ERROR(),
             ErrorsLib.INVALID_STATE(), "DefaultParticipantsManager.createOrganization", "Unable to add the new Organization to the database");

@@ -82,8 +82,10 @@ contract ParticipantsManagerTest {
 
         // create the required organizations
         address[] memory approvers;
-        DefaultOrganization org1 = new DefaultOrganization(approvers, EMPTY_STRING);
-        DefaultOrganization org2 = new DefaultOrganization(approvers, EMPTY_STRING);
+        DefaultOrganization org1 = new DefaultOrganization();
+        org1.initialize(approvers, EMPTY_STRING);
+        DefaultOrganization org2 = new DefaultOrganization();
+        org2.initialize(approvers, EMPTY_STRING);
 
         uint oldSize = participantsManager.getUserAccountsSize();
 
@@ -264,7 +266,8 @@ contract ParticipantsManagerTest {
 
 		address[] memory emptyAdmins;
 
-        Organization org = new DefaultOrganization(emptyAdmins, EMPTY_STRING);
+        Organization org = new DefaultOrganization();
+        org.initialize(emptyAdmins, EMPTY_STRING);
         bytes32 dep1Id = "department";
 
         UserAccount user1 = new DefaultUserAccount(participantsManager, 0x0);

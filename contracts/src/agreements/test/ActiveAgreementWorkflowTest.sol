@@ -264,8 +264,10 @@ contract ActiveAgreementWorkflowTest {
 		userAccount3 = new DefaultUserAccount(this, address(0));
 		nonPartyAccount = new DefaultUserAccount(this, address(0));
 
-		org1 = new DefaultOrganization(approvers, EMPTY_STRING);
-		org2 = new DefaultOrganization(approvers, EMPTY_STRING);
+		org1 = new DefaultOrganization();
+		org1.initialize(approvers, EMPTY_STRING);
+		org2 = new DefaultOrganization();
+		org2.initialize(approvers, EMPTY_STRING);
 		org1.addUserToDepartment(userAccount2, EMPTY);
 		org2.addDepartment(departmentId1, "Department 1");
 		if (!org2.addUserToDepartment(userAccount3, departmentId1)) return "Failed to add user3 to department1";

@@ -1,12 +1,13 @@
 pragma solidity ^0.4.25;
 
 import "commons-management/Upgradeable.sol";
+import "commons-management/ObjectFactory.sol";
 
 /**
  * @title ParticipantsManager Interface
  * @dev Manages organizational structures.
  */
-contract ParticipantsManager is Upgradeable {
+contract ParticipantsManager is Upgradeable, ObjectFactory {
 
     /**
      * @dev Creates and adds a user account, and optionally registers the user with an ecosystem if an address is provided

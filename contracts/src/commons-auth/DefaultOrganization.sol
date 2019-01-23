@@ -3,6 +3,7 @@ pragma solidity ^0.4.25;
 import "commons-base/ErrorsLib.sol";
 import "commons-utils/ArrayUtilsAPI.sol";
 import "commons-standards/AbstractERC165.sol";
+import "commons-management/AbstractDelegateTarget.sol";
 
 import "commons-auth/Governance.sol";
 import "commons-auth/Organization.sol";
@@ -12,7 +13,7 @@ import "commons-auth/UserAccount.sol";
  * @title DefaultOrganization
  * @dev the default implementation of the Organization interface.
  */
-contract DefaultOrganization is Organization, AbstractERC165 {
+contract DefaultOrganization is Organization, AbstractDelegateTarget, AbstractERC165 {
 	
 	using MappingsLib for Mappings.AddressBoolMap;
 	using ArrayUtilsAPI for address[];
@@ -36,14 +37,20 @@ contract DefaultOrganization is Organization, AbstractERC165 {
 	}
 
 	/**
-	 * @dev Creates a new DefaultOrganization with the provided list of initial approvers.
+	 * @dev Initializes this DefaultOrganization with the provided list of initial approvers. This function replaces the
+	 * contract constructor, so it can be used as the delegate target for an ObjectProxy.
 	 * If the approvers list is empty, the msg.sender is registered as an approver for this Organization.
 	 * Also, a default department is automatically created which cannot be removed as it serves as the catch-all
 	 * for authorizations that cannot otherwise be matched with existing departments.
+	 * REVERTS if:
+	 * - the contract had already been initialized before
 	 * @param _initialApprovers an array of addresses that should be registered as approvers for this Organization
 	 * @param _defaultDepartmentName an optional custom name/label for the default department of this organization.
 	 */
-	constructor(address[] _initialApprovers, string _defaultDepartmentName) public {
+	function initialize(address[] _initialApprovers, string _defaultDepartmentName)
+		external
+		pre_post_initialize
+	{
 		// if no _initialApprovers were passed, register msg.sender as an approver
 		if (_initialApprovers.length == 0) {
 			approvers.push(msg.sender);

@@ -90,7 +90,15 @@ contract Organization is ERC165 {
 	 * @dev The reserved ID of the "default department" of an organization
 	 */
 	bytes32 public constant DEFAULT_DEPARTMENT_ID = "DEFAULT_DEPARTMENT";
-	
+
+	/**
+	 * @dev Initializes this DefaultOrganization with the provided list of initial approvers. This function replaces the
+	 * contract constructor, so it can be used as the delegate target for an ObjectProxy.
+	 * @param _initialApprovers an array of addresses that should be registered as approvers for this Organization
+	 * @param _defaultDepartmentName an optional custom name/label for the default department of this organization.
+	 */
+	function initialize(address[] _initialApprovers, string _defaultDepartmentName) external;
+
 	/**
 	 * @dev Adds the department with the specified ID and name to this Organization.
 	 * @param _id the department ID (must be unique)

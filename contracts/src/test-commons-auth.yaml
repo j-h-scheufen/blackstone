@@ -153,6 +153,20 @@ jobs:
 ##########
 # ParticipantsManager Tests
 
+# Setup for ObjectFactory
+- name: DefaultOrganization
+  deploy:
+    contract: DefaultOrganization.bin
+    libraries: ErrorsLib:$ErrorsLib
+
+- name: registerOrganizationImplementation
+  call:
+    destination: $DOUG
+    bin: DOUG
+    function: deployContract
+    data: ["", ]
+
+
 - name: ParticipantsManagerTest
   deploy:
     contract: ParticipantsManagerTest.bin

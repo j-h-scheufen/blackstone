@@ -8,7 +8,7 @@ import "commons-management/AbstractDelegateProxy.sol";
 /**
  * @title ObjectProxy
  * @dev Implementation of a proxy contract that supports unstructured data storage, i.e. leaves the definition and management of data storage to the proxied contract.
- * The data fields required for proxying and delegating calls are stored in reserved storage slots that don't interfere with the structured storage space.
+ * The data fields required for proxying and delegating calls are stored in reserved storage slots that are extremely unlikely to ever interfere with the structured storage space of the proxied contract.
  */
 contract ObjectProxy is AbstractDelegateProxy {
 
@@ -53,6 +53,7 @@ contract ObjectProxy is AbstractDelegateProxy {
         return DOUG(dougAddress).lookupContract(getObjectClass());
     }
 
+    // TODO instead of DOUG this should be a more generic interface to lookup object class (implementation) information
     function getDoug() public view returns (address dougAddress) {
         bytes32 dougPos = storagePositionDoug;
         assembly {

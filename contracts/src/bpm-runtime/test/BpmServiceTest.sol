@@ -1240,7 +1240,8 @@ contract BpmServiceTest {
 
 		UserAccount user1 = new DefaultUserAccount(this, 0x0);
 		UserAccount organizationUser = new DefaultUserAccount(this, 0x0);
-		DefaultOrganization org1 = new DefaultOrganization(emptyAddressArray, EMPTY_STRING);
+		DefaultOrganization org1 = new DefaultOrganization();
+		org1.initialize(emptyAddressArray, EMPTY_STRING);
 		if (!org1.addUserToDepartment(organizationUser, EMPTY)) return "Unable to add user account to organization default department";
 
 		// Register a typical WEB application with only a webform
