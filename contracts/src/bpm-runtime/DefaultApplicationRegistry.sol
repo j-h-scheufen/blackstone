@@ -13,11 +13,8 @@ import "bpm-runtime/ApplicationRegistryDb.sol";
  */
 contract DefaultApplicationRegistry is Versioned(1,0,0), ApplicationRegistry, AbstractDbUpgradeable {
 
-	string public constant TABLE_APPLICATIONS = "APPLICATIONS";
-	string public constant TABLE_APPLICATION_ACCESS_POINTS = "APPLICATION_ACCESS_POINTS";
-
 	/**
-	 * @dev Adds a Service application with the given parameters to this ProcessModel
+	 * @dev Adds a Service application with the given parameters to this ApplicationRegistry
 	 * @param _id the ID of the application
 	 * @param _type the BpmModel.ApplicationType
 	 * @param _location the location of the contract implementing the application
@@ -34,15 +31,13 @@ contract DefaultApplicationRegistry is Versioned(1,0,0), ApplicationRegistry, Ab
 			_webForm
 		);
 		if (error == BaseErrors.NO_ERROR()) {
-			emit UpdateApplications(TABLE_APPLICATIONS, _id);
 			emit LogApplicationCreation(
 				EVENT_ID_APPLICATIONS,
 				_id,
 				uint8(_type),
 				_location,
 				_function,
-				_webForm,
-				0
+				_webForm
 			);
 		}
 	}
@@ -62,18 +57,12 @@ contract DefaultApplicationRegistry is Versioned(1,0,0), ApplicationRegistry, Ab
 			return BaseErrors.RESOURCE_NOT_FOUND();
 		error = ApplicationRegistryDb(database).addAccessPoint(_id, _accessPointId, _dataType, _direction);
 		if (error == BaseErrors.NO_ERROR()) {
-			emit UpdateApplicationAccessPoints(TABLE_APPLICATION_ACCESS_POINTS, _id, _accessPointId);
 			emit LogApplicationAccessPointCreation(
 				EVENT_ID_APPLICATION_ACCESS_POINTS,
 				_id,
 				_accessPointId,
 				_dataType,
 				uint8(_direction)
-			);
-			emit LogApplicationAccessPointCountUpdate(
-				EVENT_ID_APPLICATIONS,
-				_id,
-				ApplicationRegistryDb(database).getNumberOfAccessPoints(_id)
 			);
 		}
 	}

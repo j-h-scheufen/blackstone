@@ -602,13 +602,13 @@
     "TableName": "APPLICATIONS",
     "Filter": "Log1Text = 'AN://applications'",
     "Columns": {
-      "application_id": {
+      "applicationId": {
         "name": "application_id",
         "type": "bytes32",
         "primary": true,
         "bytesToString": true
       },
-      "application_type": {
+      "applicationType": {
         "name": "application_type",
         "type": "uint8"
       },
@@ -620,14 +620,10 @@
         "name": "method",
         "type": "bytes4"
       },
-      "web_form": {
+      "webForm": {
         "name": "web_form",
         "type": "bytes32",
         "bytesToString": true
-      },
-      "access_point_count": {
-        "name": "access_point_count",
-        "type": "uint"
       }
     }
   },
@@ -635,19 +631,19 @@
     "TableName": "APPLICATION_ACCESS_POINTS",
     "Filter": "Log1Text = 'AN://applications/access-points'",
     "Columns": {
-      "application_id": {
+      "applicationId": {
         "name": "application_id",
         "type": "bytes32",
         "primary": true,
         "bytesToString": true
       },
-      "access_point_id": {
+      "accessPointId": {
         "name": "access_point_id",
         "type": "bytes32",
         "primary": true,
         "bytesToString": true
       },
-      "data_type": {
+      "dataType": {
         "name": "data_type",
         "type": "uint8"
       },
