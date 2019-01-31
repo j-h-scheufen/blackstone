@@ -48,7 +48,7 @@ contract DefaultArchetype is Archetype {
 
 	mapping(bytes32 => Jurisdiction) jurisdictions;
 	bytes32[] jurisdictionKeys;
-	mapping(bytes2 => bytes32[]) jurisdictionHierarchy; // TODO this could be replaced with Mappings.Bytes2Bytes32Array later
+	mapping(bytes2 => bytes32[]) jurisdictionHierarchy; // TODO this could be replaced with Mappings.Bytes2Bytes32Array
 
 	address[] governingArchetypes;
 

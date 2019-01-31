@@ -3,12 +3,12 @@
     "TableName": "AGREEMENTS",
     "Filter": "Log1Text = 'AN://agreements'",
     "Columns": {
-      "agreement_address": {
+      "agreementAddress": {
         "name": "agreement_address",
         "type": "address",
         "primary": true
       },
-      "archetype_address": {
+      "archetypeAddress": {
         "name": "archetype_address",
         "type": "address"
       },
@@ -20,23 +20,23 @@
         "name": "creator",
         "type": "address"
       },
-      "is_private": {
+      "isPrivate": {
         "name": "is_private",
         "type": "bool"
       },
-      "legal_state": {
+      "legalState": {
         "name": "legal_state",
         "type": "uint8"
       },
-      "max_event_count": {
+      "maxEventCount": {
         "name": "max_event_count",
         "type": "uint32"
       },
-      "formation_process_instance": {
+      "formationProcessInstance": {
         "name": "formation_process_instance",
         "type": "address"
       },
-      "execution_process_instance": {
+      "executionProcessInstance": {
         "name": "execution_process_instance",
         "type": "address"
       },
@@ -54,7 +54,7 @@
     "TableName": "AGREEMENT_COLLECTIONS",
     "Filter": "Log1Text = 'AN://agreement-collections'",
     "Columns": {
-      "collection_id": {
+      "collectionId": {
         "name": "collection_id",
         "type": "bytes32",
         "primary": true
@@ -67,11 +67,11 @@
         "name": "author",
         "type": "address"
       },
-      "collection_type": {
+      "collectionType": {
         "name": "collection_type",
         "type": "uint8"
       },
-      "package_id": {
+      "packageId": {
         "name": "package_id",
         "type": "bytes32"
       }
@@ -81,7 +81,7 @@
     "TableName": "AGREEMENT_TO_PARTY",
     "Filter": "Log1Text = 'AN://agreement-to-party'",
     "Columns": {
-      "agreement_address": {
+      "agreementAddress": {
         "name": "agreement_address",
         "type": "address",
         "primary": true
@@ -91,11 +91,11 @@
         "type": "address",
         "primary": true
       },
-      "signed_by": {
+      "signedBy": {
         "name": "signed_by",
         "type": "address"
       },
-      "signature_timestamp": {
+      "signatureTimestamp": {
         "name": "signature_timestamp",
         "type": "uint"
       }
@@ -105,21 +105,21 @@
     "TableName": "AGREEMENT_TO_COLLECTION",
     "Filter": "Log1Text = 'AN://agreement-to-collection'",
     "Columns": {
-      "collection_id": {
+      "collectionId": {
         "name": "collection_id",
         "type": "bytes32",
         "primary": true
       },
-      "agreement_address": {
+      "agreementAddress": {
         "name": "agreement_address",
         "type": "address",
         "primary": true
       },
-      "agreement_name": {
+      "agreementName": {
         "name": "agreement_name",
         "type": "string"
       },
-      "archetype_address": {
+      "archetypeAddress": {
         "name": "archetype_address",
         "type": "address"
       }
@@ -129,17 +129,17 @@
     "TableName": "GOVERNING_AGREEMENTS",
     "Filter": "Log1Text = 'AN://governing-agreements'",
     "Columns": {
-      "agreement_address": {
+      "agreementAddress": {
         "name": "agreement_address",
         "type": "address",
         "primary": true
       },
-      "governing_agreement_address": {
+      "governingAgreementAddress": {
         "name": "governing_agreement_address",
         "type": "address",
         "primary": true
       },
-      "governing_agreement_name": {
+      "governingAgreementName": {
         "name": "governing_agreement_name",
         "type": "string"
       }

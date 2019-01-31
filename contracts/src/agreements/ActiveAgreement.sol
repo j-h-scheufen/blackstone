@@ -14,10 +14,61 @@ import "agreements/Agreements.sol";
  */
 contract ActiveAgreement is Named, DataStorage, AddressScopes, Signable, EventEmitter {
 
+	event LogAgreementCreation(
+		bytes32 indexed eventId,
+		address	agreementAddress,
+		address	archetypeAddress,
+		string name,
+		address	creator,
+		bool isPrivate,
+		uint8 legalState,
+		uint32 maxEventCount,
+		string privateParametersFileReference,
+		string eventLogFileReference
+	);
+
+	event LogAgreementLegalStateUpdate(
+		bytes32 indexed eventId,
+		address agreementAddress,
+		uint8 legalState
+	);
+
+	event LogAgreementMaxEventCountUpdate(
+		bytes32 indexed eventId,
+		address agreementAddress,
+		uint32 maxEventCount
+	);
+
+	event LogAgreementEventLogReference(
+		bytes32 indexed eventId,
+		address agreementAddress,
+		string eventLogFileReference
+	);
+
+	event LogActiveAgreementToPartyUpdate(
+		bytes32 indexed eventId,
+		address agreementAddress,
+		address party,
+		address signedBy,
+		uint signatureTimestamp
+	);
+
+	event LogGoverningAgreementUpdate(
+		bytes32 indexed eventId,
+		address agreementAddress,
+		address governingAgreementAddress,
+		string governingAgreementName
+	);
+
+	bytes32 public constant EVENT_ID_AGREEMENTS = "AN://agreements";
+	bytes32 public constant EVENT_ID_AGREEMENT_PARTY_MAP = "AN://agreement-to-party";
+	bytes32 public constant EVENT_ID_GOVERNING_AGREEMENT = "AN://governing-agreements";
+
 	bytes32 public constant DATA_FIELD_AGREEMENT_PARTIES = "AGREEMENT_PARTIES";
-	bytes32 public constant EVENT_ID_SIGNATURE_ADDED = "AGREEMENT_SIGNATURE_ADDED";
+
+	// Internal EventListener event
 	bytes32 public constant EVENT_ID_STATE_CHANGED = "AGREEMENT_STATE_CHANGED";
-	bytes32 public constant EVENT_ID_EVENT_LOG_UPDATED = "AGREEMENT_EVENT_LOG_UPDATED";
+
 
 	/**
 	 * @dev Returns the number governing agreements for this agreement

@@ -60,6 +60,24 @@ contract DefaultActiveAgreement is ActiveAgreement, AbstractDataStorage, Abstrac
 		privateFlag = _isPrivate;
 		parties = _parties;
 		governingAgreements = _governingAgreements;
+		emit LogAgreementCreation(
+			EVENT_ID_AGREEMENTS,
+			address(this),
+			_archetype,
+			_name,
+			_creator,
+			_isPrivate,
+			uint8(legalState),
+			maxNumberOfEvents,
+			_privateParametersFileReference,
+			eventLogFileReference
+		);
+		for (uint i = 0; i < _parties.length; i++) {
+			emit LogActiveAgreementToPartyUpdate(EVENT_ID_AGREEMENT_PARTY_MAP, address(this), _parties[i], address(0), uint(0));
+		}
+		for (i = 0; i < _governingAgreements.length; i++) {
+			emit LogGoverningAgreementUpdate(EVENT_ID_GOVERNING_AGREEMENT, address(this), _governingAgreements[i], _name);
+		}
 	}
 
 	/**
@@ -135,6 +153,7 @@ contract DefaultActiveAgreement is ActiveAgreement, AbstractDataStorage, Abstrac
 	 */
 	function setMaxNumberOfEvents(uint32 _maxNumberOfEvents) external {
 		maxNumberOfEvents = _maxNumberOfEvents;
+		emit LogAgreementMaxEventCountUpdate(EVENT_ID_AGREEMENTS, address(this), _maxNumberOfEvents);
 	}
 
 	/**
@@ -143,7 +162,7 @@ contract DefaultActiveAgreement is ActiveAgreement, AbstractDataStorage, Abstrac
 	 */
 	function setEventLogReference(string _eventLogFileReference) external {
 		eventLogFileReference = _eventLogFileReference;
-		emitEvent(EVENT_ID_EVENT_LOG_UPDATED, this);
+		emit LogAgreementEventLogReference(EVENT_ID_AGREEMENTS, address(this), _eventLogFileReference);
 	}
 
 	/**
@@ -198,10 +217,10 @@ contract DefaultActiveAgreement is ActiveAgreement, AbstractDataStorage, Abstrac
 		if (signatures[party].timestamp == 0) {
 			signatures[party].signee = signee;
 			signatures[party].timestamp = block.timestamp;
-			emitEvent(EVENT_ID_SIGNATURE_ADDED, this, party);
+			emit LogActiveAgreementToPartyUpdate(EVENT_ID_AGREEMENT_PARTY_MAP, address(this), party, signee, block.timestamp);
 			if (ActiveAgreement(this).isFullyExecuted()) {
 				legalState = Agreements.LegalState.EXECUTED;
-				emitEvent(EVENT_ID_STATE_CHANGED, this);
+				emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState));
 			}
 		}
 	}
@@ -291,7 +310,7 @@ contract DefaultActiveAgreement is ActiveAgreement, AbstractDataStorage, Abstrac
 	function setFulfilled() external {
 		// TODO this must only be allowed by an authorized account, e.g. SystemOwner which could be the registry
 		legalState = Agreements.LegalState.FULFILLED;
-		emitEvent(EVENT_ID_STATE_CHANGED, this);
+		emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState));
 	}
 
 	/**
@@ -309,13 +328,15 @@ contract DefaultActiveAgreement is ActiveAgreement, AbstractDataStorage, Abstrac
 		(actor, party) = ActiveAgreement(this).authorizePartyActor();
 
 		// if the actor is empty at this point, the authorization is regarded as failed
-		ErrorsLib.revertIf(actor == 0x0, ErrorsLib.UNAUTHORIZED(), "DefaultActiveAgreement.sign()", "The caller is not authorized to cancel");
+		ErrorsLib.revertIf(actor == 0x0,
+			ErrorsLib.UNAUTHORIZED(), "DefaultActiveAgreement.sign()", "The caller is not authorized to cancel");
 
 		if (legalState == Agreements.LegalState.DRAFT ||
 			legalState == Agreements.LegalState.FORMULATED) {
 			// unilateral cancellation is allowed before execution phase
 			legalState = Agreements.LegalState.CANCELED;
-			emitEvent(EVENT_ID_STATE_CHANGED, this);
+			emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState));
+			emitEvent(EVENT_ID_STATE_CHANGED, this); // for cancellations we need to inform the registry
 		}
 		else if (legalState == Agreements.LegalState.EXECUTED) {
 			// multilateral cancellation
@@ -328,7 +349,8 @@ contract DefaultActiveAgreement is ActiveAgreement, AbstractDataStorage, Abstrac
 					}
 					if (i == parties.length-1) {
 						legalState = Agreements.LegalState.CANCELED;
-						emitEvent(EVENT_ID_STATE_CHANGED, this);
+						emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState));
+						emitEvent(EVENT_ID_STATE_CHANGED, this); // for cancellations we need to inform the registry
 					}
 				}
 			}
