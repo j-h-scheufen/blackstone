@@ -64,29 +64,22 @@ contract ActiveAgreement is Named, DataStorage, AddressScopes, Signable, EventEm
 	function setMaxNumberOfEvents(uint32 _maxNumberOfEvents) external;
 
 	/**
-	 * @dev Returns the Hoard Address
-	 * @return the Hoard Address
+	 * @dev Returns the reference to the private parameters of this ActiveAgreement
+	 * @return the reference to an external document containing private parameters
 	 */
-	function getHoardAddress() external view returns (bytes32);
-
+	function getPrivateParametersReference() external view returns (string);
 
 	/**
-	 * @dev Returns the Hoard Secret
-	 * @return the Hoard Secret
+	 * @dev Updates the file reference for the event log of this agreement
+	 * @param _eventLogFileReference the file reference to the event log
 	 */
-	function getHoardSecret() external view returns (bytes32);
-
-
-	/**
-	 * @dev Sets the Hoard Address and Hoard Secret for the Event Log
-	 */
-	function setEventLogReference(bytes32 _eventLogHoardAddress, bytes32 _eventLogHoardSecret) external;
+	function setEventLogReference(string _eventLogFileReference) external;
 
 	/**
-	 * @dev Returns the Hoard Address and Hoard Secret for the Event Log
-	 * @return the Hoard Address and Hoard Secret for the Event Log
+	 * @dev Returns the reference for the event log of this ActiveAgreement
+	 * @return the file reference for the event log of this agreement
 	 */
-	function getEventLogReference() external view returns (bytes32 hoardAddress, bytes32 hoardSecret);
+	function getEventLogReference() external view returns (string);
 
 	/**
 	 * @dev Returns the max number of events for the event log

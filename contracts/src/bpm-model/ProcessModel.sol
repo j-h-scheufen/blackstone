@@ -1,7 +1,6 @@
 pragma solidity ^0.4.25;
 
 import "commons-base/AbstractNamedElement.sol";
-import "commons-events/EventEmitter.sol";
 import "commons-base/Versioned.sol";
 
 import "bpm-model/BpmModel.sol";
@@ -10,7 +9,7 @@ import "bpm-model/BpmModel.sol";
  * @title ProcessModel Interface
  * @dev Versionized container providing a namespace for a set of business process definitions and their artifacts. 
  */
-contract ProcessModel is EventEmitter, Versioned, AbstractNamedElement {
+contract ProcessModel is Versioned, AbstractNamedElement {
 
 	event LogProcessDefinitionCreation(
 		bytes32 indexed eventId,
@@ -48,21 +47,20 @@ contract ProcessModel is EventEmitter, Versioned, AbstractNamedElement {
 	function getProcessDefinition(bytes32 _id) external view returns (address);
 
 	/**
-	 * @dev Returns the HOARD file information of the model's diagram
-	 * @return location - the HOARD address
-	 * @return secret - the HOARD secret
+	 * @dev Returns the file reference for the model file
+	 * @return the external file reference
 	 */
-	function getDiagram() external view returns (bytes32 location,  bytes32 secret);
+	function getModelFileReference() external view returns (string);
 
 	/**
 	 * @dev Returns model author address
-	 * @return address - model author
+	 * @return the model author
 	 */
 	function getAuthor() external view returns (address);
 
 	/**
 	 * @dev Returns whether the model is private
-	 * @return bool - if model is private
+	 * @return true if the model is private, false otherwise
 	 */
 	function isPrivate() external view returns (bool);
 
@@ -179,13 +177,4 @@ contract ProcessModel is EventEmitter, Versioned, AbstractNamedElement {
 	 */
 	function getDataDefinitionDetailsAtIndex(uint _index) external view returns (bytes32 key, uint parameterType);
 
-	/**
-	 * @dev To be called by a registered process definition to signal an update.
-	 */
-	function fireProcessDefinitionUpdateEvent() external;
-
-	/**
-	 * @dev To be called by a registered process definition to signal an update.
-	 */
-	function fireActivityDefinitionUpdateEvent(bytes32 _activityId) external;
 }

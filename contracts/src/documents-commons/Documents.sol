@@ -8,9 +8,9 @@ library Documents {
 
 	// enum State {DRAFT, FINAL, EFFECTIVE, CANCELED}
 
-	struct HoardGrant {
-		bytes32 hoardAddress;
-		bytes32 secretKey;
+	struct DocumentReference {
+		string reference;
+		bool exists;
 	}
 
 	struct DocumentVersion {

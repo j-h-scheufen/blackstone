@@ -61,8 +61,7 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 	 * @param _archetype archetype
 	 * @param _name name
 	 * @param _creator address
-	 * @param _hoardAddress Address of agreement params in hoard
-	 * @param _hoardSecret Secret for hoard retrieval
+	 * @param _privateParametersFileReference the file reference of the private parametes of this agreement
 	 * @param _isPrivate agreement is private
 	 * @param _parties parties array
 	 * @param _collectionId id of agreement collection (optional)
@@ -78,8 +77,7 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 		address _archetype,
 		string _name, 
 		address _creator, 
-		bytes32 _hoardAddress, 
-		bytes32 _hoardSecret,
+		string _privateParametersFileReference,
 		bool _isPrivate, 
 		address[] _parties, 
 		bytes32 _collectionId, 
@@ -87,7 +85,7 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 		external returns (address activeAgreement)
 	{
 		validateAgreementRequirements(_archetype, _name, _governingAgreements);
-		activeAgreement = new DefaultActiveAgreement(_archetype, _name, _creator, _hoardAddress, _hoardSecret, _isPrivate, _parties, _governingAgreements);
+		activeAgreement = new DefaultActiveAgreement(_archetype, _name, _creator, _privateParametersFileReference, _isPrivate, _parties, _governingAgreements);
 		register(activeAgreement, _name);
 		if (_collectionId != "") addAgreementToCollection(_collectionId, activeAgreement);
 		emitAgreementCreationEvent(activeAgreement);
@@ -192,10 +190,8 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 			uint32(0),
 			address(0x0),
 			address(0x0),
-			ActiveAgreement(_activeAgreement).getHoardAddress(),
-			ActiveAgreement(_activeAgreement).getHoardSecret(),
-			bytes32(""),
-			bytes32("")
+			ActiveAgreement(_activeAgreement).getPrivateParametersReference(),
+			ActiveAgreement(_activeAgreement).getEventLogReference()
 		);
 	}
 
@@ -503,12 +499,10 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 	 * @return archetype - the agreement's archetype adress
 	 * @return name - the name of the agreement
 	 * @return creator - the creator of the agreement
-	 * @return hoardAddress - address of the agreement parameters in hoard (only used when agreement is private)
-	 * @return hoardSecret - secret for retrieval of hoard parameters
-	 * @return eventLogHoardAddress - address of the agreement's event log in hoard
-	 * @return eventLogHoardSecret - secret for retrieval of the hoard event log file
+	 * @return privateParametersFileReference - the file reference to the private agreement parameters (only used when agreement is private)
+	 * @return eventLogFileReference - the file reference to the agreement's event log
 	 * @return maxNumberOfEvents - the maximum number of events allowed to be stored for this agreement
-	 * @return isPrivate - whether the agreement's parameters are private, i.e. stored off-chain in hoard
+	 * @return isPrivate - whether there are private agreement parameters, i.e. stored off-chain
 	 * @return legalState - the agreement's Agreement.LegalState as uint8
 	 * @return formationProcessInstance - the address of the process instance representing the formation of this agreement
 	 * @return executionProcessInstance - the address of the process instance representing the execution of this agreement
@@ -517,10 +511,8 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 		address archetype,
 		string name,
 		address creator,
-		bytes32 hoardAddress,
-		bytes32 hoardSecret,
-		bytes32 eventLogHoardAddress,
-		bytes32 eventLogHoardSecret,
+		string privateParametersFileReference,
+		string eventLogFileReference,
 		uint maxNumberOfEvents,
 		bool isPrivate,
 		uint8 legalState,
@@ -532,9 +524,8 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 		if (bytes(name).length != 0) {
 			archetype = ActiveAgreement(_activeAgreement).getArchetype();
 			creator = ActiveAgreement(_activeAgreement).getCreator();
-			hoardAddress = ActiveAgreement(_activeAgreement).getHoardAddress();
-			hoardSecret = ActiveAgreement(_activeAgreement).getHoardSecret();
-			(eventLogHoardAddress, eventLogHoardSecret) = ActiveAgreement(_activeAgreement).getEventLogReference();
+			privateParametersFileReference = ActiveAgreement(_activeAgreement).getPrivateParametersReference();
+			eventLogFileReference = ActiveAgreement(_activeAgreement).getEventLogReference();
 			maxNumberOfEvents = ActiveAgreement(_activeAgreement).getMaxNumberOfEvents();			
 			isPrivate = ActiveAgreement(_activeAgreement).isPrivate();
 			legalState = ActiveAgreement(_activeAgreement).getLegalState();
@@ -808,14 +799,13 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 	}
 
 	/**
-	 * @dev Updates the hoard address and secret for the event log of the specified agreement
+	 * @dev Updates the file reference for the event log of the specified agreement
 	 * @param _activeAgreement Address of active agreement
-	 * @param _eventLogHoardAddress New hoard address of event log for agreement
-	 * @param _eventLogHoardSecret New hoard secret key of event log for agreement
+	 * @param _eventLogFileReference the file reference of the event log of this agreement
 	 */
-	 function setEventLogReference(address _activeAgreement, bytes32 _eventLogHoardAddress, bytes32 _eventLogHoardSecret) external {
-		ActiveAgreement(_activeAgreement).setEventLogReference(_eventLogHoardAddress, _eventLogHoardSecret);
-		emit LogAgreementEventLogReference(EVENT_ID_AGREEMENTS, _activeAgreement, _eventLogHoardAddress, _eventLogHoardSecret);
+	 function setEventLogReference(address _activeAgreement, string _eventLogFileReference) external {
+		ActiveAgreement(_activeAgreement).setEventLogReference(_eventLogFileReference);
+		emit LogAgreementEventLogReference(EVENT_ID_AGREEMENTS, _activeAgreement, _eventLogFileReference);
 	 }
 
 	/**

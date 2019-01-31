@@ -40,21 +40,13 @@
         "name": "execution_process_instance",
         "type": "address"
       },
-      "hoard_address": {
-        "name": "hoard_address",
-        "type": "bytes32"
+      "privateParametersFileReference": {
+        "name": "private_parameters_file_reference",
+        "type": "string"
       },
-      "hoard_secret": {
-        "name": "hoard_secret",
-        "type": "bytes32"
-      },
-      "event_log_hoard_address": {
-        "name": "event_log_hoard_address",
-        "type": "bytes32"
-      },
-      "event_log_hoard_secret": {
-        "name": "event_log_hoard_secret",
-        "type": "bytes32"
+      "eventLogFileReference": {
+        "name": "event_log_file_reference",
+        "type": "string"
       }
     }
   },
@@ -280,23 +272,19 @@
     "TableName": "ARCHETYPE_DOCUMENTS",
     "Filter": "Log1Text = 'AN://archetype/documents'",
     "Columns": {
-      "archetype_address": {
+      "archetypeAddress": {
         "name": "archetype_address",
         "type": "address",
         "primary": true
       },
-      "document_key": {
+      "documentKey": {
         "name": "document_key",
-        "type": "bytes32",
+        "type": "string",
         "primary": true
       },
-      "hoard_address": {
-        "name": "hoard_address",
-        "type": "bytes32"
-      },
-      "secret_key": {
-        "name": "secret_key",
-        "type": "bytes32"
+      "documentReference": {
+        "name": "document_reference",
+        "type": "string"
       }
     }
   },
@@ -535,13 +523,9 @@
         "name": "active",
         "type": "bool"
       },
-      "diagram_address": {
-        "name": "diagram_address",
-        "type": "bytes32"
-      },
-      "diagram_secret": {
-        "name": "diagram_secret",
-        "type": "bytes32"
+      "modelFileReference": {
+        "name": "model_file_reference",
+        "type": "string"
       }
     }
   },

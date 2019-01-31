@@ -18,10 +18,7 @@ contract ActiveAgreementTest {
 
 	DefaultArchetype archetype;
 	address falseAddress = 0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa;
-	bytes32 dummyHoardAddress = "hoardAddress";
-	bytes32 dummyHoardSecret = "hoardSecret";
-	bytes32 dummyEventLogHoardAddress = "eventLogHoardAddress";
-	bytes32 dummyEventLogHoardSecret = "eventLogHoardSecret";
+	string dummyPrivateParametersFileRef = "{json grant}";
 	uint maxNumberOfEvents = 5;
 	bytes32 DATA_FIELD_AGREEMENT_PARTIES = "AGREEMENT_PARTIES";
 
@@ -50,7 +47,7 @@ contract ActiveAgreementTest {
 		parties.push(address(signer2));
 
 		archetype = new DefaultArchetype(10, false, true, "archetype name", falseAddress, "description", falseAddress, falseAddress, emptyArray);
-		agreement = new DefaultActiveAgreement(archetype, agreementName, this, dummyHoardAddress, dummyHoardSecret, false, parties, emptyArray);
+		agreement = new DefaultActiveAgreement(archetype, agreementName, this, dummyPrivateParametersFileRef, false, parties, emptyArray);
 		agreement.setDataValueAsAddressArray(bogusId, bogusArray);
 
 		if (bytes(agreement.getName()).length != bytes(agreementName).length) return "Name not set correctly";
@@ -93,7 +90,7 @@ contract ActiveAgreementTest {
 		parties.push(address(org1));
 
 		archetype = new DefaultArchetype(10, false, true, "archetype name", falseAddress, "description", falseAddress, falseAddress, emptyArray);
-		agreement = new DefaultActiveAgreement(archetype, agreementName, this, dummyHoardAddress, dummyHoardSecret, false, parties, emptyArray);
+		agreement = new DefaultActiveAgreement(archetype, agreementName, this, dummyPrivateParametersFileRef, false, parties, emptyArray);
 
 		// test signing
 		address signee;
@@ -146,8 +143,8 @@ contract ActiveAgreementTest {
 		parties.push(address(signer2));
 
 		archetype = new DefaultArchetype(10, false, true, "archetype name", falseAddress, "description", falseAddress, falseAddress, emptyArray);
-		agreement1 = new DefaultActiveAgreement(archetype, "Agreement1", this, dummyHoardAddress, dummyHoardSecret, false, parties, emptyArray);
-		agreement2 = new DefaultActiveAgreement(archetype, "Agreement2", this, dummyHoardAddress, dummyHoardSecret, false, parties, emptyArray);
+		agreement1 = new DefaultActiveAgreement(archetype, "Agreement1", this, dummyPrivateParametersFileRef, false, parties, emptyArray);
+		agreement2 = new DefaultActiveAgreement(archetype, "Agreement2", this, dummyPrivateParametersFileRef, false, parties, emptyArray);
 
 		// test invalid cancellation and states
 		if (address(agreement1).call(bytes4(keccak256(abi.encodePacked("cancel()")))))

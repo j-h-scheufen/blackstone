@@ -15,16 +15,16 @@ contract ProcessModelRepositoryTest {
 
 	address author = 0x9d7fDE63776AaB9E234d656E654ED9876574C54C;
 	uint error;
-	bytes32 EMPTY = "";
+	string dummyModelFileReference = "{json grant}";
 	
 	function testRepository() external returns (string) {
 
 		SystemOwned(db).transferSystemOwnership(repo);
 		AbstractDbUpgradeable(repo).acceptDatabase(db);
 		
-		ProcessModel pm1 = new DefaultProcessModel("testModel", "Test Model", [1,0,0], author, false, EMPTY, EMPTY);
-		ProcessModel pm2 = new DefaultProcessModel("testModel", "Test Model", [2,0,0], author, false, EMPTY, EMPTY);
-		ProcessModel pm3 = new DefaultProcessModel("testModel", "Test Model", [3,0,0], author, false, EMPTY, EMPTY);
+		ProcessModel pm1 = new DefaultProcessModel("testModel", "Test Model", [1,0,0], author, false, dummyModelFileReference);
+		ProcessModel pm2 = new DefaultProcessModel("testModel", "Test Model", [2,0,0], author, false, dummyModelFileReference);
+		ProcessModel pm3 = new DefaultProcessModel("testModel", "Test Model", [3,0,0], author, false, dummyModelFileReference);
 		
 		error = repo.addModel(pm1);
 		if (error != BaseErrors.NO_ERROR()) return "Adding model 1 failed.";

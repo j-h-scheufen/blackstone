@@ -30,7 +30,7 @@ contract ProcessDefinitionTest {
 	bytes32 pId;
 	bytes32 pInterface;
 	bytes32 modelId;
-
+	string dummyModelFileReference = "{json grant}";
 	bytes32 EMPTY = "";
 
 	/**
@@ -47,7 +47,7 @@ contract ProcessDefinitionTest {
 		uint error;
 		address newAddress;
 
-		ProcessModel pm = new DefaultProcessModel("testModel", "Test Model", [1,0,0], author, false, EMPTY, EMPTY);
+		ProcessModel pm = new DefaultProcessModel("testModel", "Test Model", [1,0,0], author, false, dummyModelFileReference);
 		(error, newAddress) = pm.createProcessDefinition("p1");
 		ProcessDefinition pd = ProcessDefinition(newAddress);
 		
@@ -188,7 +188,7 @@ contract ProcessDefinitionTest {
 		uint error;
 		address addr;
 
-		ProcessModel pm = new DefaultProcessModel("conditionsModel", "Conditions Model", [1,0,0], author, false, EMPTY, EMPTY);
+		ProcessModel pm = new DefaultProcessModel("conditionsModel", "Conditions Model", [1,0,0], author, false, dummyModelFileReference);
 		(error, addr) = pm.createProcessDefinition("p1");
 		ProcessDefinition pd = ProcessDefinition(addr);
 

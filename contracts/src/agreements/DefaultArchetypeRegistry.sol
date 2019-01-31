@@ -64,7 +64,6 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 		archetype = new DefaultArchetype(_price, _isPrivate, _active, _name, _author, _description,  _formationProcess, _executionProcess, _governingArchetypes);
 		registerArchetype(archetype, _name);
 		for (uint i = 0; i < _governingArchetypes.length; i++) {
-			emit UpdateGoverningArchetypes(TABLE_GOVERNING_ARCHETYPES, archetype, _governingArchetypes[i]);
 			emit LogGoverningArchetypeUpdate(
 				EVENT_ID_GOVERNING_ARCHETYPES, 
 				archetype, 
@@ -92,7 +91,6 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 			Archetype(_archetype).getFormationProcessDefinition(),
 			Archetype(_archetype).getExecutionProcessDefinition()
 		);
-		emit UpdateArchetypes(TABLE_ARCHETYPES, _archetype);
 	}
 
 	/**
@@ -136,7 +134,6 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 	function addArchetypeToPackage(bytes32 _packageId, address _archetype) public {
 		uint error = ArchetypeRegistryDb(database).addArchetypeToPackage(_packageId, _archetype);
 		ErrorsLib.revertIf(error != BaseErrors.NO_ERROR(), ErrorsLib.RESOURCE_NOT_FOUND(), "DefaultArchetypeRegistry.addArchetypeToPackage", "Package not found");
-		emit UpdateArchetypePackageMap(TABLE_ARCHETYPE_TO_PACKAGE, _packageId, _archetype);
 		emit LogArchetypeToPackageUpdate(
 			EVENT_ID_ARCHETYPE_PACKAGE_MAP,
 			_packageId,
@@ -160,7 +157,6 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 			return BaseErrors.RESOURCE_NOT_FOUND();
 		(error, position) = Archetype(_archetype).addParameter(_parameterType, _parameterName);
 		if (error == BaseErrors.NO_ERROR()) {
-			emit UpdateArchetypeParameters(TABLE_ARCHETYPE_PARAMETERS, _archetype, _parameterName);
 			emit LogArchetypeParameterUpdate(
 				EVENT_ID_ARCHETYPE_PARAMETERS,
 				_archetype,
@@ -206,7 +202,6 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 		bytes32 key;
 		(error, key) = Archetype(_archetype).addJurisdiction(_country, _region);
 		if (error == BaseErrors.NO_ERROR()) {
-			emit UpdateArchetypeJurisdictions(TABLE_ARCHETYPE_JURISDICTIONS, _archetype, key);
 			emit LogArchetypeJurisdictionUpdate(
 				EVENT_ID_ARCHETYPE_JURISDICTIONS,
 				_archetype,
@@ -245,7 +240,6 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 		ErrorsLib.revertIf(_archetype == 0x0, ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultArchetypeRegistry.activate", "Arcehtype address must be supplied");
 		ErrorsLib.revertIf(_author != Archetype(_archetype).getAuthor(), ErrorsLib.UNAUTHORIZED(), "DefaultArchetypeRegistry.activate", "Given author address is not authorized to activate archetype");
 		Archetype(_archetype).activate();
-		emit UpdateArchetypes(TABLE_ARCHETYPES, _archetype);
 		emit LogArchetypeActive(EVENT_ID_ARCHETYPES, _archetype, true);
 	}
 
@@ -257,7 +251,6 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 	function deactivate(address _archetype, address _author) external {
 		ErrorsLib.revertIf(_author != Archetype(_archetype).getAuthor(), ErrorsLib.UNAUTHORIZED(), "DefaultArchetypeRegistry.activate", "Given address is not authorized to deactivate archetype");
 		Archetype(_archetype).deactivate();
-		emit UpdateArchetypes(TABLE_ARCHETYPES, _archetype);
 		emit LogArchetypeActive(EVENT_ID_ARCHETYPES, _archetype, false);
 	}
 
@@ -272,7 +265,6 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 		ErrorsLib.revertIf(_author != Archetype(_archetype).getAuthor(), ErrorsLib.UNAUTHORIZED(), "DefaultArchetypeRegistry.setArchetypeSuccessor", "Given author address is not authorized to set successor");
 		ErrorsLib.revertIf(_successor != 0x0 && !ArchetypeRegistryDb(database).archetypeExists(_successor), ErrorsLib.INVALID_INPUT(), "DefaultArchetypeRegistry.setArchetypeSuccessor", "Successor must be a valid archetype");
 		Archetype(_archetype).setSuccessor(_successor);
-		emit UpdateArchetypes(TABLE_ARCHETYPES, _archetype);
 		emit LogArchetypeSuccessorUpdate(EVENT_ID_ARCHETYPES, _archetype, _successor);
 	}
 
@@ -342,27 +334,22 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 	}
 
 	/**
-	 * @dev Adds Hoard document to the given Archetype
+	 * @dev Adds a file reference to the given Archetype
 	 * @param _archetype archetype
 	 * @param _name name
-	 * @param _hoardAddress hoard address
-	 * @param _secretKey secret key
+	 * @param _fileReference the external reference to the document
 	 * @return error BaseErrors.NO_ERROR(), BaseErrors.RESOURCE_NOT_FOUND() _archetype does not exist, or see DefaultArchetype
 	 */
-	// TODO: validate for empty params once Solidity is updated
-	// TODO: determine access (presumably only author should be able to call)
-	function addDocument(address _archetype, bytes32 _name, bytes32 _hoardAddress, bytes32 _secretKey) external returns (uint error) {
+	function addDocument(address _archetype, string _name, string _fileReference) external returns (uint error) {
 		if (!ArchetypeRegistryDb(database).archetypeExists(_archetype))
 			return BaseErrors.RESOURCE_NOT_FOUND();
-		error = Archetype(_archetype).addDocument(_name, _hoardAddress, _secretKey);
+		error = Archetype(_archetype).addDocument(_name, _fileReference);
 		if (error == BaseErrors.NO_ERROR()) {
-			emit UpdateArchetypeDocuments(TABLE_ARCHETYPE_DOCUMENTS, _archetype, _name);
 			emit LogArchetypeDocumentUpdate(
 				EVENT_ID_ARCHETYPE_DOCUMENTS,
 				_archetype,
 				_name,
-				_hoardAddress,
-				_secretKey
+				_fileReference
 			);
 		}
 	}
@@ -374,7 +361,6 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 	 */
 	function setArchetypePrice(address _archetype, uint32 _price) external {
 		Archetype(_archetype).setPrice(_price);
-		emit UpdateArchetypes(TABLE_ARCHETYPES, _archetype);
 		emit LogArchetypePriceUpdate(
 			EVENT_ID_ARCHETYPES,
 			_archetype,
@@ -397,7 +383,6 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 		id = keccak256(abi.encodePacked(_name, _author, block.timestamp));
 		error = ArchetypeRegistryDb(database).createPackage(id, _name, _description, _author, _isPrivate, _active);
 		if (error == BaseErrors.NO_ERROR()) {
-			emit UpdateArchetypePackages(TABLE_ARCHETYPE_PACKAGES, id);
 			emit LogArchetypePackageCreation(EVENT_ID_ARCHETYPE_PACKAGES, id, _name, _description, _author, _isPrivate, _active);
 		}
 	}
@@ -413,7 +398,6 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 		( , , packageAuthor, , ) = ArchetypeRegistryDb(database).getPackageData(_id);
 		ErrorsLib.revertIf(_author != packageAuthor, ErrorsLib.UNAUTHORIZED(), "DefaultArchetypeRegistry.activatePackage", "Given address is not authorized to activate archetype package");
 		ArchetypeRegistryDb(database).activatePackage(_id);
-		emit UpdateArchetypePackages(TABLE_ARCHETYPE_PACKAGES, _id);
 		emit LogArchetypePackageActive(EVENT_ID_ARCHETYPE_PACKAGES, _id, true);
 	}
 
@@ -428,7 +412,6 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 		( , , packageAuthor, , ) = ArchetypeRegistryDb(database).getPackageData(_id);
 		ErrorsLib.revertIf(_author != packageAuthor, ErrorsLib.UNAUTHORIZED(), "DefaultArchetypeRegistry.activatePackage", "Given address is not authorized to deactivate archetype package");
 		ArchetypeRegistryDb(database).deactivatePackage(_id);
-		emit UpdateArchetypePackages(TABLE_ARCHETYPE_PACKAGES, _id);
 		emit LogArchetypePackageActive(EVENT_ID_ARCHETYPE_PACKAGES, _id, false);
 	}
 
@@ -524,7 +507,7 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
      * @param _index index
      * @return name name
      */
-	function getDocumentByArchetypeAtIndex(address _archetype, uint _index) external view returns (bytes32 name) {
+	function getDocumentByArchetypeAtIndex(address _archetype, uint _index) external view returns (string name) {
 		uint error;
 		(error, name) = Archetype(_archetype).getDocumentAtIndex(_index);
 	}
@@ -532,13 +515,12 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
     /**
      * @dev Returns data about the document at the specified address
 	 * @param _archetype archetype
-	 * @param _name name
-	 * @return _hoardAddress hoard address
-	 * @return _secretKey secret key
+	 * @param _name the document name
+	 * @return fileReference - the document reference
 	 */
-	function getDocumentByArchetypeData(address _archetype, bytes32 _name) external view returns (bytes32 hoardAddress, bytes32 secretKey) {
+	function getDocumentByArchetypeData(address _archetype, string _name) external view returns (string fileReference) {
 		uint error;
-		(error, hoardAddress, secretKey) = Archetype(_archetype).getDocument(_name);
+		(error, fileReference) = Archetype(_archetype).getDocument(_name);
 	}
 
     /**

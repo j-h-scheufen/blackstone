@@ -4,7 +4,6 @@ import "commons-base/BaseErrors.sol";
 import "commons-base/ErrorsLib.sol";
 import "commons-collections/Mappings.sol";
 import "commons-collections/MappingsLib.sol";
-import "commons-events/DefaultEventEmitter.sol";
 
 import "bpm-model/BpmModel.sol";
 import "bpm-model/DefaultProcessDefinition.sol";
@@ -13,7 +12,7 @@ import "bpm-model/DefaultProcessDefinition.sol";
  * @title DefaultProcessModel
  * @dev Default implementation of the ProcessModel interface 
  */
-contract DefaultProcessModel is ProcessModel, DefaultEventEmitter {
+contract DefaultProcessModel is ProcessModel {
 
 	using MappingsLib for Mappings.Bytes32AddressMap;
 	using MappingsLib for Mappings.Bytes32UintMap;
@@ -23,8 +22,7 @@ contract DefaultProcessModel is ProcessModel, DefaultEventEmitter {
 	BpmModel.ParticipantMap participants;
 	mapping(bytes32 => bool) processInterfaces;
 	bytes32[] processInterfaceKeys;
-	bytes32 hoardAddress;
-	bytes32 hoardSecret;
+	string modelFileReference;
 	address author;
 	bool privateFlag;
 
@@ -35,16 +33,14 @@ contract DefaultProcessModel is ProcessModel, DefaultEventEmitter {
 	 * @param _version the model version
 	 * @param _author the model author
 	 * @param _isPrivate indicates if model is visible only to creator
-	 * @param _hoardAddress the HOARD address of the model file
-	 * @param _hoardSecret the HOARD secret of the model file
+	 * @param _modelFileReference the reference to the external model file from which this ProcessModel originated
 	 */
-	constructor(bytes32 _id, string _name, uint8[3] _version, address _author, bool _isPrivate, bytes32 _hoardAddress, bytes32 _hoardSecret)
+	constructor(bytes32 _id, string _name, uint8[3] _version, address _author, bool _isPrivate, string _modelFileReference)
 		Versioned(_version[0], _version[1], _version[2])
 		AbstractNamedElement(_id, _name)
 		public
 	{
-		hoardAddress = _hoardAddress;
-		hoardSecret = _hoardSecret;
+		modelFileReference = _modelFileReference;
 		author = _author;
 		privateFlag = _isPrivate;
 	}
@@ -59,7 +55,6 @@ contract DefaultProcessModel is ProcessModel, DefaultEventEmitter {
 		if (processDefinitions.exists(_id)) return (BaseErrors.RESOURCE_ALREADY_EXISTS(), 0x0);
 		newAddress = new DefaultProcessDefinition(_id, this);
 		error = processDefinitions.insert(_id, newAddress);
-		emitEvent("UPDATE_PROCESS_DEFINITION", newAddress);
 		emit LogProcessDefinitionCreation(
 			EVENT_ID_PROCESS_DEFINITIONS,
 			newAddress,
@@ -80,18 +75,16 @@ contract DefaultProcessModel is ProcessModel, DefaultEventEmitter {
 	}
 
 	/**
-	 * @dev Returns the HOARD file information of the model's diagram
-	 * @return location - the HOARD address
-	 * @return secret - the HOARD secret
+	 * @dev Returns the file reference for the model file
+	 * @return the external file reference
 	 */
-	function getDiagram() external view returns (bytes32 location,  bytes32 secret) {
-		location = hoardAddress;
-		secret = hoardSecret;
+	function getModelFileReference() external view returns (string) {
+		return modelFileReference;
 	}
 
 	/**
 	 * @dev Returns model author address
-	 * @return address - model author
+	 * @return the model author
 	 */
 	function getAuthor() external view returns (address) {
 		return author;
@@ -99,7 +92,7 @@ contract DefaultProcessModel is ProcessModel, DefaultEventEmitter {
 
 	/**
 	 * @dev Returns whether the model is private
-	 * @return bool - if model is private
+	 * @return true if the model is private, false otherwise
 	 */
 	function isPrivate() external view returns (bool) {
 		return privateFlag;
@@ -147,7 +140,6 @@ contract DefaultProcessModel is ProcessModel, DefaultEventEmitter {
 		}
 		participants.rows[_id].exists = true;
 
-		emitEvent("UPDATE_PROCESS_MODEL", this);
 		return BaseErrors.NO_ERROR();
 	}
 
@@ -298,27 +290,4 @@ contract DefaultProcessModel is ProcessModel, DefaultEventEmitter {
 		parameterType = dataDefinitions.get(key);
 	}
 
-	/**
-	 * @dev To be called by a registered process definition to signal an update.
-	 * Causes the ProcessModel to emit an update event on behalf of the msg.sender
-	 */
-	function fireProcessDefinitionUpdateEvent() external {
-		ProcessDefinition pd = ProcessDefinition(msg.sender);
-		// check if the sender is a registered process definition
-		if (processDefinitions.get(pd.getId()) == msg.sender) {
-			emitEvent("UPDATE_PROCESS_DEFINITION", pd);
-		}
-	}
-
-	/**
-	 * @dev To be called by a registered process definition to signal an update.
-	 * Causes the ProcessModel to emit an update event on behalf of the msg.sender
-	 */
-	function fireActivityDefinitionUpdateEvent(bytes32 _activityId) external {
-		ProcessDefinition pd = ProcessDefinition(msg.sender);
-		// check if the sender is a registered process definition
-		if (processDefinitions.get(pd.getId()) == msg.sender) {
-			emitEvent("UPDATE_ACTIVITY_DEFINITION", pd, _activityId);
-		}
-	}
 }

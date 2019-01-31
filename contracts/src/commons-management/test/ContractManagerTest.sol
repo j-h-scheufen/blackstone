@@ -90,7 +90,7 @@ contract ContractManagerTest {
  */
 contract DefaultTestService is Versioned, AbstractDbUpgradeable {
 
-    constructor(uint8[3] _version) Versioned(_version[0], _version[1], _version[2]) {
+    constructor(uint8[3] _version) Versioned(_version[0], _version[1], _version[2]) public {
 
     }
 

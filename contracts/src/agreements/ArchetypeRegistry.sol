@@ -11,14 +11,6 @@ import "agreements/Agreements.sol";
  */
 contract ArchetypeRegistry is Upgradeable {
 
-  event UpdateArchetypes(string name, address key);
-  event UpdateArchetypeDocuments(string name, address key, bytes32 key2);
-  event UpdateArchetypeParameters(string name, address key1, bytes32 key2);
-	event UpdateArchetypeJurisdictions(string name, address key1, bytes32 key2);
-	event UpdateArchetypePackages(string name, bytes32 key1);
-	event UpdateArchetypePackageMap(string name, bytes32 key1, address key2);
-	event UpdateGoverningArchetypes(string name, address key1, address key2);
-
 	event LogArchetypeCreation(
 		bytes32 indexed eventId,
 		address archetype_address,
@@ -84,10 +76,9 @@ contract ArchetypeRegistry is Upgradeable {
 
 	event LogArchetypeDocumentUpdate(
 		bytes32 indexed eventId,
-		address archetype_address,
-		bytes32 document_key,
-		bytes32 hoard_address,
-		bytes32 secret_key
+		address archetypeAddress,
+		string documentKey,
+		string documentReference
 	);
 
 	event LogArchetypeJurisdictionUpdate(
@@ -250,16 +241,13 @@ contract ArchetypeRegistry is Upgradeable {
 	);
 
 	/**
-	 * @dev Adds Hoard document to the given Archetype
+	 * @dev Adds a file reference to the given Archetype
 	 * @param _archetype archetype
 	 * @param _name name
-	 * @param _hoardAddress hoard address
-	 * @param _secretKey secret key
+	 * @param _fileReference the external reference to the document
 	 * @return error BaseErrors.NO_ERROR(), BaseErrors.RESOURCE_NOT_FOUND() _archetype does not exist, or see DefaultArchetype
 	 */
-	// TODO: validate for empty params once Solidity is updated
-	// TODO: determine access (presumably only author should be able to call)
-	function addDocument(address _archetype, bytes32 _name, bytes32 _hoardAddress, bytes32 _secretKey) external returns (uint error);
+	function addDocument(address _archetype, string _name, string _fileReference) external returns (uint error);
 
 	/**
 	 * @dev Sets price of given archetype
@@ -362,16 +350,15 @@ contract ArchetypeRegistry is Upgradeable {
 		* @param _index index
 		* @return name name
 		*/
-	function getDocumentByArchetypeAtIndex(address _archetype, uint _index) external view returns (bytes32 name);
+	function getDocumentByArchetypeAtIndex(address _archetype, uint _index) external view returns (string name);
 
 	/**
 		* @dev Returns data about the document given the specified name
 		* @param _archetype archetype
-		* @param _name name
-		* @return hoardAddress hoard address
-		* @return secretKey secret key
+		* @param _name the document name
+		* @return fileReference - the document reference
 		*/
-	function getDocumentByArchetypeData(address _archetype, bytes32 _name) external view returns (bytes32 hoardAddress, bytes32 secretKey);
+	function getDocumentByArchetypeData(address _archetype, string _name) external view returns (string fileReference);
 
 	/**
 		* @dev Gets parameters size for given Archetype

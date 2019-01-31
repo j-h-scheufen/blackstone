@@ -76,6 +76,7 @@ contract BpmServiceTest {
 	address[] parties;
 
 	string constant SUCCESS = "success";
+	string constant dummyModelFileReference = "{json grant}";
 	bytes32 EMPTY = "";
 
 	ProcessModelRepository repository;
@@ -587,7 +588,7 @@ contract BpmServiceTest {
 
 		bytes32 bytes32Value;
 
-		(error, addr) = repository.createProcessModel("testModel2", "Test Model", [1,0,0], modelAuthor, false, EMPTY, EMPTY);
+		(error, addr) = repository.createProcessModel("testModel2", "Test Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -669,7 +670,7 @@ contract BpmServiceTest {
 	 */
 	function testInternalProcessExecution() external returns (string) {
 
-		(error, addr) = repository.createProcessModel("testModel3", "Test Model 3", [1,0,0], modelAuthor, false, EMPTY, EMPTY);
+		(error, addr) = repository.createProcessModel("testModel3", "Test Model 3", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -735,7 +736,7 @@ contract BpmServiceTest {
 		bytes32 activityId;
 		uint8 state;
 
-		(error, addr) = repository.createProcessModel("routingModel", "Routing Model", [1,0,0], modelAuthor, false, EMPTY, EMPTY);
+		(error, addr) = repository.createProcessModel("routingModel", "Routing Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -826,7 +827,7 @@ contract BpmServiceTest {
 		bytes32 activityId;
 		uint8 state;
 
-		(error, addr) = repository.createProcessModel("loopingModel", "Looping Model", [1,0,0], modelAuthor, false, EMPTY, EMPTY);
+		(error, addr) = repository.createProcessModel("loopingModel", "Looping Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -948,7 +949,7 @@ contract BpmServiceTest {
 		// re-usable variables for return values
 		bytes32 activityId;
 
-		(error, addr) = repository.createProcessModel("twoGatewayModel", "2 Gateway Model", [1,0,0], modelAuthor, false, EMPTY, EMPTY);
+		(error, addr) = repository.createProcessModel("twoGatewayModel", "2 Gateway Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -1077,7 +1078,7 @@ contract BpmServiceTest {
 		EventApplication eventApp = new EventApplication(service);
 		FailureServiceApplication serviceApp = new FailureServiceApplication();
 
-		(error, addr) = repository.createProcessModel("serviceApplicationsModel", "Service Applications", [1,0,0], modelAuthor, false, EMPTY, EMPTY);
+		(error, addr) = repository.createProcessModel("serviceApplicationsModel", "Service Applications", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -1177,7 +1178,7 @@ contract BpmServiceTest {
 		bytes32 dataStorageId = "agreement";
 		bytes32 dataPathOnProcess = "customAssignee";
 	
-		(error, addr) = repository.createProcessModel("conditionalPerformerModel", "Test Model CP", [1,0,0], modelAuthor, false, EMPTY, EMPTY);
+		(error, addr) = repository.createProcessModel("conditionalPerformerModel", "Test Model CP", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -1248,7 +1249,7 @@ contract BpmServiceTest {
 		error = applicationRegistry.addApplication("Webform1", BpmModel.ApplicationType.WEB, 0x0, bytes4(EMPTY), "MyCustomWebform");
 		if (error != BaseErrors.NO_ERROR()) return "Error registering WEB application for user task";
 
-		(error, addr) = repository.createProcessModel("testModelUserTasks", "UserTask Test Model", [1,0,0], modelAuthor, false, EMPTY, EMPTY);
+		(error, addr) = repository.createProcessModel("testModelUserTasks", "UserTask Test Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -1376,7 +1377,7 @@ contract BpmServiceTest {
 
 		UserAccount user1 = new DefaultUserAccount(this, 0x0);
 	
-		(error, addr) = repository.createProcessModel("testModelAbort", "Abort Test Model", [1,0,0], modelAuthor, false, EMPTY, EMPTY);
+		(error, addr) = repository.createProcessModel("testModelAbort", "Abort Test Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -1460,7 +1461,7 @@ contract BpmServiceTest {
 		signatories[1] = address(user2);
 		dataStorage.setDataValueAsAddressArray("SIGNATORIES", signatories);
 
-		(error, addr) = repository.createProcessModel("multiInstanceUserTasks", "Multi Instance User Tasks", [1,0,0], modelAuthor, false, EMPTY, EMPTY);
+		(error, addr) = repository.createProcessModel("multiInstanceUserTasks", "Multi Instance User Tasks", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -1548,12 +1549,12 @@ contract BpmServiceTest {
 		service.setApplicationRegistry(applicationRegistry);
 
 		// Two process models
-		(error, addr) = repository.createProcessModel("ModelA", "Model A", [1,0,0], modelAuthor, false, EMPTY, EMPTY);
+		(error, addr) = repository.createProcessModel("ModelA", "Model A", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create ProcessModel A";
 		ProcessModel pmA = ProcessModel(addr);
 		pmA.addParticipant(participantId1, address(this), EMPTY, EMPTY, 0x0);
 
-		(error, addr) = repository.createProcessModel("ModelB", "Model B", [1,0,0], modelAuthor, false, EMPTY, EMPTY);
+		(error, addr) = repository.createProcessModel("ModelB", "Model B", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create ProcessModel B";
 		ProcessModel pmB = ProcessModel(addr);
 

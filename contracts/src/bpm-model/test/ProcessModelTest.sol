@@ -15,6 +15,7 @@ contract ProcessModelTest {
 	address participant1Address = 0x776FDe59876aAB7D654D656e654Ed9876574c54c;
 	address author = 0x9d7fDE63776AaB9E234d656E654ED9876574C54C;
 	string modelName = "Test Model";
+	string dummyModelFileReference = "{json grant string}";
 
 	bytes32 EMPTY = "";
 
@@ -23,17 +24,14 @@ contract ProcessModelTest {
 		uint error;
 		address newAddress;
 
-		ProcessModel pm = new DefaultProcessModel("testModel", "Test Model", [1,2,3], author, false, "hoardAddress", "hoardSecret");
+		ProcessModel pm = new DefaultProcessModel("testModel", "Test Model", [1,2,3], author, false, dummyModelFileReference);
 		if (pm.getId() != "testModel") return "ProcessModel ID not set correctly";
 		if (bytes(pm.getName()).length != bytes(modelName).length) return "ProcessModel Name not set correctly";
 		if (pm.getAuthor() != author) return "ProcessModel Author not set correctly";
 		if (pm.isPrivate() != false) return "ProcessModel expected to be public";
 		if (pm.major() != 1 || pm.minor() != 2 || pm.patch() != 3) return "ProcessModel Version not set correctly";
-		bytes32 location;
-		bytes32 secret;
-		(location, secret) = pm.getDiagram();
-		if (location != "hoardAddress") return "wrong hoard location retrieved";
-		if (secret != "hoardSecret") return "wrong hoard secret retrieved";
+		string memory modelFileRef = pm.getModelFileReference();
+		if (keccak256(abi.encodePacked(modelFileRef)) != keccak256(abi.encodePacked(dummyModelFileReference))) return "model file reference should match";
 
 		// data definitions
 		if (pm.getNumberOfDataDefinitions() != 0) return "There should not be any data definitions in the model after creation";

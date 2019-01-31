@@ -10,22 +10,19 @@ import "commons-utils/DataTypes.sol";
 contract Archetype is Named {
 
 	/**
-	 * @dev Adds the document specified by the given parameters to the archetype
+	 * @dev Adds the document specified by the external reference to the archetype under the given name
 	 * @param _name name
-	 * @param _hoardAddress hoard address
-	 * @param _secretKey secret key
+	 * @param _fileReference the external reference to the document
 	 * @return error code indicating success or failure
 	 */
-	function addDocument(bytes32 _name, bytes32 _hoardAddress, bytes32 _secretKey) external returns (uint error);
+	function addDocument(string _name, string _fileReference) external returns (uint error);
 
 	/**
-	 * @dev Adds parameter
+	 * @dev Adds a parameter to this Archetype
 	 * @param _parameterType parameter type (enum)
 	 * @param _parameterName parameter name
-	 * @return 
-	 *	 		 BaseErrors.NO_ERROR() and position of parameter, if successful,
-	 *		   BaseErrors.NULL_PARAM_NOT_ALLOWED() if _parameter is empty,
-	 *		   BaseErrors.RESOURCE_ALREADY_EXISTS() if _parameter already exists
+	 * @return error - code indicating success or failure
+	 * @return position - the position at which the parameter was added, if successful
 	 */
 	function addParameter(DataTypes.ParameterType _parameterType, bytes32 _parameterName) external returns (uint error, uint position);
 
@@ -64,11 +61,12 @@ contract Archetype is Named {
 	function getAuthor() external view returns (address author);
 
 	/**
-	 * @dev Gets document with given name
+	 * @dev Gets document reference with given name
 	 * @param _name document name
-	 * @return externalContent external content
+	 * @return error - an error code
+	 * @return fileReference - the reference to the external document
 	 */
-	function getDocument(bytes32 _name) external view returns (uint error, bytes32 hoardAddress, bytes32 secretKey);
+	function getDocument(string _name) external view returns (uint error, string fileReference);
 
 	/**
 	 * @dev Gets number of parameters
@@ -105,7 +103,7 @@ contract Archetype is Named {
 	 * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS() if index is out of bounds
 	 * @return name
 	 */
-	function getDocumentAtIndex(uint _index) external view returns (uint error, bytes32 name);
+	function getDocumentAtIndex(uint _index) external view returns (uint error, string name);
 
 	/**
 	 * @dev Returns the number jurisdictions for this archetype

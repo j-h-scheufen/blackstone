@@ -1,6 +1,5 @@
 pragma solidity ^0.4.25;
 
-import "commons-events/EventListener.sol";
 import "commons-management/Upgradeable.sol";
 
 import "bpm-model/ProcessModel.sol";
@@ -10,12 +9,8 @@ import "bpm-model/BpmModel.sol";
  * @title ProcessModelRepository Interface
  * @dev Manages registered ProcessModel instances with their past and active versions.
  */
-contract ProcessModelRepository is EventListener, Upgradeable {
+contract ProcessModelRepository is Upgradeable {
 	
-	event UpdateProcessModel(string table, address model);
-	event UpdateProcessDefinition(string table, address model, address processDefinition);
-	event UpdateActivityDefinition(string table, address model, address processDefinition, bytes32 activityId);
-
 	event LogProcessModelCreation(
 		bytes32 indexed eventId,
 		address model_address,
@@ -27,8 +22,13 @@ contract ProcessModelRepository is EventListener, Upgradeable {
 		address author,
 		bool is_private,
 		bool active,
-		bytes32 diagram_address,
-		bytes32 diagram_secret
+		string modelFileReference
+	);
+
+	event LogProcessModelActivation(
+		bytes32 indexed eventId,
+		address model_address,
+		bool active
 	);
 
 	bytes32 public constant EVENT_ID_PROCESS_MODELS = "AN://process-models";
@@ -40,10 +40,9 @@ contract ProcessModelRepository is EventListener, Upgradeable {
 	 * @param _version the model version
 	 * @param _author the model author
 	 * @param _isPrivate indicates if the model is private
-	 * @param _hoardAddress the HOARD address of the model file
-	 * @param _hoardSecret the HOARD secret of the model file
+	 * @param _modelFileReference the reference to the external model file from which this ProcessModel originated
 	 */
-	function createProcessModel(bytes32 _id, string _name, uint8[3] _version, address _author, bool _isPrivate, bytes32 _hoardAddress, bytes32 _hoardSecret) external returns (uint error, address modelAddress);
+	function createProcessModel(bytes32 _id, string _name, uint8[3] _version, address _author, bool _isPrivate, string _modelFileReference) external returns (uint error, address modelAddress);
 
 	/**
 	 * @dev Adds the given ProcessModel to this repository.
@@ -98,10 +97,9 @@ contract ProcessModelRepository is EventListener, Upgradeable {
 	 * @return author - the model's author
 	 * @return isPrivate - indicates if model is private
 	 * @return active - whether the model is active
-	 * @return diagramAddress - the HOARD address of the model diagram file
-	 * @return diagramSecret - the HOARD secret of the model diagram file
+	 * @return modelFileReference - the external reference of the model file
 	 */
-	function getModelData(address _model) external view returns (bytes32 id, string name, uint versionMajor, uint versionMinor, uint versionPatch, address author, bool isPrivate, bool active, bytes32 diagramAddress, bytes32 diagramSecret);
+	function getModelData(address _model) external view returns (bytes32 id, string name, uint versionMajor, uint versionMinor, uint versionPatch, address author, bool isPrivate, bool active, string modelFileReference);
 
 	/**
 	 * @dev Returns the process definition address when the model ID and process definition ID are provided

@@ -43,8 +43,8 @@ contract DefaultArchetype is Archetype {
 	Mappings.Bytes32UintMap parameterTypes;
 	bytes32[] parameters;
 
-	mapping(bytes32 => Documents.HoardGrant) documents;
-	bytes32[] documentsNames;
+	mapping(string => Documents.DocumentReference) documents;
+	string[] documentNames;
 
 	mapping(bytes32 => Jurisdiction) jurisdictions;
 	bytes32[] jurisdictionKeys;
@@ -76,31 +76,34 @@ contract DefaultArchetype is Archetype {
 	}
 
 	/**
-	 * @dev Adds document
+	 * @dev Adds the document specified by the external reference to the archetype under the given name
+	 * REVERTS if:
+	 * - the name is empty
 	 * @param _name name
-	 * @param _hoardAddress hoard address
-	 * @param _secretKey secret key
-	 * @return error BaseErrors.NO_ERROR() or BaseErrors.RESOURCE_ALREADY_EXISTS() if _name already exists in documentNames
+	 * @param _fileReference the external reference to the document
+	 * @return error BaseErrors.NO_ERROR() if successful
+	 * @return BaseErrors.RESOURCE_ALREADY_EXISTS() if _name already exists in documentNames
 	 */
-	// TODO: validate for empty params once Solidity is updated
-	// TODO: determine access (presumably only author should be able to call)
-	function addDocument(bytes32 _name, bytes32 _hoardAddress, bytes32 _secretKey) external returns (uint error) {
-		if (documentsNames.contains(_name))
+	// TODO: determine access (presumably only author should be able to add documents)
+	function addDocument(string _name, string _fileReference) external returns (uint error) {
+		ErrorsLib.revertIf(bytes(_name).length == 0,
+			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultArchetype.addDocument", "The name must not be empty");
+		if (documents[_name].exists)
 			return BaseErrors.RESOURCE_ALREADY_EXISTS();
 
-		documentsNames.push(_name);
-		documents[_name] = Documents.HoardGrant(_hoardAddress, _secretKey);
+		documentNames.push(_name);
+		documents[_name].reference = _fileReference;
+		documents[_name].exists = true;
 		error = BaseErrors.NO_ERROR();
 	}
 
 	/**
-	 * @dev Adds parameter
-	 * @param _parameterType parameter type (enum)
-	 * @param _parameterName parameter name
-	 * @return 
-	 *	 		 BaseErrors.NO_ERROR() and position of parameter, if successful,
-	 *		   BaseErrors.NULL_PARAM_NOT_ALLOWED() if _parameter is empty,
-	 *		   BaseErrors.RESOURCE_ALREADY_EXISTS() if _parameter already exists
+	 * @dev Adds a parameter to the Archetype
+	 * @param _parameterType the DataTypes.ParameterType
+	 * @param _parameterName the parameter name
+	 * @return BaseErrors.NO_ERROR() and position of parameter, if successful,
+	 * @return BaseErrors.NULL_PARAM_NOT_ALLOWED() if _parameter is empty,
+	 * @return BaseErrors.RESOURCE_ALREADY_EXISTS() if _parameter already exists
 	 */
 	function addParameter(DataTypes.ParameterType _parameterType, bytes32 _parameterName) external returns (uint error, uint position) {
 		if (_parameterName == "")
@@ -212,19 +215,17 @@ contract DefaultArchetype is Archetype {
 	}
 
 	/**
-	 * @dev Gets document with given name
+	 * @dev Gets document reference with given name
 	 * @param _name document name
-	 * @return error BaseErrors.NO_ERROR() or BaseErrors.RESOURCE_NOT_FOUND() if documentsNames does not contain _name
-	 * @return hoardAddress hoard address
-	 * @return secretKey secret key
+	 * @return error BaseErrors.NO_ERROR() or BaseErrors.RESOURCE_NOT_FOUND() if documentNames does not contain _name
+	 * @return fileReference - the reference to the external document
 	 */
-	function getDocument(bytes32 _name) external view returns (uint error, bytes32 hoardAddress, bytes32 secretKey) {
+	function getDocument(string _name) external view returns (uint error, string fileReference) {
 		error = BaseErrors.NO_ERROR();
-		if (!documentsNames.contains(_name))
+		if (!documents[_name].exists)
 			error = BaseErrors.RESOURCE_NOT_FOUND();
 		else {
-			hoardAddress = documents[_name].hoardAddress;
-			secretKey = documents[_name].secretKey;
+			fileReference = documents[_name].reference;
 		}
 	}
 
@@ -268,7 +269,7 @@ contract DefaultArchetype is Archetype {
 	 * @return size number of documents
 	 */
 	function getNumberOfDocuments() external view returns (uint size) {
-		return documentsNames.length;
+		return documentNames.length;
 	}
 
 	/**
@@ -277,12 +278,12 @@ contract DefaultArchetype is Archetype {
 	 * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS() if index is out of bounds
 	 * @return name
 	 */
-	function getDocumentAtIndex(uint _index) external view returns (uint error, bytes32 documentName) {
+	function getDocumentAtIndex(uint _index) external view returns (uint error, string documentName) {
 		error = BaseErrors.NO_ERROR();
-		if (_index >= documentsNames.length)
+		if (_index >= documentNames.length)
 			error = BaseErrors.INDEX_OUT_OF_BOUNDS();
 		else
-			documentName = documentsNames[_index];
+			documentName = documentNames[_index];
 	}
 
 	/**
