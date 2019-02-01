@@ -194,10 +194,9 @@ jobs:
     function: transferUpgradeOwnership
     data: [$DOUG]
 
-- name: SetContractManagerInProxy
+- name: SetContractManagerInDougProxy
   call:
     destination: $DOUG
     bin: DefaultDoug
     function: setContractManager
     data: [$ContractManager]
-

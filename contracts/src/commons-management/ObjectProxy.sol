@@ -2,7 +2,7 @@ pragma solidity ^0.4.25;
 
 import "commons-base/ErrorsLib.sol";
 
-import "commons-management/DOUG.sol";
+import "commons-management/ArtifactsFinder.sol";
 import "commons-management/AbstractDelegateProxy.sol";
 
 /**
@@ -13,9 +13,9 @@ import "commons-management/AbstractDelegateProxy.sol";
 contract ObjectProxy is AbstractDelegateProxy {
 
     /**
-     * Storage position of the address for DOUG
+     * Storage position of the address for the ArtifactsFinder
      */
-    bytes32 private constant storagePositionDoug = keccak256("AN://contract/storage/doug");
+    bytes32 private constant storagePositionArtifactsFinder = keccak256("AN://contract/storage/artifacts-finder");
     /**
      * Storage position of the object class identifier's length
      */
@@ -27,15 +27,19 @@ contract ObjectProxy is AbstractDelegateProxy {
 
     /**
      * @dev Creates a new ObjectProxy with the given address as the proxied contract
-     * @param _doug the address of a DOUG contract
+     * @param _artifactsFinder the address of a DOUG contract
      * @param _objectClass the identifier for the proxied implementation
      */
-    constructor(address _doug, string memory _objectClass) public {
-        bytes32 dougPos = storagePositionDoug;
+    constructor(address _artifactsFinder, string memory _objectClass) public {
+        ErrorsLib.revertIf(_artifactsFinder == address(0),
+            ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "ObjectProxy.constructor", "_artifactsFinder address must not be empty");
+        ErrorsLib.revertIf(bytes(_objectClass).length == 0,
+            ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "ObjectProxy.constructor", "_objectClass string must not be empty");
+        bytes32 finderPos = storagePositionArtifactsFinder;
         bytes32 classLengthPos = storagePositionObjectClassLength;
         bytes32 classValuePos = storagePositionObjectClassValue;
         assembly {
-            sstore(dougPos, _doug)
+            sstore(finderPos, _artifactsFinder)
             sstore(classLengthPos, mload(_objectClass)) // size of the string
             sstore(classValuePos, mload(add(_objectClass, 0x20))) // string value
         }
@@ -46,22 +50,19 @@ contract ObjectProxy is AbstractDelegateProxy {
      * Retrieves and returns the delegate address for this proxy by querying DOUG using the obect class identifier.
      * @return the address of the proxied contract
      */
-    function getDelegate() public view returns (address) {
-        address dougAddress = getDoug();
-        ErrorsLib.revertIf(dougAddress == address(0),
-            ErrorsLib.INVALID_STATE(), "ObjectProxy.getDelegate", "DOUG address cannot be determined for lookup of delegate implementation");
-        return DOUG(dougAddress).lookupContract(getObjectClass());
+    function getDelegate() public view returns (address delegate) {
+        // Note: we don't check if the ArtifactsFinder address exists, because the constructor guarantees its presence
+        (delegate, ) = ArtifactsFinder(getArtifactsFinder()).getArtifact(getObjectClass());
     }
 
-    // TODO instead of DOUG this should be a more generic interface to lookup object class (implementation) information
-    function getDoug() public view returns (address dougAddress) {
-        bytes32 dougPos = storagePositionDoug;
+    function getArtifactsFinder() internal view returns (address finderAddress) {
+        bytes32 finderPos = storagePositionArtifactsFinder;
         assembly {
-            dougAddress := sload(dougPos)
+            finderAddress := sload(finderPos)
         }
     }
 
-    function getObjectClass() public view returns (string objectClass) {
+    function getObjectClass() internal view returns (string objectClass) {
         bytes32 classLengthPos = storagePositionObjectClassLength;
         bytes32 classValuePos = storagePositionObjectClassValue;
         assembly {

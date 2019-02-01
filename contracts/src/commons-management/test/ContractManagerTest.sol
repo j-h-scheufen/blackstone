@@ -107,7 +107,7 @@ contract TestServiceWithDependency is DefaultTestService, ContractLocatorEnabled
     address dependency1;
     string dep1Name = "io.monax/agreements-network/services/Service2";
 
-    constructor(uint8[3] _version) DefaultTestService(_version) {
+    constructor(uint8[3] _version) DefaultTestService(_version) public {
 
     }
 
