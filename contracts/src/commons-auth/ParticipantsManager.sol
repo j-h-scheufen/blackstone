@@ -9,6 +9,8 @@ import "commons-management/ObjectFactory.sol";
  */
 contract ParticipantsManager is Upgradeable, ObjectFactory {
 
+    string public constant OBJECT_CLASS_ORGANIZATION = "commons.auth.Organization";
+
     /**
      * @dev Creates and adds a user account, and optionally registers the user with an ecosystem if an address is provided
      * @param _id id (required)

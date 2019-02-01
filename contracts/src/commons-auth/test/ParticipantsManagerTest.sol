@@ -3,6 +3,8 @@ pragma solidity ^0.4.25;
 import "commons-utils/TypeUtilsAPI.sol";
 import "commons-base/SystemOwned.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
+import "commons-management/ArtifactsRegistry.sol";
+import "commons-management/DefaultArtifactsRegistry.sol";
 
 import "commons-auth/Ecosystem.sol";
 import "commons-auth/DefaultEcosystem.sol";
@@ -21,6 +23,8 @@ contract ParticipantsManagerTest {
     address addr;
     bytes32 id;
     
+    ArtifactsRegistry artifacts = new DefaultArtifactsRegistry();
+    Organization defaultOrganization = new DefaultOrganization();
     ParticipantsManager participantsManager;
     Ecosystem myEcosystem;
 
@@ -35,7 +39,8 @@ contract ParticipantsManagerTest {
      * @dev Internal helper function to initiate a new ParticipantsManager with an empty database.
      */
     function createNewParticipantsManager() internal returns (ParticipantsManager manager) {
-		manager =  new DefaultParticipantsManager();
+		manager =  new DefaultParticipantsManager(artifacts);
+        artifacts.registerArtifact(manager.OBJECT_CLASS_ORGANIZATION(), defaultOrganization, [1,0,0], true);
 		ParticipantsManagerDb database = new ParticipantsManagerDb();
 		SystemOwned(database).transferSystemOwnership(manager);
 		AbstractDbUpgradeable(manager).acceptDatabase(database);

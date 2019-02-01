@@ -72,9 +72,6 @@ contract Organization is ERC165 {
         address approver_address
     );
 
-	/**
-	 * @dev Event IDs
-	 */
     bytes32 public constant EVENT_ID_ORGANIZATION_ACCOUNTS = "AN://organization-accounts";
     bytes32 public constant EVENT_ID_ORGANIZATION_USERS = "AN://organizations/users";
     bytes32 public constant EVENT_ID_DEPARTMENT_USERS = "AN://departments/users";

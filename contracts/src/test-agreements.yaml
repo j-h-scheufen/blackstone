@@ -277,10 +277,38 @@ jobs:
     function: deployContract
     data: [ArchetypeRegistry, $ArchetypeRegistry]
 
+- name: ArtifactsRegistry
+  deploy:
+    contract: DefaultArtifactsRegistry.bin
+    libraries: ErrorsLib:$ErrorsLib
+
 - name: ParticipantsManager
   deploy:
     contract: DefaultParticipantsManager.bin
     libraries: ErrorsLib:$ErrorsLib, MappingsLib:$MappingsLib
+    data: [$ArtifactsRegistry]
+
+- name: DefaultOrganizationImplementation
+  deploy:
+    contract: DefaultOrganization.bin
+    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib
+
+- name: ObjectClassOrganization
+  query-contract:
+    destination: $ParticipantsManager
+    bin: ParticipantsManager
+    function: OBJECT_CLASS_ORGANIZATION
+
+- name: RegisterOrganizationObjectClass
+  call:
+    destination: $ArtifactsRegistry
+    bin: ArtifactsRegistry
+    function: registerArtifact
+    data:
+        - $ObjectClassOrganization
+        - $DefaultOrganizationImplementation
+        - [1,0,0]
+        - "true"
 
 - name: ParticipantsManagerDb
   deploy:

@@ -19,11 +19,10 @@ import "commons-auth/Organization.sol";
  */
 contract DefaultParticipantsManager is Versioned(1,0,0), ParticipantsManager, AbstractObjectFactory, AbstractDbUpgradeable {
 
-    string public constant OBJECT_CLASS_ORGANIZATION = "commons.auth.Organization";
-
-    // TODO need to set DOUG here?? or call setDoug() extra, but that creates risk for missing the initialization; the constructor makes it explicit ... ?
-
-    constructor () public {
+    constructor (address _artifactsRegistry) public {
+   		ErrorsLib.revertIf(_artifactsRegistry == address(0),
+			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultParticipantsManager.constructor", "ArtifactsRegistry address must not be empty");
+		artifactsRegistry = _artifactsRegistry;
         addInterfaceSupport(ERC165_ID_ObjectFactory);
     }
 
@@ -65,7 +64,7 @@ contract DefaultParticipantsManager is Versioned(1,0,0), ParticipantsManager, Ab
             approvers = _initialApprovers;
         }
 
-        organization = new ObjectProxy(doug, OBJECT_CLASS_ORGANIZATION);
+        organization = new ObjectProxy(artifactsRegistry, OBJECT_CLASS_ORGANIZATION);
         Organization(address(organization)).initialize(approvers, _defaultDepartmentName);
         error = ParticipantsManagerDb(database).addOrganization(organization);
         ErrorsLib.revertIf(error != BaseErrors.NO_ERROR(),

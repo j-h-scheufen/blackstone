@@ -43,6 +43,9 @@ jobs:
   - name: DOUG
     build:
       contract: commons-management/TestDoug.sol
+  - name: DefaultArtifactsRegistry
+    build:
+      contract: commons-management/DefaultArtifactsRegistry.sol
   - name: ApplicationRegistry
     build:
       contract: bpm-runtime/DefaultApplicationRegistry.sol

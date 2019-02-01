@@ -11,6 +11,9 @@ jobs:
   - name: MappingsLib
     build:
       contract: commons-collections/MappingsLib.sol
+  - name: DOUG
+    build:
+      contract: commons-management/DefaultDoug.sol
   - name: UserAccountTest
     build:
       contract: commons-auth/test/UserAccountTest.sol
