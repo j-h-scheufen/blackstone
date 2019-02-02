@@ -160,16 +160,16 @@ contract DataStorageTest {
 		myStorage.setDataValueAsBytes32("key3", "bla");
 		myStorage.setDataValueAsUintArray(i256ArrId, u256Arr);
 
-		if (myStorage.getSize() != 4) return "pre-removal storage size should be 4";
+		if (myStorage.getNumberOfData() != 4) return "pre-removal storage size should be 4";
 		
 		myStorage.removeData(i256ArrId);
 		uint[] memory retUintArray = myStorage.getDataValueAsUintArray(i256ArrId);
 		if (retUintArray.length > 0) return "Returned array should be empty due to entry having been deleted";
 		
-		if (myStorage.getSize() != 3) return "post-removal storage size should be 9";
+		if (myStorage.getNumberOfData() != 3) return "post-removal storage size should be 9";
 		
 		myStorage.removeData("fakeKeyTTTT");
-		if (myStorage.getSize() != 3) return "Storage size should not have changed when deleting non-existent entry";
+		if (myStorage.getNumberOfData() != 3) return "Storage size should not have changed when deleting non-existent entry";
 
 		return SUCCESS;
 	}

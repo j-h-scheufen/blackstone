@@ -6,6 +6,94 @@ pragma solidity ^0.4.25;
  */
 contract DataStorage {
 
+	event LogDataStorageUpdateBool(
+		bytes32 indexed eventId,
+		address storageAddress,
+		bytes32 dataId,
+		bool boolValue
+	);
+
+	event LogDataStorageUpdateBoolArray(
+		bytes32 indexed eventId,
+		address storageAddress,
+		bytes32 dataId,
+		bool[] boolArrayValue
+	);
+
+	event LogDataStorageUpdateUint(
+		bytes32 indexed eventId,
+		address storageAddress,
+		bytes32 dataId,
+		uint uintValue
+	);
+
+	event LogDataStorageUpdateUintArray(
+		bytes32 indexed eventId,
+		address storageAddress,
+		bytes32 dataId,
+		uint[] uintArrayValue
+	);
+
+	event LogDataStorageUpdateInt(
+		bytes32 indexed eventId,
+		address storageAddress,
+		bytes32 dataId,
+		int intValue
+	);
+
+	event LogDataStorageUpdateIntArray(
+		bytes32 indexed eventId,
+		address storageAddress,
+		bytes32 dataId,
+		int[] intArrayValue
+	);
+
+	event LogDataStorageUpdateBytes32(
+		bytes32 indexed eventId,
+		address storageAddress,
+		bytes32 dataId,
+		bytes32 bytes32Value
+	);
+
+	event LogDataStorageUpdateBytes32Array(
+		bytes32 indexed eventId,
+		address storageAddress,
+		bytes32 dataId,
+		bytes32[] bytes32ArrayValue
+	);
+
+	event LogDataStorageUpdateAddress(
+		bytes32 indexed eventId,
+		address storageAddress,
+		bytes32 dataId,
+		address addressValue
+	);
+
+	event LogDataStorageUpdateAddressArray(
+		bytes32 indexed eventId,
+		address storageAddress,
+		bytes32 dataId,
+		address[] addressArrayValue
+	);
+
+	event LogDataStorageUpdateString(
+		bytes32 indexed eventId,
+		address storageAddress,
+		bytes32 dataId,
+		string stringValue
+	);
+
+  // TODO String[] can only be supported after upgrade to Solidity 0.5.x
+
+	// event LogDataStorageUpdateStringArray(
+	// 	bytes32 indexed eventId,
+	// 	address storageAddress,
+	// 	bytes32 dataId,
+	// 	string[] stringArrayValue
+	// );
+
+	bytes32 public constant EVENT_ID_DATA_STORAGE = "AN://data-storage";
+  
   /**
    * @dev Returns the data type of the Data object identified by the given id
    * @param _id the id of the data
@@ -14,10 +102,10 @@ contract DataStorage {
   function getDataType(bytes32 _id) external view returns (uint8);
 
   /**
-   * @dev Returns the size of the DataMap
+   * @dev Returns the number of data fields in this DataStorage
    * @return uint the size
    */
-  function getSize() external view returns (uint);
+  function getNumberOfData() external view returns (uint);
 
   /**
    * @dev Returns the data id at the given index
@@ -123,6 +211,20 @@ contract DataStorage {
    * @return bytes32 the value of the data
    */
   function getDataValueAsBytes32 (bytes32 _id) external view returns (bytes32);
+
+  /**
+   * @dev Creates a Data object with the given value and inserts it into the DataMap
+   * @param _id the id of the data
+   * @param _value the bool[] value of the data
+   */
+  function setDataValueAsBoolArray (bytes32 _id, bool[] _value) external;
+
+  /**
+   * @dev Gets the value of the Data object identified by the given id
+   * @param _id the id of the data
+   * @return bool[] the value of the data
+   */
+  function getDataValueAsBoolArray (bytes32 _id) external view returns (bool[]);
 
   /**
    * @dev Creates a Data object with the given value and inserts it into the DataMap
