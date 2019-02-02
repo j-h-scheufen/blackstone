@@ -27,8 +27,6 @@ contract DefaultProcessInstance is ProcessInstance, AbstractDataStorage, Abstrac
     using BpmRuntimeLib for BpmRuntime.ActivityInstance;
     using BpmRuntimeLib for ProcessDefinition;
 
-	bytes32 constant EVENT_ID_PROCESS_DATA = "AN://process-instance/data";
-
     BpmRuntime.ProcessInstance self;
 
     /**
@@ -103,6 +101,14 @@ contract DefaultProcessInstance is ProcessInstance, AbstractDataStorage, Abstrac
         self.addr = address(this);
         self.processDefinition = _processDefinition;
         self.state = BpmRuntime.ProcessInstanceState.CREATED;
+        emit LogProcessInstanceCreation(
+			EVENT_ID_PROCESS_INSTANCES,
+			address(this),
+			_processDefinition,
+			uint8(BpmRuntime.ProcessInstanceState.CREATED),
+			self.startedBy
+		);
+
     }
 
 	/**
@@ -129,17 +135,22 @@ contract DefaultProcessInstance is ProcessInstance, AbstractDataStorage, Abstrac
         // TODO should check that the owner of the DB and the owner of the PI match (or that the PI is in the DB)
         // TODO external invocation still possible, but might be OK since it might not result in any processing if the engine has not changed the state of the PI?!
         return self.execute(_service);
+        emit LogProcessInstanceStateUpdate(
+            EVENT_ID_PROCESS_INSTANCES,
+            address(this),
+            uint8(self.state)
+        );
+
     }
 
 	/**
 	 * @dev Aborts this ProcessInstance and halts any ongoing activities. After the abort the ProcessInstance cannot be resurrected.
-     * @param _service the BpmService to emit update events for ActivityInstances
 	 */
-    function abort(BpmService _service)
+    function abort()
         external
         pre_onlyByOwner
     {
-        self.abort(_service); //TODO the service is only required to emit events after activity instance state changes
+        self.abort();
         notifyProcessStateChange();
     }
 
@@ -173,7 +184,6 @@ contract DefaultProcessInstance is ProcessInstance, AbstractDataStorage, Abstrac
                 self.graph.activities[activityId].done = true;
             }
         }
-        _service.fireActivityUpdateEvent(this, _activityInstanceId);
 
         // attempt to continue the transaction as there might now be more activities to process
         return self.continueTransaction(_service);
@@ -396,9 +406,6 @@ contract DefaultProcessInstance is ProcessInstance, AbstractDataStorage, Abstrac
     {
         (address storageAddress, bytes32 dataPath) = resolveOutDataLocation(_activityInstanceId, _dataMappingId);
         DataStorage(storageAddress).setDataValueAsBool(dataPath, _value);
-        if (storageAddress == address(this)) {
-            emit LogProcessDataBoolUpdate(EVENT_ID_PROCESS_DATA, address(this), dataPath, _value);
-        }
     }
 
 	/**
@@ -414,9 +421,6 @@ contract DefaultProcessInstance is ProcessInstance, AbstractDataStorage, Abstrac
     {
         (address storageAddress, bytes32 dataPath) = resolveOutDataLocation(_activityInstanceId, _dataMappingId);
         DataStorage(storageAddress).setDataValueAsString(dataPath, _value);
-        if (storageAddress == address(this)) {
-            emit LogProcessDataStringUpdate(EVENT_ID_PROCESS_DATA, address(this), dataPath, _value);
-        }
     }
 
 	/**
@@ -432,9 +436,6 @@ contract DefaultProcessInstance is ProcessInstance, AbstractDataStorage, Abstrac
     {
         (address storageAddress, bytes32 dataPath) = resolveOutDataLocation(_activityInstanceId, _dataMappingId);
         DataStorage(storageAddress).setDataValueAsBytes32(dataPath, _value);
-        if (storageAddress == address(this)) {
-            emit LogProcessDataBytes32Update(EVENT_ID_PROCESS_DATA, address(this), dataPath, _value);
-        }
     }
 
 	/**
@@ -450,9 +451,6 @@ contract DefaultProcessInstance is ProcessInstance, AbstractDataStorage, Abstrac
     {
         (address storageAddress, bytes32 dataPath) = resolveOutDataLocation(_activityInstanceId, _dataMappingId);
         DataStorage(storageAddress).setDataValueAsUint(dataPath, _value);
-        if (storageAddress == address(this)) {
-            emit LogProcessDataUintUpdate(EVENT_ID_PROCESS_DATA, address(this), dataPath, _value);
-        }
     }
 
 	/**
@@ -468,9 +466,6 @@ contract DefaultProcessInstance is ProcessInstance, AbstractDataStorage, Abstrac
     {
         (address storageAddress, bytes32 dataPath) = resolveOutDataLocation(_activityInstanceId, _dataMappingId);
         DataStorage(storageAddress).setDataValueAsInt(dataPath, _value);
-        if (storageAddress == address(this)) {
-            emit LogProcessDataIntUpdate(EVENT_ID_PROCESS_DATA, address(this), dataPath, _value);
-        }
     }
 
 	/**
@@ -486,9 +481,6 @@ contract DefaultProcessInstance is ProcessInstance, AbstractDataStorage, Abstrac
     {
         (address storageAddress, bytes32 dataPath) = resolveOutDataLocation(_activityInstanceId, _dataMappingId);
         DataStorage(storageAddress).setDataValueAsAddress(dataPath, _value);
-        if (storageAddress == address(this)) {
-            emit LogProcessDataAddressUpdate(EVENT_ID_PROCESS_DATA, address(this), dataPath, _value);
-        }
     }
 
     /**
@@ -607,12 +599,32 @@ contract DefaultProcessInstance is ProcessInstance, AbstractDataStorage, Abstrac
         }
     }
 
-  /**
-    * @dev Notifies listeners about a process state change
-    */
-  function notifyProcessStateChange() public {
-    for (uint i=0; i<stateChangeListeners.length; i++) {
-      stateChangeListeners[i].processStateChanged(this);
+    /**
+     * @dev Notifies listeners about a process state change
+     */
+    function notifyProcessStateChange() public {
+        for (uint i=0; i<stateChangeListeners.length; i++) {
+            stateChangeListeners[i].processStateChanged(this);
+        }
     }
-  }
+
+    /**
+     * @dev Overwrites AbstractAddressScopes.setAddressScope() in order to emit an event in the context of this ActiveAgreement
+     */
+	function setAddressScope(address _address, bytes32 _context, bytes32 _fixedScope, bytes32 _dataPath, bytes32 _dataStorageId, address _dataStorage)
+		public
+	{
+        super.setAddressScope(_address, _context, _fixedScope, _dataPath, _dataStorageId, _dataStorage);
+        emit LogProcessInstanceAddressScopesUpdate(
+            EVENT_ID_PROCESS_INSTANCE_ADDRESS_SCOPES,
+            address(this),
+            _address,
+            _context,
+            _fixedScope,
+            _dataPath,
+            _dataStorageId,
+            _dataStorage
+        );        
+    }
+
 }

@@ -14,47 +14,33 @@ import "bpm-runtime/TransitionConditionResolver.sol";
  */
 contract ProcessInstance is DataStorage, AddressScopes, OwnerTransferable, ProcessStateChangeEmitter, TransitionConditionResolver {
 
-	event LogProcessDataBoolUpdate(
+	event LogProcessInstanceCreation(
 		bytes32 indexed eventId,
 		address processInstanceAddress,
-		bytes32 dataId,
-		bool boolValue
+		address processDefinitionAddress,
+		uint8 state,
+		address startedBy
 	);
 
-	event LogProcessDataUintUpdate(
+	event LogProcessInstanceStateUpdate(
 		bytes32 indexed eventId,
 		address processInstanceAddress,
-		bytes32 dataId,
-		uint uintValue
+		uint8 state
 	);
 
-	event LogProcessDataIntUpdate(
+	event LogProcessInstanceAddressScopesUpdate(
 		bytes32 indexed eventId,
 		address processInstanceAddress,
-		bytes32 dataId,
-		int intValue
+		address scopeAddress,
+		bytes32 scopeContext,
+		bytes32 fixedScope,
+		bytes32 dataPath,
+		bytes32 dataStorageId,
+		address dataStorage
 	);
 
-	event LogProcessDataBytes32Update(
-		bytes32 indexed eventId,
-		address processInstanceAddress,
-		bytes32 dataId,
-		bytes32 bytes32Value
-	);
-
-	event LogProcessDataAddressUpdate(
-		bytes32 indexed eventId,
-		address processInstanceAddress,
-		bytes32 dataId,
-		address addressValue
-	);
-
-	event LogProcessDataStringUpdate(
-		bytes32 indexed eventId,
-		address processInstanceAddress,
-		bytes32 dataId,
-		string stringValue
-	);
+	bytes32 public constant EVENT_ID_PROCESS_INSTANCES = "AN://process-instances";
+	bytes32 public constant EVENT_ID_PROCESS_INSTANCE_ADDRESS_SCOPES = "AN://process-instances/scopes";
 
 	/**
 	 * @dev Initiates and populates the runtime graph that will handle the state of this ProcessInstance.
@@ -71,9 +57,8 @@ contract ProcessInstance is DataStorage, AddressScopes, OwnerTransferable, Proce
 
 	/**
 	 * @dev Aborts this ProcessInstance and halts any ongoing activities. After the abort the ProcessInstance cannot be resurrected.
-     * @param _service the BpmService to emit update events for ActivityInstances
 	 */
-	function abort(BpmService _service) external;
+	function abort() external;
 
 	/**
 	 * @dev Completes the specified activity

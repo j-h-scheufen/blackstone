@@ -146,6 +146,44 @@
     }
   },
   {
+    "TableName": "AGREEMENT_ADDRESS_SCOPES",
+    "Filter": "Log1Text = 'AN://agreements/scopes'",
+    "Columns": {
+      "agreementAddress": {
+        "name": "agreement_address",
+        "type": "address",
+        "primary": true
+      },
+      "scopeAddress": {
+        "name": "scope_address",
+        "type": "address"
+      },
+      "scopeContext": {
+        "name": "scope_context",
+        "type": "bytes32",
+        "bytesToString": true
+      },
+      "fixedScope": {
+        "name": "fixed_scope",
+        "type": "bytes32"
+      },
+      "dataPath": {
+        "name": "data_path",
+        "type": "bytes32",
+        "bytesToString": true
+      },
+      "dataStorageId": {
+        "name": "data_storage_id",
+        "type": "bytes32",
+        "bytesToString": true
+      },
+      "dataStorage": {
+        "name": "data_storage",
+        "type": "address"
+      }
+    }
+  },
+  {
     "TableName": "ARCHETYPES",
     "Filter": "Log1Text = 'AN://archetypes'",
     "Columns": {
@@ -654,11 +692,11 @@
     }
   },
   {
-    "TableName": "PROCESS_DATA",
-    "Filter": "Log1Text = 'AN://process-instance/data'",
+    "TableName": "DATA_STORAGE",
+    "Filter": "Log1Text = 'AN://data-storage'",
     "Columns": {
-      "processInstanceAddress": {
-        "name": "process_instance_address",
+      "storageAddress": {
+        "name": "storage_address",
         "type": "address",
         "primary": true
       },
@@ -697,24 +735,19 @@
   },
   {
     "TableName": "PROCESS_INSTANCE_ADDRESS_SCOPES",
-    "Filter": "Log1Text = 'AN://process-instance/scopes'",
+    "Filter": "Log1Text = 'AN://process-instances/scopes'",
     "Columns": {
       "processInstanceAddress": {
         "name": "process_instance_address",
         "type": "address",
         "primary": true
       },
-      "addresScopeKey": {
-        "name": "addres_scope_key",
-        "type": "bytes32",
-        "primary": true
-      },
-      "keyAddress": {
-        "name": "key_address",
+      "scopeAddress": {
+        "name": "scope_address",
         "type": "address"
       },
-      "keyContext": {
-        "name": "key_context",
+      "scopeContext": {
+        "name": "scope_context",
         "type": "bytes32",
         "bytesToString": true
       },

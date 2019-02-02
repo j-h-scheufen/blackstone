@@ -24,14 +24,22 @@ import "bpm-runtime/TransitionConditionResolver.sol";
  */
 library BpmRuntimeLib {
 
+    // NOTE: some of the following event definitions are duplicates of events defined in ProcessInstance.sol
+
+	event LogProcessInstanceStateUpdate(
+		bytes32 indexed eventId,
+		address processInstanceAddress,
+		uint8 state
+	);
+
     event LogActivityInstanceCreation(
         bytes32 indexed eventId,
         bytes32 activityInstanceId,
         bytes32 activityId,
         address processInstanceAddress,
         uint created,
-        uint completed,
         address performer,
+        uint completed,
         address completedBy,
         uint8 state
     );
@@ -70,8 +78,10 @@ library BpmRuntimeLib {
         address performer,
         uint8 state
     );
-    
+
     bytes32 public constant EVENT_ID_ACTIVITY_INSTANCES = "AN://activity-instances";
+    // NOTE: EVENT_ID_PROCESS_INSTANCES is also defined in ProcessInstance.sol as similar events can generate from within the PI
+	bytes32 public constant EVENT_ID_PROCESS_INSTANCES = "AN://process-instances";
 
     function getERC165IdOrganization() internal pure returns (bytes4) {
         return (bytes4(keccak256(abi.encodePacked("addUser(address)"))) ^ 
@@ -160,7 +170,7 @@ library BpmRuntimeLib {
                         _activityInstance.id,
                         _activityInstance.completedBy,
                         _activityInstance.completed,
-                        0x0,
+                        address(0),
                         BpmRuntime.ActivityInstanceState.COMPLETED
                     );
                 }
@@ -224,7 +234,7 @@ library BpmRuntimeLib {
                         _activityInstance.id,
                         _activityInstance.completedBy,
                         _activityInstance.completed,
-                        0x0,
+                        address(0),
                         BpmRuntime.ActivityInstanceState.COMPLETED
                     );
                 }
@@ -267,7 +277,7 @@ library BpmRuntimeLib {
                     _activityInstance.id,
                     _activityInstance.completedBy,
                     _activityInstance.completed,
-                    0x0,
+                    address(0),
                     BpmRuntime.ActivityInstanceState.COMPLETED
                 );
             }
@@ -297,7 +307,7 @@ library BpmRuntimeLib {
                         emit LogActivityInstanceStateUpdate(
                             EVENT_ID_ACTIVITY_INSTANCES,
                             _activityInstance.id,
-                            uint8(_activityInstance.state)
+                            uint8(BpmRuntime.ActivityInstanceState.APPLICATION)
                         );
                         error = invokeApplication(_activityInstance, _rootDataStorage, application, msg.sender, _processDefinition, _service.getApplicationRegistry());
                         if (error != BaseErrors.NO_ERROR()) {
@@ -490,7 +500,6 @@ library BpmRuntimeLib {
                         _processInstance.activities.rows[aiId].value.completed = block.timestamp;
                         _processInstance.graph.activities[activityId].instancesCompleted++;
                     }
-                    _service.fireActivityUpdateEvent(_processInstance.addr, aiId);
                 }
 
                 // check the completed vs total instances
@@ -524,7 +533,11 @@ library BpmRuntimeLib {
         }
         else if (completed) {
             _processInstance.state = BpmRuntime.ProcessInstanceState.COMPLETED;
-            _service.emitProcessStateChangeEvent(_processInstance.addr);
+            emit LogProcessInstanceStateUpdate(
+                EVENT_ID_PROCESS_INSTANCES,
+                _processInstance.addr,
+                uint8(BpmRuntime.ProcessInstanceState.ABORTED)
+            );
             ProcessInstance(_processInstance.addr).notifyProcessStateChange();
             // check if the process is the subprocess of another process
             if (_processInstance.subProcessActivityInstance != "") {
@@ -741,9 +754,9 @@ library BpmRuntimeLib {
                                                                              multiInstanceIndex: _index,
                                                                              state: BpmRuntime.ActivityInstanceState.CREATED,
                                                                              created: created,
-                                                                             performer: 0x0,
-                                                                             completed: 0,
-                                                                             completedBy: 0x0});
+                                                                             performer: address(0),
+                                                                             completed: uint8(0),
+                                                                             completedBy: address(0)});
         insertOrUpdate(_processInstance.activities, ai);
         emit LogActivityInstanceCreation(
             EVENT_ID_ACTIVITY_INSTANCES,
@@ -751,9 +764,9 @@ library BpmRuntimeLib {
             _activityId,
             _processInstance.addr,
             created,
-            0,
-            0x0,
-            0x0,
+            address(0),
+            uint8(0),
+            address(0),
             uint8(BpmRuntime.ActivityInstanceState.CREATED)
         );
     }
@@ -762,7 +775,7 @@ library BpmRuntimeLib {
      * @dev Aborts the given ProcessInstance and all of its activities
      * @param _processInstance the process instance to abort
      */
-    function abort(BpmRuntime.ProcessInstance storage _processInstance, BpmService _service) public {
+    function abort(BpmRuntime.ProcessInstance storage _processInstance) public {
         // aborting is only possible for active processes
         if (_processInstance.state == BpmRuntime.ProcessInstanceState.ACTIVE ||
             _processInstance.state == BpmRuntime.ProcessInstanceState.CREATED) {
@@ -772,7 +785,6 @@ library BpmRuntimeLib {
                 activityInstanceId = _processInstance.activities.keys[i];
                 if (_processInstance.activities.rows[activityInstanceId].value.state != BpmRuntime.ActivityInstanceState.COMPLETED) {
                     _processInstance.activities.rows[activityInstanceId].value.state = BpmRuntime.ActivityInstanceState.ABORTED;
-                    _service.fireActivityUpdateEvent(_processInstance.addr, activityInstanceId);
                     emit LogActivityInstanceStateUpdate(
                         EVENT_ID_ACTIVITY_INSTANCES,
                         activityInstanceId,
@@ -782,7 +794,11 @@ library BpmRuntimeLib {
             }
             clear(_processInstance.graph);
             _processInstance.state = BpmRuntime.ProcessInstanceState.ABORTED;
-            _service.emitProcessStateChangeEvent(_processInstance.addr);
+            emit LogProcessInstanceStateUpdate(
+                EVENT_ID_PROCESS_INSTANCES,
+                _processInstance.addr,
+                uint8(BpmRuntime.ProcessInstanceState.ABORTED)
+            );
         }
     }
 

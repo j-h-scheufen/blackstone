@@ -50,7 +50,7 @@ contract AbstractAddressScopes is AddressScopes {
 	 * @param _dataStorage the dataStorgage address of a ConditionalData defining the scope
 	 */
 	function setAddressScope(address _address, bytes32 _context, bytes32 _fixedScope, bytes32 _dataPath, bytes32 _dataStorageId, address _dataStorage)
-		external
+		public
 	{
 		ErrorsLib.revertIf(_address == address(0),
 			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "AbstractAddressScopes.setScope", "The address to which to add a scope must not be empty");

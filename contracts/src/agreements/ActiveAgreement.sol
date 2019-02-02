@@ -60,9 +60,21 @@ contract ActiveAgreement is Named, DataStorage, AddressScopes, Signable, EventEm
 		string governingAgreementName
 	);
 
+	event LogAgreementAddressScopesUpdate(
+		bytes32 indexed eventId,
+		address agreementAddress,
+		address scopeAddress,
+		bytes32 scopeContext,
+		bytes32 fixedScope,
+		bytes32 dataPath,
+		bytes32 dataStorageId,
+		address dataStorage
+	);
+
 	bytes32 public constant EVENT_ID_AGREEMENTS = "AN://agreements";
 	bytes32 public constant EVENT_ID_AGREEMENT_PARTY_MAP = "AN://agreement-to-party";
 	bytes32 public constant EVENT_ID_GOVERNING_AGREEMENT = "AN://governing-agreements";
+	bytes32 public constant EVENT_ID_AGREEMENT_ADDRESS_SCOPES = "AN://agreements/scopes";
 
 	bytes32 public constant DATA_FIELD_AGREEMENT_PARTIES = "AGREEMENT_PARTIES";
 

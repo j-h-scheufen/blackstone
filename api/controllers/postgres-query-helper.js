@@ -436,8 +436,8 @@ const getActivityInstanceData = (id, userAddress) => {
     LEFT JOIN organization_accounts o ON o.organization_address = ai.performer 
     LEFT JOIN process_instance_address_scopes scopes ON (
       scopes.process_instance_address = pdat.process_instance_address 
-      AND scopes.key_address = ai.performer 
-      AND scopes.key_context = ai.activity_id
+      AND scopes.scope_address = ai.performer 
+      AND scopes.scope_context = ai.activity_id
     )
     WHERE ai.activity_instance_id = $1
     AND (
@@ -501,8 +501,8 @@ const getTasksByUserAddress = (userAddress) => {
     LEFT JOIN organization_accounts o ON o.organization_address = ai.performer
     LEFT JOIN process_instance_address_scopes scopes ON (
       scopes.process_instance_address = pdat.process_instance_address
-      AND scopes.key_address = ai.performer 
-      AND scopes.key_context = ai.activity_id
+      AND scopes.scope_address = ai.performer 
+      AND scopes.scope_context = ai.activity_id
     )
     WHERE ad.task_type = 1
     AND ai.state = 4

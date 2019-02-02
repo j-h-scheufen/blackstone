@@ -20,7 +20,7 @@ contract AddressScopes {
 	 * @param _dataStorageId the dataStorageId of a ConditionalData defining the scope
 	 * @param _dataStorage the dataStorgage address of a ConditionalData defining the scope
 	 */
-	function setAddressScope(address _address, bytes32 _context, bytes32 _fixedScope, bytes32 _dataPath, bytes32 _dataStorageId, address _dataStorage) external;
+	function setAddressScope(address _address, bytes32 _context, bytes32 _fixedScope, bytes32 _dataPath, bytes32 _dataStorageId, address _dataStorage) public;
 
 	/**
 	 * @dev Returns the scope for the given address and context. If the scope depends on a ConditionalData, the function should attempt

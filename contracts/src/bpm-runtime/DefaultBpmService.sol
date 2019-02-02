@@ -27,14 +27,6 @@ contract DefaultBpmService is Versioned(1,0,0), AbstractDbUpgradeable, ContractL
 
     using BpmRuntimeLib for ProcessInstance;
 
-    string constant TABLE_PROCESS_INSTANCES = "PROCESS_INSTANCES";
-    string constant TABLE_ACTIVITY_INSTANCES = "ACTIVITY_INSTANCES";
-    string constant TABLE_PROCESS_DATA = "PROCESS_DATA";
-    string constant TABLE_PROCESS_INSTANCE_ADDRESS_SCOPES = "PROCESS_INSTANCE_ADDRESS_SCOPES";
-	bytes32 constant EVENT_ID_PROCESS_INSTANCES = "AN://process-instances";
-	bytes32 constant EVENT_ID_PROCESS_DATA = "AN://process-instance/data";
-	bytes32 constant EVENT_ID_PROCESS_INSTANCE_ADDRESS_SCOPES = "AN://process-instance/scopes";
-
     //TODO these string should not be hardcoded. Inject via constructor after AN-307 fixed
     string constant serviceIdProcessModelRepository = "ProcessModelRepository";
     string constant serviceIdApplicationRegistry = "ApplicationRegistry";
@@ -90,62 +82,7 @@ contract DefaultBpmService is Versioned(1,0,0), AbstractDbUpgradeable, ContractL
     {
         _pi.initRuntime();
         BpmServiceDb(database).addProcessInstance(_pi);
-        bytes32 dataId;
-        for (uint i=0; i<_pi.getSize(); i++) {
-            ( ,dataId) = _pi.getDataIdAtIndex(i);
-            emit UpdateProcessData(TABLE_PROCESS_DATA, _pi, dataId);
-            emit LogProcessDataCreation(
-                EVENT_ID_PROCESS_DATA,
-                address(_pi),
-                dataId,
-                _pi.getDataValueAsBool(dataId),
-                _pi.getDataValueAsUint(dataId),
-                _pi.getDataValueAsInt(dataId),
-                _pi.getDataValueAsBytes32(dataId),
-                _pi.getDataValueAsAddress(dataId),
-                _pi.getDataValueAsString(dataId)
-            );
-        }
-        emitProcessInstanceAddressScopeEvents(_pi);
         error = _pi.execute(this);
-        emit UpdateProcesses(TABLE_PROCESS_INSTANCES, _pi);
-        emit LogProcessInstanceStateUpdate(
-            EVENT_ID_PROCESS_INSTANCES,
-            address(_pi),
-            _pi.getState()
-        );
-    }
-
-    function emitProcessInstanceAddressScopeEvents(ProcessInstance _pi) internal {
-        bytes32[] memory keys = _pi.getAddressScopeKeys();
-        address keyAddress;
-        bytes32 keyContext;
-        bytes32 fixedScope;
-        bytes32 dataPath;
-        bytes32 dataStorageId;
-        address dataStorage;
-        for (uint i = 0; i<keys.length; i++) {
-            emit UpdateProcessInstanceAddressScopes(TABLE_PROCESS_INSTANCE_ADDRESS_SCOPES, _pi, keys[i]);
-            (
-                keyAddress,
-                keyContext,
-                fixedScope,
-                dataPath,
-                dataStorageId,
-                dataStorage
-            ) = _pi.getAddressScopeDetailsForKey(keys[i]);
-            emit LogProcessInstanceAddressScopesUpdate(
-                EVENT_ID_PROCESS_INSTANCE_ADDRESS_SCOPES,
-                address(_pi),
-                keys[i],
-                keyAddress,
-                keyContext,
-                fixedScope,
-                dataPath,
-                dataStorageId,
-                dataStorage
-            );
-        }
     }
 
 	/**
@@ -168,13 +105,6 @@ contract DefaultBpmService is Versioned(1,0,0), AbstractDbUpgradeable, ContractL
         processInstance.transferOwnership(msg.sender);
         ErrorsLib.revertIf(address(processInstance) == 0x0,
                 ErrorsLib.INVALID_STATE(), "DefaultBpmService.createDefaultProcessInstance", "Process Instance address empty");
-        emit LogProcessInstanceCreation(
-			EVENT_ID_PROCESS_INSTANCES,
-			address(processInstance),
-			processInstance.getProcessDefinition(),
-			processInstance.getState(),
-			processInstance.getStartedBy()
-		);
     }
 
     /**
@@ -291,7 +221,7 @@ contract DefaultBpmService is Versioned(1,0,0), AbstractDbUpgradeable, ContractL
 	 * @return the process data size
 	 */
     function getNumberOfProcessData(address _address) external view returns (uint size) {
-        size = ProcessInstance(_address).getSize();
+        size = ProcessInstance(_address).getNumberOfData();
     }
 
     /**
@@ -399,36 +329,6 @@ contract DefaultBpmService is Versioned(1,0,0), AbstractDbUpgradeable, ContractL
 	 */
     function getApplicationRegistry() external view returns (ApplicationRegistry) {
         return applicationRegistry;
-    }
-
-    /**
-     * @dev Fires the UpdateActivities event to update sqlsol with given activity
-     * @param _piAddress - the address of the process instance to which the activity belongs
-     * @param _activityId - the bytes32 Id of the activity
-     */
-    function fireActivityUpdateEvent (address _piAddress, bytes32 _activityId) external {
-        emit UpdateActivities(TABLE_ACTIVITY_INSTANCES, _piAddress, _activityId);
-    }
-
-	/**
-     * @dev Fires the UpdateProcessData event to update sqlsol with given information
-     * @param _piAddress - the address of the process instance to which the activity belongs
-     * @param _dataId - the ID of the data entry
-     */
-    function fireProcessDataUpdateEvent(address _piAddress, bytes32 _dataId) external {
-        emit UpdateProcessData(TABLE_PROCESS_DATA, _piAddress, _dataId);
-    }
-
-    /**
-     * @dev Emits a state change event for the process instance
-     * @param _processInstance address of process intance
-     */
-    function emitProcessStateChangeEvent(address _processInstance) external {
-        emit LogProcessInstanceStateUpdate(
-            EVENT_ID_PROCESS_INSTANCES,
-            _processInstance,
-            ProcessInstance(_processInstance).getState()
-        );
     }
 
 	/**

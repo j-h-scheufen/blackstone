@@ -13,54 +13,10 @@ import "bpm-runtime/BpmServiceDb.sol";
  */
 contract BpmService is Upgradeable {
 
-	// Events
-	event UpdateActivities(string name, address key1, bytes32 key2);
-	event UpdateProcesses(string name, address key1);
-	event UpdateProcessData(string name, address key1, bytes32 key2);
-	event UpdateProcessInstanceAddressScopes(string name, address key1, bytes32 key2);
-
-	event LogProcessInstanceCreation(
-		bytes32 indexed eventId,
-		address processInstanceAddress,
-		address processDefinitionAddress,
-		uint8 state,
-		address startedBy
-	);
-
-	event LogProcessInstanceStateUpdate(
-		bytes32 indexed eventId,
-		address processInstanceAddress,
-		uint8 state
-	);
-
-	event LogProcessDataCreation(
-		bytes32 indexed eventId,
-		address processInstanceAddress,
-		bytes32 dataId,
-		bool boolValue,
-		uint uintValue,
-		int intValue,
-		bytes32 bytes32Value,
-		address addressValue,
-		string stringValue
-	);
-
-	event LogProcessInstanceAddressScopesUpdate(
-		bytes32 indexed eventId,
-		address processInstanceAddress,
-		bytes32 addressScopeKey,
-		address keyAddress,
-		bytes32 keyContext,
-		bytes32 fixedScope,
-		bytes32 dataPath,
-		bytes32 dataStorageId,
-		address dataStorage
-	);
-	
 	/**
-		* @dev Gets the ProcessModelRepository address for this BpmService
-		* @return the address of the repository
-		*/
+	 * @dev Gets the ProcessModelRepository address for this BpmService
+	 * @return the address of the repository
+	 */
 	function getProcessModelRepository() external view returns (ProcessModelRepository);
 
 	/**
@@ -233,25 +189,5 @@ contract BpmService is Upgradeable {
 	 * @return the BpmServiceDb
 	 */
 	function getBpmServiceDb() external view returns (BpmServiceDb);
-
-	/**
-	 * @dev Fires the UpdateActivities event to update sqlsol with given activity
-	 * @param _piAddress - the address of the process instance to which the activity belongs
-	 * @param _activityId - the bytes32 Id of the activity
-	 */
-	function fireActivityUpdateEvent(address _piAddress, bytes32 _activityId) external;
-
-	/**
-	 * @dev Fires the UpdateProcessData event to update sqlsol with given information
-	 * @param _piAddress - the address of the process instance to which the activity belongs
-	 * @param _dataId - the ID of the data entry
-	 */
-	function fireProcessDataUpdateEvent(address _piAddress, bytes32 _dataId) external;
-
-	/**
-	 * @dev Emits a state change event for the process instance
-	 * @param _processInstance address of process intance
-	 */
-	function emitProcessStateChangeEvent(address _processInstance) external;
 
 }

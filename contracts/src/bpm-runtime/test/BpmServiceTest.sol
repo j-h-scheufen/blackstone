@@ -1425,9 +1425,9 @@ contract BpmServiceTest {
 		( , , , addr, , state) = pi2.getActivityInstanceData(pi2.getActivityInstanceAtIndex(1));
 		if (state != uint8(BpmRuntime.ActivityInstanceState.SUSPENDED)) return "Activity2 in pi2 should be suspended";
 
-		// abort both processes, only the second one should succeed
-		pi1.abort(service);
-		pi2.abort(service);
+		// abort both processes and check that any previously open activity instances are aborted.
+		pi1.abort();
+		pi2.abort();
 
 		if (pi1.getState() != uint8(BpmRuntime.ProcessInstanceState.ABORTED)) return "pi1 should be aborted";
 		if (pi2.getState() != uint8(BpmRuntime.ProcessInstanceState.ABORTED)) return "pi2 should be aborted";

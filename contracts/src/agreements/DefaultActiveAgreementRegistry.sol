@@ -485,7 +485,7 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 	 * @return the number of parameters
 	 */
 	function getNumberOfAgreementParameters(address _address) external view returns (uint size) {
-			size = ActiveAgreement(_address).getSize();
+			size = ActiveAgreement(_address).getNumberOfData();
 	}
 
   /**
@@ -655,10 +655,10 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 			if (ActiveAgreement(msg.sender).getLegalState() == uint8(Agreements.LegalState.CANCELED) ||
 				ActiveAgreement(msg.sender).getLegalState() == uint8(Agreements.LegalState.DEFAULT)) {
 					if (ActiveAgreementRegistryDb(database).getAgreementFormationProcess(msg.sender) != 0x0) {
-						ProcessInstance(ActiveAgreementRegistryDb(database).getAgreementFormationProcess(msg.sender)).abort(bpmService);
+						ProcessInstance(ActiveAgreementRegistryDb(database).getAgreementFormationProcess(msg.sender)).abort();
 					}
 					if (ActiveAgreementRegistryDb(database).getAgreementExecutionProcess(msg.sender) != 0x0) {
-						ProcessInstance(ActiveAgreementRegistryDb(database).getAgreementExecutionProcess(msg.sender)).abort(bpmService);
+						ProcessInstance(ActiveAgreementRegistryDb(database).getAgreementExecutionProcess(msg.sender)).abort();
 					}
 			}
 		}
