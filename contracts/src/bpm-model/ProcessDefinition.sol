@@ -20,24 +20,24 @@ contract ProcessDefinition is Bytes32Identifiable {
 
 	event LogActivityDefinitionCreation(
 		bytes32 indexed eventId,
-		address model_address,
-		address process_definition_address,
-		bytes32 activity_id,
-		uint8 activity_type,
-		uint8 task_type,
-		uint8 task_behavior,
-		bytes32 participant_id,
-		bool multi_instance,
+		address modelAddress,
+		address processDefinitionAddress,
+		bytes32 activityId,
+		uint8 activityType,
+		uint8 taskType,
+		uint8 taskBehavior,
+		bytes32 participantId,
+		bool multiInstance,
 		bytes32 application,
-		bytes32 sub_process_model_id,
-		bytes32 sub_process_definition_id
+		bytes32 subProcessModelId,
+		bytes32 subProcessDefinitionId
 	);
 
 	event LogDataMappingCreation(
 		bytes32 indexed eventId,
 		address processDefinitionAddress,
 		bytes32 activityId,
-    bytes32 dataMappingId,
+    	bytes32 dataMappingId,
 		bytes32 dataPath,
 		bytes32 dataStorageId,
 		address dataStorage,

@@ -11,27 +11,11 @@ import "bpm-model/BpmModel.sol";
  */
 contract ProcessModelRepository is Upgradeable {
 	
-	event LogProcessModelCreation(
-		bytes32 indexed eventId,
-		address model_address,
-		bytes32 id,
-		string name,
-		uint version_major,
-		uint version_minor,
-		uint version_patch,
-		address author,
-		bool is_private,
-		bool active,
-		string modelFileReference
-	);
-
 	event LogProcessModelActivation(
 		bytes32 indexed eventId,
-		address model_address,
+		address modelAddress,
 		bool active
 	);
-
-	bytes32 public constant EVENT_ID_PROCESS_MODELS = "AN://process-models";
 
 	/**
 	 * @dev Factory function to instantiate a ProcessModel. The model is automatically added to this repository.

@@ -43,6 +43,19 @@ contract DefaultProcessModel is ProcessModel {
 		modelFileReference = _modelFileReference;
 		author = _author;
 		privateFlag = _isPrivate;
+		emit LogProcessModelCreation(
+			EVENT_ID_PROCESS_MODELS,
+			address(this),
+			_id,
+			_name,
+			_version[0],
+			_version[1],
+			_version[2],
+			_author,
+			_isPrivate,
+			false,
+			_modelFileReference
+		);
 	}
 	
 	/**

@@ -11,6 +11,20 @@ import "bpm-model/BpmModel.sol";
  */
 contract ProcessModel is Versioned, AbstractNamedElement {
 
+	event LogProcessModelCreation(
+		bytes32 indexed eventId,
+		address modelAddress,
+		bytes32 id,
+		string name,
+		uint versionMajor,
+		uint versionMinor,
+		uint versionPatch,
+		address author,
+		bool isPrivate,
+		bool active,
+		string modelFileReference
+	);
+
 	event LogProcessDefinitionCreation(
 		bytes32 indexed eventId,
 		address processDefinitionAddress,
@@ -28,6 +42,7 @@ contract ProcessModel is Versioned, AbstractNamedElement {
 		uint parameterType
 	);
 
+	bytes32 public constant EVENT_ID_PROCESS_MODELS = "AN://process-models";
 	bytes32 public constant EVENT_ID_PROCESS_DEFINITIONS = "AN://process-definitions";
 	bytes32 public constant EVENT_ID_PROCESS_MODEL_DATA = "AN://process-model-data";
 

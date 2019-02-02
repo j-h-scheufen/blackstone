@@ -10,7 +10,7 @@ contract UserAccount is Owned {
 
    event LogUserCreation(
         bytes32 indexed eventId,
-        address user_account_address,
+        address userAccountAddress,
         address owner
     );
 

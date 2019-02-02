@@ -149,7 +149,7 @@
     "TableName": "ARCHETYPES",
     "Filter": "Log1Text = 'AN://archetypes'",
     "Columns": {
-      "archetype_address": {
+      "archetypeAddress": {
         "name": "archetype_address",
         "type": "address",
         "primary": true
@@ -174,7 +174,7 @@
         "name": "active",
         "type": "bool"
       },
-      "is_private": {
+      "isPrivate": {
         "name": "is_private",
         "type": "bool"
       },
@@ -182,11 +182,11 @@
         "name": "successor",
         "type": "address"
       },
-      "formation_process_Definition": {
+      "formationProcessDefinition": {
         "name": "formation_process_Definition",
         "type": "address"
       },
-      "execution_process_Definition": {
+      "executionProcessDefinition": {
         "name": "execution_process_Definition",
         "type": "address"
       }
@@ -196,7 +196,7 @@
     "TableName": "ARCHETYPE_PACKAGES",
     "Filter": "Log1Text = 'AN://archetype-packages'",
     "Columns": {
-      "package_id": {
+      "packageId": {
         "name": "package_id",
         "type": "bytes32",
         "primary": true
@@ -213,7 +213,7 @@
         "name": "author",
         "type": "address"
       },
-      "is_private": {
+      "isPrivate": {
         "name": "is_private",
         "type": "bool"
       },
@@ -227,17 +227,17 @@
     "TableName": "ARCHETYPE_TO_PACKAGE",
     "Filter": "Log1Text = 'AN://archetype-to-package'",
     "Columns": {
-      "package_id": {
+      "packageId": {
         "name": "package_id",
         "type": "bytes32",
         "primary": true
       },
-      "archetype_address": {
+      "archetypeAddress": {
         "name": "archetype_address",
         "type": "address",
         "primary": true
       },
-      "archetype_name": {
+      "archetypeName": {
         "name": "archetype_name",
         "type": "string"
       }
@@ -247,18 +247,18 @@
     "TableName": "ARCHETYPE_PARAMETERS",
     "Filter": "Log1Text = 'AN://archetype/parameters'",
     "Columns": {
-      "archetype_address": {
+      "archetypeAddress": {
         "name": "archetype_address",
         "type": "address",
         "primary": true
       },
-      "parameter_name": {
+      "parameterName": {
         "name": "parameter_name",
         "type": "bytes32",
         "primary": true,
         "bytesToString": true
       },
-      "parameter_type": {
+      "parameterType": {
         "name": "parameter_type",
         "type": "uint8"
       },
@@ -292,7 +292,7 @@
     "TableName": "ARCHETYPE_JURISDICTIONS",
     "Filter": "Log1Text = 'AN://archetype/jurisdictions'",
     "Columns": {
-      "archetype_address": {
+      "archetypeAddress": {
         "name": "archetype_address",
         "type": "address",
         "primary": true
@@ -314,17 +314,17 @@
     "TableName": "GOVERNING_ARCHETYPES",
     "Filter": "Log1Text = 'AN://governing-archetypes'",
     "Columns": {
-      "archetype_address": {
+      "archetypeAddress": {
         "name": "archetype_address",
         "type": "address",
         "primary": true
       },
-      "governing_archetype_address": {
+      "governingArchetypeAddress": {
         "name": "governing_archetype_address",
         "type": "address",
         "primary": true
       },
-      "governing_archetype_name": {
+      "governingArchetypeName": {
         "name": "governing_archetype_name",
         "type": "string"
       }
@@ -334,17 +334,17 @@
     "TableName": "ACTIVITY_INSTANCES",
     "Filter": "Log1Text = 'AN://activity-instances'",
     "Columns": {
-      "activity_instance_id": {
+      "activityInstanceId": {
         "name": "activity_instance_id",
         "type": "bytes32",
         "primary": true
       },
-      "activity_id": {
+      "activityId": {
         "name": "activity_id",
         "type": "bytes32",
         "bytesToString": true
       },
-      "process_instance_address": {
+      "processInstanceAddress": {
         "name": "process_instance_address",
         "type": "address"
       },
@@ -360,7 +360,7 @@
         "name": "performer",
         "type": "address"
       },
-      "completed_by": {
+      "completedBy": {
         "name": "completed_by",
         "type": "address"
       },
@@ -374,12 +374,12 @@
     "TableName": "PROCESS_INSTANCES",
     "Filter": "Log1Text = 'AN://process-instances'",
     "Columns": {
-      "process_instance_address": {
+      "processInstanceAddress": {
         "name": "process_instance_address",
         "type": "address",
         "primary": true
       },
-      "process_definition_address": {
+      "processDefinitionAddress": {
         "name": "process_definition_address",
         "type": "address"
       },
@@ -387,7 +387,7 @@
         "name": "state",
         "type": "uint8"
       },
-      "started_by": {
+      "startedBy": {
         "name": "started_by",
         "type": "address"
       }
@@ -397,40 +397,40 @@
     "TableName": "ACTIVITY_DEFINITIONS",
     "Filter": "Log1Text = 'AN://activity-definitions'",
     "Columns": {
-      "activity_id": {
+      "activityId": {
         "name": "activity_id",
         "type": "bytes32",
         "primary": true,
         "bytesToString": true
       },
-      "model_address": {
+      "modelAddress": {
         "name": "model_address",
         "type": "address",
         "primary": true
       },
-      "process_definition_address": {
+      "processDefinitionAddress": {
         "name": "process_definition_address",
         "type": "address",
         "primary": true
       },
-      "activity_type": {
+      "activityType": {
         "name": "activity_type",
         "type": "uint8"
       },
-      "task_type": {
+      "taskType": {
         "name": "task_type",
         "type": "uint8"
       },
-      "task_behavior": {
+      "taskBehavior": {
         "name": "task_behavior",
         "type": "uint8"
       },
-      "participant_id": {
+      "participantId": {
         "name": "participant_id",
         "type": "bytes32",
         "bytesToString": true
       },
-      "multi_instance": {
+      "multiInstance": {
         "name": "multi_instance",
         "type": "bool"
       },
@@ -439,12 +439,12 @@
         "type": "bytes32",
         "bytesToString": true
       },
-      "sub_process_model_id": {
+      "subProcessModelId": {
         "name": "sub_process_model_id",
         "type": "bytes32",
         "bytesToString": true
       },
-      "sub_process_definition_id": {
+      "subProcessPefinitionId": {
         "name": "sub_process_definition_id",
         "type": "bytes32",
         "bytesToString": true
@@ -485,7 +485,7 @@
     "TableName": "PROCESS_MODELS",
     "Filter": "Log1Text = 'AN://process-models'",
     "Columns": {
-      "model_address": {
+      "modelAddress": {
         "name": "model_address",
         "type": "address",
         "primary": true
@@ -499,15 +499,15 @@
         "name": "name",
         "type": "string"
       },
-      "version_major": {
+      "versionMajor": {
         "name": "version_major",
         "type": "uint"
       },
-      "version_minor": {
+      "versionMinor": {
         "name": "version_minor",
         "type": "uint"
       },
-      "version_patch": {
+      "versionPatch": {
         "name": "version_patch",
         "type": "uint"
       },
@@ -515,7 +515,7 @@
         "name": "author",
         "type": "address"
       },
-      "is_private": {
+      "isPrivate": {
         "name": "is_private",
         "type": "bool"
       },
@@ -657,39 +657,39 @@
     "TableName": "PROCESS_DATA",
     "Filter": "Log1Text = 'AN://process-instance/data'",
     "Columns": {
-      "process_instance_address": {
+      "processInstanceAddress": {
         "name": "process_instance_address",
         "type": "address",
         "primary": true
       },
-      "data_id": {
+      "dataId": {
         "name": "data_id",
         "type": "bytes32",
         "primary": true,
         "bytesToString": true
       },
-      "bool_value": {
+      "boolValue": {
         "name": "bool_value",
         "type": "bool"
       },
-      "uint_value": {
+      "uintValue": {
         "name": "uint_value",
         "type": "uint"
       },
-      "int_value": {
+      "intValue": {
         "name": "int_value",
         "type": "int"
       },
-      "bytes32_value": {
+      "bytes32Value": {
         "name": "bytes32_value",
         "type": "bytes32",
         "bytesToString": true
       },
-      "address_value": {
+      "addressValue": {
         "name": "address_value",
         "type": "address"
       },
-      "string_value": {
+      "stringValue": {
         "name": "string_value",
         "type": "string"
       }
@@ -699,40 +699,40 @@
     "TableName": "PROCESS_INSTANCE_ADDRESS_SCOPES",
     "Filter": "Log1Text = 'AN://process-instance/scopes'",
     "Columns": {
-      "process_instance_address": {
+      "processInstanceAddress": {
         "name": "process_instance_address",
         "type": "address",
         "primary": true
       },
-      "addres_scope_key": {
+      "addresScopeKey": {
         "name": "addres_scope_key",
         "type": "bytes32",
         "primary": true
       },
-      "key_address": {
+      "keyAddress": {
         "name": "key_address",
         "type": "address"
       },
-      "key_context": {
+      "keyContext": {
         "name": "key_context",
         "type": "bytes32",
         "bytesToString": true
       },
-      "fixed_scope": {
+      "fixedScope": {
         "name": "fixed_scope",
         "type": "bytes32"
       },
-      "data_path": {
+      "dataPath": {
         "name": "data_path",
         "type": "bytes32",
         "bytesToString": true
       },
-      "data_storage_id": {
+      "dataStorageId": {
         "name": "data_storage_id",
         "type": "bytes32",
         "bytesToString": true
       },
-      "data_storage": {
+      "dataStorage": {
         "name": "data_storage",
         "type": "address"
       }
@@ -820,7 +820,7 @@
     "TableName": "PARAMETER_TYPES",
     "Filter": "Log1Text = 'AN://parameter-types'",
     "Columns": {
-      "parameter_type": {
+      "parameterType": {
         "name": "parameter_type",
         "type": "uint",
         "primary": true
@@ -835,7 +835,7 @@
     "TableName": "USER_ACCOUNTS",
     "Filter": "Log1Text = 'AN://user-accounts'",
     "Columns": {
-      "user_account_address": {
+      "userAccountAddress": {
         "name": "user_account_address",
         "type": "address",
         "primary": true
@@ -850,16 +850,16 @@
     "TableName": "ORGANIZATION_ACCOUNTS",
     "Filter": "Log1Text = 'AN://organization-accounts'",
     "Columns": {
-      "organization_address": {
+      "organizationAddress": {
         "name": "organization_address",
         "type": "address",
         "primary": true
       },
-      "approver_count": {
+      "approverCount": {
         "name": "approver_count",
         "type": "uint"
       },
-      "organization_id": {
+      "organizationId": {
         "name": "organization_id",
         "type": "bytes32"
       }
@@ -869,12 +869,12 @@
     "TableName": "ORGANIZATION_APPROVERS",
     "Filter": "Log1Text = 'AN://organizations/approvers'",
     "Columns": {
-      "organization_address": {
+      "organizationAddress": {
         "name": "organization_address",
         "type": "address",
         "primary": true
       },
-      "approver_address": {
+      "approverAddress": {
         "name": "approver_address",
         "type": "address",
         "primary": true
@@ -886,12 +886,12 @@
     "Filter": "Log1Text = 'AN://organizations/users'",
     "DeleteFilter": "CRUD_ACTION = 'delete'",
     "Columns": {
-      "organization_address": {
+      "organizationaddress": {
         "name": "organization_address",
         "type": "address",
         "primary": true
       },
-      "user_address": {
+      "userAddress": {
         "name": "user_address",
         "type": "address",
         "primary": true
@@ -903,18 +903,18 @@
     "Filter": "Log1Text = 'AN://organizations/departments'",
     "DeleteFilter": "CRUD_ACTION = 'delete'",
     "Columns": {
-      "organization_address": {
+      "organizationAddress": {
         "name": "organization_address",
         "type": "address",
         "primary": true
       },
-      "department_id": {
+      "departmentId": {
         "name": "department_id",
         "type": "bytes32",
         "bytesToString": true,
         "primary": true
       },
-      "user_count": {
+      "userCount": {
         "name": "user_count",
         "type": "uint"
       },
@@ -929,18 +929,18 @@
     "Filter": "Log1Text = 'AN://departments/users'",
     "DeleteFilter": "CRUD_ACTION = 'delete'",
     "Columns": {
-      "organization_address": {
+      "organizationAddress": {
         "name": "organization_address",
         "type": "address",
         "primary": true
       },
-      "department_id": {
+      "departmentId": {
         "name": "department_id",
         "type": "bytes32",
         "bytesToString": true,
         "primary": true
       },
-      "user_address": {
+      "userAddress": {
         "name": "user_address",
         "type": "address",
         "primary": true

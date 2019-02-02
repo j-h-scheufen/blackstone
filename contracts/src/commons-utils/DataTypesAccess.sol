@@ -10,13 +10,13 @@ contract DataTypesAccess {
 
     event LogDataType(
         bytes32 indexed eventId,
-        uint data_type,
+        uint dataType,
         string label
     );
 
     event LogParameterType(
         bytes32 indexed eventId,
-        uint parameter_type,
+        uint parameterType,
         string label
     );
 

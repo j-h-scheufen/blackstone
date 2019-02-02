@@ -11,65 +11,65 @@ contract Organization is ERC165 {
 
     event LogOrganizationCreation(
         bytes32 indexed eventId,
-        address organization_address,
-        uint approver_count,
-        bytes32 organization_id
+        address organizationAddress,
+        uint approverCount,
+        bytes32 organizationId
     );
 
     event LogOrganizationUserUpdate(
         bytes32 indexed eventId,
-        address organization_address,
-        address user_address
+        address organizationAddress,
+        address userAddress
     );
 
     event LogOrganizationUserRemoval(
         bytes32 indexed eventId,
         bytes32 CRUD_ACTION,
-        address organization_address,
-        address user_address
+        address organizationAddress,
+        address userAddress
     ); 
 
     event LogDepartmentUserUpdate(
         bytes32 indexed eventId,
-        address organization_address,
-        bytes32 department_id,
-        address user_address
+        address organizationAddress,
+        bytes32 departmentId,
+        address userAddress
     );
 
     event LogDepartmentUserRemoval(
         bytes32 indexed eventId,
         bytes32 CRUD_ACTION,
-        address organization_address,
-        bytes32 department_id,
-        address user_address
+        address organizationAddress,
+        bytes32 departmentId,
+        address userAddress
     );
 
     event LogOrganizationDepartmentUpdate(
         bytes32 indexed eventId,
-        address organization_address,
-        bytes32 department_id,
-        uint user_count,
+        address organizationAddress,
+        bytes32 departmentId,
+        uint userCount,
         string name        
     );
 
     event LogOrganizationDepartmentRemoval(
         bytes32 indexed eventId,
         bytes32 CRUD_ACTION,
-        address organization_address,
-        bytes32 department_id
+        address organizationAddress,
+        bytes32 departmentId
     );
 
     event LogOrganizationApproverUpdate(
         bytes32 indexed eventId,
-        address organization_address,
-        address approver_address
+        address organizationAddress,
+        address approverAddress
     );
 
     event LogOrganizationApproverRemoval(
         bytes32 indexed eventId,
         bytes32 CRUD_ACTION,
-        address organization_address,
-        address approver_address
+        address organizationAddress,
+        address approverAddress
     );
 
     bytes32 public constant EVENT_ID_ORGANIZATION_ACCOUNTS = "AN://organization-accounts";

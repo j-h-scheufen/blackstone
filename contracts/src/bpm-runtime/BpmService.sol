@@ -21,40 +21,40 @@ contract BpmService is Upgradeable {
 
 	event LogProcessInstanceCreation(
 		bytes32 indexed eventId,
-		address process_instance_address,
-		address process_definition_address,
+		address processInstanceAddress,
+		address processDefinitionAddress,
 		uint8 state,
-		address started_by
+		address startedBy
 	);
 
 	event LogProcessInstanceStateUpdate(
 		bytes32 indexed eventId,
-		address process_instance_address,
+		address processInstanceAddress,
 		uint8 state
 	);
 
 	event LogProcessDataCreation(
 		bytes32 indexed eventId,
-		address process_instance_address,
-		bytes32 data_id,
-		bool bool_value,
-		uint uint_value,
-		int int_value,
-		bytes32 bytes32_value,
-		address address_value,
-		string string_value
+		address processInstanceAddress,
+		bytes32 dataId,
+		bool boolValue,
+		uint uintValue,
+		int intValue,
+		bytes32 bytes32Value,
+		address addressValue,
+		string stringValue
 	);
 
 	event LogProcessInstanceAddressScopesUpdate(
 		bytes32 indexed eventId,
-		address process_instance_address,
-		bytes32 addres_scope_key,
-		address key_address,
-		bytes32 key_context,
-		bytes32 fixed_scope,
-		bytes32 data_path,
-		bytes32 data_storage_id,
-		address data_storage
+		address processInstanceAddress,
+		bytes32 addressScopeKey,
+		address keyAddress,
+		bytes32 keyContext,
+		bytes32 fixedScope,
+		bytes32 dataPath,
+		bytes32 dataStorageId,
+		address dataStorage
 	);
 	
 	/**

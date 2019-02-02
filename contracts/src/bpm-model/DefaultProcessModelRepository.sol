@@ -52,19 +52,6 @@ contract DefaultProcessModelRepository is Versioned(1,1,0), ProcessModelReposito
 	function addModel(ProcessModel _model) public returns (uint error) {
 		error = ProcessModelRepositoryDb(database).addModel(_model.getId(), _model.getVersion(), _model);
 		if ( error != BaseErrors.NO_ERROR()) return;
-		emit LogProcessModelCreation(
-			EVENT_ID_PROCESS_MODELS,
-			address(_model),
-			_model.getId(),
-			_model.getName(),
-			_model.major(),
-			_model.minor(),
-			_model.patch(),
-			_model.getAuthor(),
-			_model.isPrivate(),
-			ProcessModelRepositoryDb(database).getActiveModel(_model.getId()) == address(_model),
-			_model.getModelFileReference()
-		);
 		// if there is no active model for this ID namespace, yet, then this one becomes the active one by default
 		if (!ProcessModelRepositoryDb(database).modelIsActive(_model.getId())) {
 			ProcessModelRepositoryDb(database).registerActiveModel(_model.getId(), _model);
@@ -89,10 +76,10 @@ contract DefaultProcessModelRepository is Versioned(1,1,0), ProcessModelReposito
 		// re-use the addr field to lookup a previously activated model with the same ID
 		addr = ProcessModelRepositoryDb(database).getActiveModel(_model.getId());
 		ProcessModelRepositoryDb(database).registerActiveModel(_model.getId(), _model);
-		emit LogProcessModelActivation(EVENT_ID_PROCESS_MODELS, address(_model), true);
+		emit LogProcessModelActivation(_model.EVENT_ID_PROCESS_MODELS(), address(_model), true);
 		if (addr != 0x0 && addr != address(_model)) {
 			// previously activated model detected that should be updated
-			emit LogProcessModelActivation(EVENT_ID_PROCESS_MODELS, address(addr), false);
+			emit LogProcessModelActivation(_model.EVENT_ID_PROCESS_MODELS(), address(addr), false);
 		}
 		return BaseErrors.NO_ERROR();
 	}

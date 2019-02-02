@@ -16,44 +16,44 @@ contract ProcessInstance is DataStorage, AddressScopes, OwnerTransferable, Proce
 
 	event LogProcessDataBoolUpdate(
 		bytes32 indexed eventId,
-		address process_instance_address,
-		bytes32 data_id,
-		bool bool_value
+		address processInstanceAddress,
+		bytes32 dataId,
+		bool boolValue
 	);
 
 	event LogProcessDataUintUpdate(
 		bytes32 indexed eventId,
-		address process_instance_address,
-		bytes32 data_id,
-		uint uint_value
+		address processInstanceAddress,
+		bytes32 dataId,
+		uint uintValue
 	);
 
 	event LogProcessDataIntUpdate(
 		bytes32 indexed eventId,
-		address process_instance_address,
-		bytes32 data_id,
-		int int_value
+		address processInstanceAddress,
+		bytes32 dataId,
+		int intValue
 	);
 
 	event LogProcessDataBytes32Update(
 		bytes32 indexed eventId,
-		address process_instance_address,
-		bytes32 data_id,
-		bytes32 bytes32_value
+		address processInstanceAddress,
+		bytes32 dataId,
+		bytes32 bytes32Value
 	);
 
 	event LogProcessDataAddressUpdate(
 		bytes32 indexed eventId,
-		address process_instance_address,
-		bytes32 data_id,
-		address address_value
+		address processInstanceAddress,
+		bytes32 dataId,
+		address addressValue
 	);
 
 	event LogProcessDataStringUpdate(
 		bytes32 indexed eventId,
-		address process_instance_address,
-		bytes32 data_id,
-		string string_value
+		address processInstanceAddress,
+		bytes32 dataId,
+		string stringValue
 	);
 
 	/**

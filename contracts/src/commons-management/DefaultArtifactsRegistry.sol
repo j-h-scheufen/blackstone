@@ -21,7 +21,7 @@ contract DefaultArtifactsRegistry is ArtifactsRegistry {
         ErrorsLib.revertIf(bytes(_artifactId).length == 0 || _location == address(0),
             ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultArtifactsRegistry.registerArtifact", "_artifactId and _location must not be empty");
         address current = artifacts[_artifactId].locations[keccak256(abi.encodePacked(_version))];
-        ErrorsLib.revertIf(current != address(0) && current != _location,
+        ErrorsLib.revertIf(current != address(0) && current != _location, 
             ErrorsLib.OVERWRITE_NOT_ALLOWED(), "DefaultArtifactsRegistry.registerArtifact", "An artifact with the same ID, but a different address is already registered");
         if (current == address(0)) {
             artifacts[_artifactId].locations[keccak256(abi.encodePacked(_version))] = _location;

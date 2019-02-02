@@ -26,46 +26,46 @@ library BpmRuntimeLib {
 
     event LogActivityInstanceCreation(
         bytes32 indexed eventId,
-        bytes32 activity_instance_id,
-        bytes32 activity_id,
-        address process_instance_address,
+        bytes32 activityInstanceId,
+        bytes32 activityId,
+        address processInstanceAddress,
         uint created,
         uint completed,
         address performer,
-        address completed_by,
+        address completedBy,
         uint8 state
     );
 
     event LogActivityInstanceStateUpdate(
         bytes32 indexed eventId,
-        bytes32 activity_instance_id,
+        bytes32 activityInstanceId,
         uint8 state
     );
 
     event LogActivityInstancePerformerUpdate(
         bytes32 indexed eventId,
-        bytes32 activity_instance_id,
+        bytes32 activityInstanceId,
         address performer
     );
 
     event LogActivityInstanceStateAndPerformerUpdate(
         bytes32 indexed eventId,
-        bytes32 activity_instance_id,
+        bytes32 activityInstanceId,
         address performer,
         uint8 state
     );
 
     event LogActivityInstanceStateAndTimestampUpdate(
         bytes32 indexed eventId,
-        bytes32 activity_instance_id,
+        bytes32 activityInstanceId,
         uint completed,
         uint8 state
     );
 
     event LogActivityInstanceCompletion(
         bytes32 indexed eventId,
-        bytes32 activity_instance_id,
-        address completed_by,
+        bytes32 activityInstanceId,
+        address completedBy,
         uint completed,
         address performer,
         uint8 state

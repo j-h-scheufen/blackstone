@@ -13,64 +13,64 @@ contract ArchetypeRegistry is Upgradeable {
 
 	event LogArchetypeCreation(
 		bytes32 indexed eventId,
-		address archetype_address,
+		address archetypeAddress,
 		string name,
 		string description,
 		uint32 price,
 		address author,
 		bool active,
-		bool is_private,
+		bool isPrivate,
 		address successor,
-		address formation_process_Definition,
-		address execution_process_Definition
+		address formationProcessDefinition,
+		address executionProcessDefinition
 	);
 
 	event LogArchetypeSuccessorUpdate(
 		bytes32 indexed eventId,
-		address archetype_address,
+		address archetypeAddress,
 		address successor
 	);
 
 	event LogArchetypePriceUpdate(
 		bytes32 indexed eventId,
-		address archetype_address,
+		address archetypeAddress,
 		uint32 price
 	);
 
 	event LogArchetypeActive(
 		bytes32 indexed eventId,
-		address archetype_address,
+		address archetypeAddress,
 		bool active
 	);
 
 	event LogArchetypePackageCreation(
 		bytes32 indexed eventId,
-		bytes32 package_id,
+		bytes32 packageId,
 		string name,
 		string description,
 		address author,
-		bool is_private,
+		bool isPrivate,
 		bool active
 	);
 
 	event LogArchetypePackageActive(
 		bytes32 indexed eventId,
-		bytes32 package_id,
+		bytes32 packageId,
 		bool active
 	);
 
 	event LogArchetypeToPackageUpdate(
 		bytes32 indexed eventId,
-		bytes32 package_id,
-		address archetype_address,
-		string archetype_name
+		bytes32 packageId,
+		address archetypeAddress,
+		string archetypeName
 	);
 
 	event LogArchetypeParameterUpdate(
 		bytes32 indexed eventId,
-		address archetype_address,
-		bytes32 parameter_name,
-		uint8 parameter_type,
+		address archetypeAddress,
+		bytes32 parameterName,
+		uint8 parameterType,
 		uint position		
 	);
 
@@ -83,16 +83,16 @@ contract ArchetypeRegistry is Upgradeable {
 
 	event LogArchetypeJurisdictionUpdate(
 		bytes32 indexed eventId,
-		address archetype_address,
+		address archetypeAddress,
 		bytes2 country,
 		bytes32 region
 	);
 
 	event LogGoverningArchetypeUpdate(
 		bytes32 indexed eventId,
-		address archetype_address,
-		address governing_archetype_address,
-		string governing_archetype_name
+		address archetypeAddress,
+		address governingArchetypeAddress,
+		string governingArchetypeName
 	);
 
 	bytes32 public constant EVENT_ID_ARCHETYPES = "AN://archetypes";
