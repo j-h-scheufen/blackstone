@@ -45,158 +45,158 @@ jobs:
     val: success
 
 ##########
-# ContractManager Test
+# ArtifactsRegistry Test
 ############################################################################################
-- name: ContractManagerTest
+- name: ArtifactsRegistryTest
   deploy:
-    contract: ContractManagerTest.bin
-    instance: ContractManagerTest
+    contract: ArtifactsRegistryTest.bin
+    instance: ArtifactsRegistryTest
     libraries: ErrorsLib:$ErrorsLib, MappingsLib:$MappingsLib, ERC165Utils:$ERC165Utils
 
-- name: testContractManager
+- name: testArtifactsRegistry
   call:
-    destination: $ContractManagerTest
-    bin: ContractManagerTest
-    function: testContractManager
+    destination: $ArtifactsRegistryTest
+    bin: ArtifactsRegistryTest
+    function: testArtifactsRegistry
 
-- name: assertContractManagement
+- name: assertArtifactsRegistry
   assert:
-    key: $testContractManager
+    key: $testArtifactsRegistry
     relation: eq
     val: success
 
 #####
 # DOUG Test
 ############################################################################################
-- name: DougTest
-  deploy:
-    contract: DougTest.bin
-    instance: DougTest
-    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib, ERC165Utils:$ERC165Utils
+# - name: DougTest
+#   deploy:
+#     contract: DougTest.bin
+#     instance: DougTest
+#     libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib, ERC165Utils:$ERC165Utils
 
-- name: testServiceDeployment
-  call:
-    destination: $DougTest
-    bin: DougTest
-    function: testServiceDeployment
+# - name: testServiceDeployment
+#   call:
+#     destination: $DougTest
+#     bin: DougTest
+#     function: testServiceDeployment
 
-- name: assertServiceDeployment
-  assert:
-    key: $testServiceDeployment
-    relation: eq
-    val: success
+# - name: assertServiceDeployment
+#   assert:
+#     key: $testServiceDeployment
+#     relation: eq
+#     val: success
 
-#####
-# DougProxyTest
-############################################################################################
-- name: DougProxyTest
-  deploy:
-    contract: DougProxyTest.bin
-    instance: DougProxyTest
-    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib, ERC165Utils:$ERC165Utils
+# #####
+# # DougProxyTest
+# ############################################################################################
+# - name: DougProxyTest
+#   deploy:
+#     contract: DougProxyTest.bin
+#     instance: DougProxyTest
+#     libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib, ERC165Utils:$ERC165Utils
 
-- name: testProxyDelegation
-  call:
-    destination: $DougProxyTest
-    bin: DougProxyTest
-    function: testProxyDelegation
+# - name: testProxyDelegation
+#   call:
+#     destination: $DougProxyTest
+#     bin: DougProxyTest
+#     function: testProxyDelegation
 
-- name: assertProxyDelegation
-  assert:
-    key: $testProxyDelegation
-    relation: eq
-    val: success
-
-
-#####
-# ObjectProxyTest
-############################################################################################
-- name: ObjectProxyTest
-  deploy:
-    contract: ObjectProxyTest.bin
-    instance: ObjectProxyTest
-    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, TypeUtilsAPI:$TypeUtilsAPI, MappingsLib:$MappingsLib, ERC165Utils:$ERC165Utils
-
-- name: testProxyHandling
-  call:
-    destination: $ObjectProxyTest
-    bin: ObjectProxyTest
-    function: testProxyHandling
-
-- name: assertProxyHandling
-  assert:
-    key: $testProxyHandling
-    relation: eq
-    val: success
+# - name: assertProxyDelegation
+#   assert:
+#     key: $testProxyDelegation
+#     relation: eq
+#     val: success
 
 
-#####
-# DOUG + Proxy setup via EPM (This tests the typical EPM DOUG setup in projects)
-############################################################################################
-- name: ContractManagerDb
-  deploy:
-    contract: ContractManagerDb.bin
-    libraries: ErrorsLib:$ErrorsLib, MappingsLib:$MappingsLib
+# #####
+# # ObjectProxyTest
+# ############################################################################################
+# - name: ObjectProxyTest
+#   deploy:
+#     contract: ObjectProxyTest.bin
+#     instance: ObjectProxyTest
+#     libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, TypeUtilsAPI:$TypeUtilsAPI, MappingsLib:$MappingsLib, ERC165Utils:$ERC165Utils
 
-- name: ContractManager
-  deploy:
-    contract: DefaultContractManager.bin
-    libraries: ErrorsLib:$ErrorsLib, MappingsLib:$MappingsLib, ERC165Utils:$ERC165Utils
+# - name: testProxyHandling
+#   call:
+#     destination: $ObjectProxyTest
+#     bin: ObjectProxyTest
+#     function: testProxyHandling
 
-- name: ChangeContractManagerDbOwnership
-  call:
-    destination: $ContractManagerDb
-    bin: ContractManagerDb
-    function: transferSystemOwnership
-    data: [$ContractManager]
+# - name: assertProxyHandling
+#   assert:
+#     key: $testProxyHandling
+#     relation: eq
+#     val: success
 
-- name: SetContractManagerDb
-  call:
-    destination: $ContractManager
-    bin: DefaultContractManager
-    function: acceptDatabase
-    data: [$ContractManagerDb]
 
-- name: AssertContractManagerDb
-  assert:
-    key: $SetContractManagerDb
-    relation: eq
-    val: "true"
+# #####
+# # DOUG + Proxy setup via EPM (This tests the typical EPM DOUG setup in projects)
+# ############################################################################################
+# - name: ContractManagerDb
+#   deploy:
+#     contract: ContractManagerDb.bin
+#     libraries: ErrorsLib:$ErrorsLib, MappingsLib:$MappingsLib
 
-- name: DefaultDoug
-  deploy:
-    contract: DefaultDoug.bin
-    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib, ERC165Utils:$ERC165Utils
+# - name: ContractManager
+#   deploy:
+#     contract: DefaultContractManager.bin
+#     libraries: ErrorsLib:$ErrorsLib, MappingsLib:$MappingsLib, ERC165Utils:$ERC165Utils
 
-- name: DOUG
-  deploy:
-    contract: DougProxy.bin
-    libraries: ErrorsLib:$ErrorsLib
+# - name: ChangeContractManagerDbOwnership
+#   call:
+#     destination: $ContractManagerDb
+#     bin: ContractManagerDb
+#     function: transferSystemOwnership
+#     data: [$ContractManager]
 
-- name: SetProxiedDoug
-  call:
-    destination: $DOUG
-    bin: DougProxy
-    function: setProxiedDoug
-    data: [$DefaultDoug]
+# - name: SetContractManagerDb
+#   call:
+#     destination: $ContractManager
+#     bin: DefaultContractManager
+#     function: acceptDatabase
+#     data: [$ContractManagerDb]
 
-- name: ChangeContractManagerSystemOwnership
-  call:
-    destination: $ContractManager
-    bin: DefaultContractManager
-    function: transferSystemOwnership
-    data: [$DOUG]
+# - name: AssertContractManagerDb
+#   assert:
+#     key: $SetContractManagerDb
+#     relation: eq
+#     val: "true"
 
-- name: ChangeContractManagerUpgradeOwnership
-  call:
-    destination: $ContractManager
-    bin: DefaultContractManager
-    function: transferUpgradeOwnership
-    data: [$DOUG]
+# - name: DefaultDoug
+#   deploy:
+#     contract: DefaultDoug.bin
+#     libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib, ERC165Utils:$ERC165Utils
 
-- name: SetContractManagerInDougProxy
-  call:
-    destination: $DOUG
-    bin: DefaultDoug
-    function: setContractManager
-    data: [$ContractManager]
+# - name: DOUG
+#   deploy:
+#     contract: DougProxy.bin
+#     libraries: ErrorsLib:$ErrorsLib
+
+# - name: SetProxiedDoug
+#   call:
+#     destination: $DOUG
+#     bin: DougProxy
+#     function: setProxiedDoug
+#     data: [$DefaultDoug]
+
+# - name: ChangeContractManagerSystemOwnership
+#   call:
+#     destination: $ContractManager
+#     bin: DefaultContractManager
+#     function: transferSystemOwnership
+#     data: [$DOUG]
+
+# - name: ChangeContractManagerUpgradeOwnership
+#   call:
+#     destination: $ContractManager
+#     bin: DefaultContractManager
+#     function: transferUpgradeOwnership
+#     data: [$DOUG]
+
+# - name: SetContractManagerInDougProxy
+#   call:
+#     destination: $DOUG
+#     bin: DefaultDoug
+#     function: setContractManager
+#     data: [$ContractManager]

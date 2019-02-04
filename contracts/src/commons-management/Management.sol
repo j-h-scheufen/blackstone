@@ -8,6 +8,7 @@ library Management {
 
     struct Artifact {
         address activeVersion;
+        bool exists;
         mapping (address => uint8[3]) versions; //version by location
         mapping (bytes32 => address) locations; //location by version
     }
