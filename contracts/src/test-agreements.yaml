@@ -277,10 +277,17 @@ jobs:
     function: deployContract
     data: [ArchetypeRegistry, $ArchetypeRegistry]
 
-- name: ArtifactsRegistry
+- name: ArtifactsRegistryDelegate
   deploy:
     contract: DefaultArtifactsRegistry.bin
     libraries: ErrorsLib:$ErrorsLib
+
+# Proxy contract
+- name: ArtifactsRegistry
+  deploy:
+    contract: OwnedDelegateUnstructuredProxy.bin
+    libraries: ErrorsLib:$ErrorsLib
+    data: [$ArtifactsRegistryDelegate]
 
 - name: ParticipantsManager
   deploy:
@@ -302,7 +309,7 @@ jobs:
 - name: RegisterOrganizationObjectClass
   call:
     destination: $ArtifactsRegistry
-    bin: ArtifactsRegistry
+    bin: DefaultArtifactsRegistry
     function: registerArtifact
     data:
         - $ObjectClassOrganization

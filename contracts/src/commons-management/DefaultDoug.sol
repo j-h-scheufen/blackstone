@@ -43,7 +43,7 @@ contract DefaultDoug is StorageDefProxied, StorageDefOwner, StorageDefManager, O
 			ErrorsLib.INVALID_PARAMETER_STATE(), "DefaultDoug.setContractManager", "DOUG must be upgradeOwner of the ContractManager");
 		if (manager != 0x0) {
 			ErrorsLib.revertIf(!Upgradeable(manager).upgrade(_contractManager),
-				"", "DefaultDoug.setContractManager", "Failed to upgrade from an existing ContractManager");
+				ErrorsLib.INVALID_STATE(), "DefaultDoug.setContractManager", "Failed to upgrade from an existing ContractManager");
 		}
 		manager = _contractManager;
 	}
@@ -63,8 +63,8 @@ contract DefaultDoug is StorageDefProxied, StorageDefOwner, StorageDefManager, O
 	 */
     function deployContract(string _id, address _address) external pre_onlyByOwner returns (bool success) {
 		if (ERC165Utils.implementsInterface(_address, getERC165IdUpgradeable())) {
-		ErrorsLib.revertIf(UpgradeOwned(_address).getUpgradeOwner() != address(this),
-			ErrorsLib.INVALID_PARAMETER_STATE(), "DefaultDoug.deployContract", "DOUG must be upgradeOwner of the provided contract");
+			ErrorsLib.revertIf(UpgradeOwned(_address).getUpgradeOwner() != address(this),
+				ErrorsLib.INVALID_PARAMETER_STATE(), "DefaultDoug.deployContract", "DOUG must be upgradeOwner of the provided contract");
 		}
 		address existing = ContractManager(manager).getContract(_id);
 		if (existing != 0x0 && ERC165Utils.implementsInterface(existing, getERC165IdUpgradeable())) {

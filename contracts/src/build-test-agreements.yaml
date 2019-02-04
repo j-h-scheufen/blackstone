@@ -46,6 +46,9 @@ jobs:
   - name: DefaultArtifactsRegistry
     build:
       contract: commons-management/DefaultArtifactsRegistry.sol
+  - name: OwnedDelegateUnstructuredProxy
+    build:
+      contract: commons-management/OwnedDelegateUnstructuredProxy.sol
   - name: ApplicationRegistry
     build:
       contract: bpm-runtime/DefaultApplicationRegistry.sol
@@ -58,7 +61,10 @@ jobs:
   - name: ArchetypeRegistryDb
     build:
       contract: agreements/ArchetypeRegistryDb.sol
-  - name: ParticipantsManager
+  - name: DefaultOrganization
+    build:
+      contract: commons-auth/DefaultOrganization.sol
+  - name: DefaultParticipantsManager
     build:
       contract: commons-auth/DefaultParticipantsManager.sol
   - name: ParticipantsManagerDb
@@ -67,10 +73,10 @@ jobs:
   - name: ProcessModelRepositoryDb
     build:
       contract: bpm-model/ProcessModelRepositoryDb.sol
-  - name: ProcessModelRepository
+  - name: DefaultProcessModelRepository
     build:
       contract: bpm-model/DefaultProcessModelRepository.sol
-  - name: BpmService
+  - name: DefaultBpmService
     build:
       contract: bpm-runtime/DefaultBpmService.sol
   - name: BpmServiceDb
