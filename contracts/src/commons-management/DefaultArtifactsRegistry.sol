@@ -35,26 +35,34 @@ contract DefaultArtifactsRegistry is ArtifactsRegistry, AbstractDelegateTarget, 
      * - the artifact ID or location are empty
      * - the artifact ID and version are already registered with a different address location
      * @param _artifactId the ID of the artifact
-     * @param _location the address of the smart contract artifact
+     * @param _artifactAddress the address of the smart contract artifact
      * @param _version the semantic version of the artifact
      * @param _activeVersion whether this version of the artifact should be tracked as the active version
      */
-    function registerArtifact(string _artifactId, address _location, uint8[3] _version, bool _activeVersion) external {
-        ErrorsLib.revertIf(bytes(_artifactId).length == 0 || _location == address(0),
-            ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultArtifactsRegistry.registerArtifact", "_artifactId and _location must not be empty");
-        address current = artifacts[_artifactId].locations[keccak256(abi.encodePacked(_version))];
-        ErrorsLib.revertIf(current != address(0) && current != _location, 
+    function registerArtifact(string _artifactId, address _artifactAddress, uint8[3] _version, bool _activeVersion) external {
+        ErrorsLib.revertIf(bytes(_artifactId).length == 0 || _artifactAddress == address(0),
+            ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultArtifactsRegistry.registerArtifact", "_artifactId and _artifactAddress must not be empty");
+        address existingLocationForVersion = artifacts[_artifactId].locations[keccak256(abi.encodePacked(_version))];
+        ErrorsLib.revertIf(existingLocationForVersion != address(0) && existingLocationForVersion != _artifactAddress,
             ErrorsLib.OVERWRITE_NOT_ALLOWED(), "DefaultArtifactsRegistry.registerArtifact", "An artifact with the same ID and version, but a different address is already registered");
+        // if this artifact is a previously unknown entry, we need to register its existence
         if (!artifacts[_artifactId].exists) {
             artifactIds.push(_artifactId);
             artifacts[_artifactId].exists = true;
         }
-        if (current == address(0)) {
-            artifacts[_artifactId].locations[keccak256(abi.encodePacked(_version))] = _location;
-            artifacts[_artifactId].versions[_location] = _version;
+        // if this version has not be registered before, register it. (if existingLocationForVersion is not 0x0, that means this exact same ID/location/version combination is already registered and we don't need to do anything)
+        if (existingLocationForVersion == address(0)) {
+            artifacts[_artifactId].locations[keccak256(abi.encodePacked(_version))] = _artifactAddress;
+            artifacts[_artifactId].versions[_artifactAddress] = _version;
             if (_activeVersion) {
-                artifacts[_artifactId].activeVersion = _location;
+                address existingActiveLocation = artifacts[_artifactId].activeVersion;
+                if (existingActiveLocation != address(0) && existingActiveLocation != _artifactAddress) {
+                    // emit change event for other active version that is being replaced
+                    emit LogArtifactActivation(EVENT_ID_ARTIFACTS, _artifactId, existingActiveLocation, false);
+                }
+                artifacts[_artifactId].activeVersion = _artifactAddress;
             }
+            emit LogArtifactCreation(EVENT_ID_ARTIFACTS, _artifactId, _artifactAddress, _version[0], _version[1], _version[2], _activeVersion);
         }
     }
 
@@ -69,6 +77,12 @@ contract DefaultArtifactsRegistry is ArtifactsRegistry, AbstractDelegateTarget, 
         address current = artifacts[_artifactId].locations[keccak256(abi.encodePacked(_version))];
         ErrorsLib.revertIf(current == address(0),
             ErrorsLib.RESOURCE_NOT_FOUND(), "DefaultArtifactsRegistry.setActiveVersion", "The specified ID and version is not registered");
+        address existingActiveLocation = artifacts[_artifactId].activeVersion;
+        if (existingActiveLocation != address(0) && existingActiveLocation != current) {
+            emit LogArtifactActivation(EVENT_ID_ARTIFACTS, _artifactId, existingActiveLocation, false);
+        }
+        artifacts[_artifactId].activeVersion = current;
+        emit LogArtifactActivation(EVENT_ID_ARTIFACTS, _artifactId, existingActiveLocation, true);
     }
 
     /**

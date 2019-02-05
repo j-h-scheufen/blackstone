@@ -1,5 +1,36 @@
 [
   {
+    "TableName": "ARTIFACTS",
+    "Filter": "Log1Text = 'AN://artifacts'",
+    "Columns": {
+      "artifactId": {
+        "name": "artifact_id",
+        "type": "string",
+        "primary": true
+      },
+      "artifactAddress": {
+        "name": "artifactAddress",
+        "type": "address",
+        "primary": true
+      },
+      "versionMajor": {
+        "name": "version_major",
+        "type": "uint8"
+      },
+      "versionMinor": {
+        "name": "version_minor",
+        "type": "uint8"
+      },
+      "versionPath": {
+        "name": "version_patch",
+        "type": "uint8"
+      },
+      "activeVersion": {
+        "name": "active_version",
+        "type": "bool"
+      }
+  },
+  {
     "TableName": "AGREEMENTS",
     "Filter": "Log1Text = 'AN://agreements'",
     "Columns": {

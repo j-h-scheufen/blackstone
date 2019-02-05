@@ -67,9 +67,19 @@ contract ArtifactsRegistryTest {
         if (registry.getNumberOfArtifacts() != 2) return "There should still be 2 artifacts after service2 upgrade with new version";
         (location, version) = registry.getArtifact(keyService2);
         if (location != address(s2_1)) return "The active location for service2 should have been changed after the upgrade.";
-
         if (!address(s1).call(abi.encodeWithSignature("performWithDependency()"))) return "Calling service1 with an updated dependency registered should succeed";
         if (s1.getDependency1() != address(s2_1)) return "The dependency1 address on service1 should now point to service2_1";
+
+        // test activation scenarios
+        ( , version) = registry.getArtifact(keyService2);
+        if (version[0] != 2 || version[1] != 4 || version[2] != 0) return "The currently active version for service2 should 2.4.0";
+        registry.registerArtifact(keyService2, address(this), [3,0,1], true);
+        ( , version) = registry.getArtifact(keyService2);
+        if (version[0] != 3 || version[1] != 0 || version[2] != 1) return "The currently active version for service2 should new be 3.0.1";
+        // switch back to the old version
+        registry.setActiveVersion(keyService2, [2,4,0]);
+        ( , version) = registry.getArtifact(keyService2);
+        if (version[0] != 2 || version[1] != 4 || version[2] != 0) return "The currently active version for service2 should've been switched back to 2.4.0";
 
         return "success";
     }
