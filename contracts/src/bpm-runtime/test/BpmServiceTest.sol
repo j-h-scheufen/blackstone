@@ -14,6 +14,8 @@ import "commons-auth/DefaultOrganization.sol";
 import "commons-auth/UserAccount.sol";
 import "commons-auth/DefaultUserAccount.sol";
 import "bpm-model/ProcessModelRepository.sol";
+import "bpm-model/ProcessModelRepositoryDb.sol";
+import "bpm-model/DefaultProcessModelRepository.sol";
 import "bpm-model/ProcessModel.sol";
 import "bpm-model/ProcessDefinition.sol";
 
@@ -90,16 +92,44 @@ contract BpmServiceTest {
 	// graph needs to be a storage variable to mimic behavior inside ProcessInstance
 	BpmRuntime.ProcessGraph graph;
 
-	constructor (address _processModelRepository, address _appRegistry) public {
-		require(_appRegistry != address(0) && _processModelRepository != address(0), "Service addresses required for testing not provided");
+	/**
+	 * @dev Constructor for the test creates the dependencies that the BpmService needs
+	 */
+	constructor () public {
+		// ProcessModelRegistry
+		ProcessModelRepositoryDb modelDb = new ProcessModelRepositoryDb();
+		processModelRepository = new DefaultProcessModelRepository();
+		modelDb.transferSystemOwnership(processModelRepository);
+		require(AbstractDbUpgradeable(processModelRepository).acceptDatabase(modelDb), "ProcessModelRepositoryDb not set");
+		// ApplicatonRegistry
+		ApplicationRegistryDb appDb = new ApplicationRegistryDb();
+		applicationRegistry = new DefaultApplicationRegistry();
+		appDb.transferSystemOwnership(applicationRegistry);
+		require(AbstractDbUpgradeable(applicationRegistry).acceptDatabase(appDb), "ApplicationRegistryDb not set");
+		// ArtifactsRegistry
 		artifactsRegistry = new DefaultArtifactsRegistry();
-		artifactsRegistry.registerArtifact(serviceIdApplicationRegistry, _appRegistry, [1,1,0], true);
-		artifactsRegistry.registerArtifact(serviceIdModelRepository, _processModelRepository, [1,3,1], true);
-		// In addition to registering the dependencies in the ArtifactsRegistry, we also save them into storage vars for test convenience
-		applicationRegistry = ApplicationRegistry(_appRegistry);
-		processModelRepository = ProcessModelRepository(_processModelRepository);
+		artifactsRegistry.registerArtifact(serviceIdModelRepository, processModelRepository, Versioned(processModelRepository).getVersion(), true);
+		artifactsRegistry.registerArtifact(serviceIdApplicationRegistry, applicationRegistry, Versioned(applicationRegistry).getVersion(), true);
 	}
-	
+
+	/**
+	 * @dev Creates and returns a new TestBpmService using an existing ProcessModelRepository and ApplicationRegistry.
+	 * This function can be used in the beginning of a test to have a fresh BpmService instance.
+	 */
+	function createNewTestBpmService() internal returns (TestBpmService) {
+		TestBpmService service = new TestBpmService(serviceIdModelRepository, serviceIdApplicationRegistry);
+		BpmServiceDb serviceDb = new BpmServiceDb();
+		SystemOwned(serviceDb).transferSystemOwnership(service);
+		AbstractDbUpgradeable(service).acceptDatabase(serviceDb);
+		service.setArtifactsFinder(artifactsRegistry);
+		// check that dependencies are wired correctly
+		require (address(service.getApplicationRegistry()) != address(0), "ApplicationRegistry in new BpmService not found");
+		require (address(service.getProcessModelRepository()) != address(0), "ProcessModelRepository in new BpmService not found");
+		require (address(service.getApplicationRegistry()) == address(applicationRegistry), "ApplicationRegistry in BpmService address mismatch");
+		require (address(service.getProcessModelRepository()) == address(processModelRepository), "ProcessModelRepository in BpmService address mismatch");
+		return service;
+	}
+
 	/**
 	 * @dev Tests a process graph consisting of sequential activities.
 	 */
@@ -694,7 +724,7 @@ contract BpmServiceTest {
 		// Validate to set the start activity and enable runtime configuration
 		pd.validate();
 
-		TestBpmService service = getNewTestBpmService();
+		TestBpmService service = createNewTestBpmService();
 
 		ProcessInstance pi = service.createDefaultProcessInstance(pd, this, EMPTY);
 
@@ -777,7 +807,7 @@ contract BpmServiceTest {
 		(success, bytes32Value) = pd.validate();
 		if (!success) return bytes32Value.toString();
 
-		TestBpmService service = getNewTestBpmService();
+		TestBpmService service = createNewTestBpmService();
 
 		// Start first process instance with Age not set (should take default transition to activity4)
 		ProcessInstance pi1 = service.createDefaultProcessInstance(pd, this, EMPTY);
@@ -859,7 +889,7 @@ contract BpmServiceTest {
 		(bool valid, bytes32 errorMsg) = pd.validate();
 		if (!valid) return errorMsg.toString();
 
-		TestBpmService service = getNewTestBpmService();
+		TestBpmService service = createNewTestBpmService();
 
 		// Start first process instance with Payments Made uninitialized
 		ProcessInstance pi = new DefaultProcessInstance(pd, this, EMPTY);
@@ -986,7 +1016,7 @@ contract BpmServiceTest {
 		(bool valid, bytes32 errorMsg) = pd.validate();
 		if (!valid) return errorMsg.toString();
 
-		TestBpmService service = getNewTestBpmService();
+		TestBpmService service = createNewTestBpmService();
 
 		// Start first process instance with Payments Made uninitialized
 		ProcessInstance pi = new DefaultProcessInstance(pd, this, EMPTY);
@@ -1071,7 +1101,7 @@ contract BpmServiceTest {
 		bytes32 dataPath;
 
 		// Init BpmService
-		TestBpmService service = getNewTestBpmService();
+		TestBpmService service = createNewTestBpmService();
 
 		TestData dataStorage = new TestData();
 		EventApplication eventApp = new EventApplication(service);
@@ -1234,7 +1264,7 @@ contract BpmServiceTest {
 		bytes memory returnData;
 		address[] memory emptyAddressArray;
 
-		TestBpmService service = getNewTestBpmService();
+		TestBpmService service = createNewTestBpmService();
 
 		//TODO missing test coverage of the authorizePerformer function / completeActivity for users in different department settings
 
@@ -1372,7 +1402,7 @@ contract BpmServiceTest {
 
 		bytes32 bytes32Value;
 
-		TestBpmService service = getNewTestBpmService();
+		TestBpmService service = createNewTestBpmService();
 
 		UserAccount user1 = new DefaultUserAccount(this, 0x0);
 	
@@ -1452,7 +1482,7 @@ contract BpmServiceTest {
 		UserAccount user1 = new DefaultUserAccount(this, 0x0);
 		UserAccount user2 = new DefaultUserAccount(this, 0x0);
 
-		TestBpmService service = getNewTestBpmService();
+		TestBpmService service = createNewTestBpmService();
 
 		TestData dataStorage = new TestData();
 		address[] memory signatories = new address[](2);
@@ -1543,7 +1573,7 @@ contract BpmServiceTest {
 		bytes32 bytes32Value;
 		ProcessInstance[3] memory subProcesses;
 
-		TestBpmService service = getNewTestBpmService();
+		TestBpmService service = createNewTestBpmService();
 
 		// Two process models
 		(error, addr) = processModelRepository.createProcessModel("ModelA", "Model A", [1,0,0], modelAuthor, false, dummyModelFileReference);
@@ -1641,20 +1671,6 @@ contract BpmServiceTest {
 		if (piMain.getState() != uint8(BpmRuntime.ProcessInstanceState.COMPLETED)) return "The Main PI should be completed";
 
 		return SUCCESS;
-	}
-
-	function getNewTestBpmService() internal returns (TestBpmService) {
-		TestBpmService service = new TestBpmService(serviceIdModelRepository, serviceIdApplicationRegistry);
-		BpmServiceDb serviceDb = new BpmServiceDb();
-		SystemOwned(serviceDb).transferSystemOwnership(service);
-		AbstractDbUpgradeable(service).acceptDatabase(serviceDb);
-		service.setArtifactsFinder(artifactsRegistry);
-		// check that service is wired correctly
-		require (address(service.getApplicationRegistry()) != address(0), "ApplicationRegistry in new BpmService not found");
-		require (address(service.getProcessModelRepository()) != address(0), "ProcessModelRepository in new BpmService not found");
-		require (address(service.getApplicationRegistry()) == address(applicationRegistry), "ApplicationRegistry in BpmService address mismatch");
-		require (address(service.getProcessModelRepository()) == address(processModelRepository), "ProcessModelRepository in BpmService address mismatch");
-		return service;
 	}
 
 	// public function to call the BpmRuntimeLib.execute() function via this contract

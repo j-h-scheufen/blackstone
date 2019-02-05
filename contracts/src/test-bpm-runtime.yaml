@@ -84,77 +84,11 @@ jobs:
 
 ##########
 # BPM Tests
-
-# SETUP
-- name: ProcessModelRepositoryDb
-  deploy:
-    contract: ProcessModelRepositoryDb.bin
-    libraries: ErrorsLib:$ErrorsLib, TypeUtilsAPI:$TypeUtilsImpl, ArrayUtilsAPI:$ArrayUtilsImpl, MappingsLib:$MappingsLib
-
-- name: ProcessModelRepository
-  deploy:
-    contract: DefaultProcessModelRepository.bin
-    libraries: ErrorsLib:$ErrorsLib, TypeUtilsAPI:$TypeUtilsImpl, ArrayUtilsAPI:$ArrayUtilsImpl, MappingsLib:$MappingsLib, BpmModelLib:$BpmModelLib, DataStorageUtils:$DataStorageUtils
-
-- name: ChangeRepositoryDbOwnership
-  call:
-    destination: $ProcessModelRepositoryDb
-    bin: ProcessModelRepositoryDb
-    function: transferSystemOwnership
-    data: [$ProcessModelRepository]
-
-- name: SetRepositoryDb
-  call:
-    destination: $ProcessModelRepository
-    bin: DefaultProcessModelRepository
-    function: acceptDatabase
-    data: [$ProcessModelRepositoryDb]
-
-- name: AssertRepositoryDb
-  assert:
-    key: $SetRepositoryDb
-    relation: eq
-    val: "true"
-
-- name: ApplicationRegistryDb
-  deploy:
-    contract: ApplicationRegistryDb.bin
-    instance: ApplicationRegistryDb
-    libraries: ErrorsLib:$ErrorsLib
-
-- name: ApplicationRegistry
-  deploy:
-    contract: DefaultApplicationRegistry.bin
-    instance: DefaultApplicationRegistry
-    libraries: ErrorsLib:$ErrorsLib
-
-- name: ChangeAppRegistryDbOwnership
-  call:
-    destination: $ApplicationRegistryDb
-    bin: ApplicationRegistryDb
-    function: transferSystemOwnership
-    data: [$ApplicationRegistry]
-
-- name: SetAppRegistryDb
-  call:
-    destination: $ApplicationRegistry
-    bin: DefaultApplicationRegistry
-    function: acceptDatabase
-    data: [$ApplicationRegistryDb]
-
-- name: AssertAppRegistryDb
-  assert:
-    key: $SetAppRegistryDb
-    relation: eq
-    val: "true"
-
-# TESTS
 - name: BpmServiceTest
   deploy:
     contract: BpmServiceTest.bin
     instance: BpmServiceTest
-    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsImpl, TypeUtilsAPI:$TypeUtilsImpl, MappingsLib:$MappingsLib, BpmRuntimeLib:$BpmRuntimeLib, DataStorageUtils:$DataStorageUtils
-    data: [$ProcessModelRepository, $ApplicationRegistry]
+    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsImpl, TypeUtilsAPI:$TypeUtilsImpl, MappingsLib:$MappingsLib, BpmModelLib:$BpmModelLib, BpmRuntimeLib:$BpmRuntimeLib, DataStorageUtils:$DataStorageUtils
 
 - name: testProcessGraphSequential
   call:

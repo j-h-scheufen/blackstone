@@ -4,26 +4,35 @@ import "commons-base/BaseErrors.sol";
 import "commons-base/SystemOwned.sol";
 import "commons-utils/DataTypes.sol";
 import "commons-utils/TypeUtilsAPI.sol";
-import "commons-auth/ParticipantsManager.sol";
 import "commons-auth/Organization.sol";
 import "commons-auth/UserAccount.sol";
 import "commons-auth/DefaultUserAccount.sol";
 import "commons-auth/DefaultOrganization.sol";
-import "commons-management/DOUG.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
+import "commons-management/ArtifactsFinderEnabled.sol";
+import "commons-management/ArtifactsRegistry.sol";
+import "commons-management/DefaultArtifactsRegistry.sol";
 import "bpm-model/BpmModel.sol";
 import "bpm-model/ProcessModelRepository.sol";
+import "bpm-model/ProcessModelRepositoryDb.sol";
+import "bpm-model/DefaultProcessModelRepository.sol";
 import "bpm-model/ProcessModel.sol";
 import "bpm-model/ProcessDefinition.sol";
 import "bpm-runtime/BpmRuntime.sol";
 import "bpm-runtime/BpmService.sol";
+import "bpm-runtime/BpmServiceDb.sol";
+import "bpm-runtime/DefaultBpmService.sol";
 import "bpm-runtime/ProcessInstance.sol"; 
 import "bpm-runtime/DefaultProcessInstance.sol"; 
 import "bpm-runtime/ApplicationRegistry.sol";
+import "bpm-runtime/ApplicationRegistryDb.sol";
+import "bpm-runtime/DefaultApplicationRegistry.sol";
 
 import "agreements/ActiveAgreementRegistry.sol";
 import "agreements/DefaultActiveAgreementRegistry.sol";
 import "agreements/ArchetypeRegistry.sol";
+import "agreements/ArchetypeRegistryDb.sol";
+import "agreements/DefaultArchetypeRegistry.sol";
 import "agreements/AgreementSignatureCheck.sol";
 
 contract ActiveAgreementWorkflowTest {
@@ -68,25 +77,69 @@ contract ActiveAgreementWorkflowTest {
 	address[] governingArchetypes;
 	address[] governingAgreements;
 
-	// DOUG instance and dependencies retrieved from DOUG
-	DOUG doug;
 	BpmService bpmService;
 	ArchetypeRegistry archetypeRegistry;
-	ParticipantsManager participantsManager;
 	ProcessModelRepository processModelRepository;
 	ApplicationRegistry applicationRegistry;
 
-	// re-usable entities as storage variables to avoid "stack too deep" problems in tests
-	TestRegistry agreementRegistry = new TestRegistry();
-	ActiveAgreementRegistryDb registryDb = new ActiveAgreementRegistryDb();
+	ArtifactsRegistry artifactsRegistry;
+	string constant serviceIdBpmService = "agreements-network/services/BpmService";
+	string constant serviceIdArchetypeRegistry = "agreements-network/services/ArchetypeRegistry";
+	string constant serviceIdModelRepository = "agreements-network/services/ProcessModelRepository";
+	string constant serviceIdApplicationRegistry = "agreements-network/services/ApplicationRegistry";
 
-	function setDoug(DOUG _doug) external {
-		doug = _doug;
-		bpmService = BpmService(doug.lookupContract("BpmService"));
-		archetypeRegistry = ArchetypeRegistry(doug.lookupContract("ArchetypeRegistry"));
-		participantsManager = ParticipantsManager(doug.lookupContract("ParticipantsManager"));
-		processModelRepository = ProcessModelRepository(doug.lookupContract("ProcessModelRepository"));
-		applicationRegistry = ApplicationRegistry(doug.lookupContract("ApplicationRegistry"));
+	// re-usable entities as storage variables to avoid "stack too deep" problems in tests
+	TestRegistry agreementRegistry;
+
+	/**
+	 * @dev Constructor for the test creates the dependencies that the ActiveAgreementRegistry needs
+	 */
+	constructor () public {
+		// BpmService
+		BpmServiceDb bpmServiceDb = new BpmServiceDb();
+		bpmService = new DefaultBpmService(serviceIdModelRepository, serviceIdApplicationRegistry);
+		bpmServiceDb.transferSystemOwnership(bpmService);
+		require(AbstractDbUpgradeable(bpmService).acceptDatabase(bpmServiceDb), "BpmServiceDb not set");
+		// ArchetypeRegistry
+		ArchetypeRegistryDb archRegistryDb = new ArchetypeRegistryDb();
+		archetypeRegistry = new DefaultArchetypeRegistry();
+		archRegistryDb.transferSystemOwnership(archetypeRegistry);
+		require(AbstractDbUpgradeable(archetypeRegistry).acceptDatabase(archRegistryDb), "ArchetypeRegistryDb not set");
+		// ProcessModelRegistry
+		ProcessModelRepositoryDb modelDb = new ProcessModelRepositoryDb();
+		processModelRepository = new DefaultProcessModelRepository();
+		modelDb.transferSystemOwnership(processModelRepository);
+		require(AbstractDbUpgradeable(processModelRepository).acceptDatabase(modelDb), "ProcessModelRepositoryDb not set");
+		// ApplicatonRegistry
+		ApplicationRegistryDb appDb = new ApplicationRegistryDb();
+		applicationRegistry = new DefaultApplicationRegistry();
+		appDb.transferSystemOwnership(applicationRegistry);
+		require(AbstractDbUpgradeable(applicationRegistry).acceptDatabase(appDb), "ApplicationRegistryDb not set");
+		// ArtifactsRegistry
+		artifactsRegistry = new DefaultArtifactsRegistry();
+		artifactsRegistry.registerArtifact(serviceIdBpmService, address(bpmService), Versioned(bpmService).getVersion(), true);
+		artifactsRegistry.registerArtifact(serviceIdArchetypeRegistry, address(archetypeRegistry), Versioned(archetypeRegistry).getVersion(), true);
+		artifactsRegistry.registerArtifact(serviceIdModelRepository, address(processModelRepository), Versioned(processModelRepository).getVersion(), true);
+		artifactsRegistry.registerArtifact(serviceIdApplicationRegistry, address(applicationRegistry), Versioned(applicationRegistry).getVersion(), true);
+		ArtifactsFinderEnabled(bpmService).setArtifactsFinder(artifactsRegistry);
+	}
+
+	/**
+	 * @dev Creates and returns a new ActiveAgreementRegistry using an existing ArchetypeRegistry and BpmService.
+	 * This function can be used in the beginning of a test to have a fresh BpmService instance.
+	 */
+	function createNewAgreementRegistry() internal returns (TestRegistry) {
+		TestRegistry newRegistry = new TestRegistry(serviceIdArchetypeRegistry, serviceIdBpmService);
+		ActiveAgreementRegistryDb agreementRegistryDb = new ActiveAgreementRegistryDb();
+		SystemOwned(agreementRegistryDb).transferSystemOwnership(newRegistry);
+		AbstractDbUpgradeable(newRegistry).acceptDatabase(agreementRegistryDb);
+		ArtifactsFinderEnabled(newRegistry).setArtifactsFinder(artifactsRegistry);
+		// check that dependencies are wired correctly
+		require (address(newRegistry.getArchetypeRegistry()) != address(0), "ArchetypeRegistry in new ActiveAgreementRegistry not found");
+		require (address(newRegistry.getArchetypeRegistry()) == address(archetypeRegistry), "ArchetypeRegistry in ActiveAgreementRegistry address mismatch");
+		require (address(newRegistry.getBpmService()) != address(0), "ProcessModelRepository in new BpmService not found");
+		require (address(newRegistry.getBpmService()) == address(bpmService), "ProcessModelRepository in BpmService address mismatch");
+		return newRegistry;
 	}
 
 	/**
@@ -97,6 +150,8 @@ contract ActiveAgreementWorkflowTest {
 		// re-usable variables for return values
 		uint error;
 		address addr;
+
+		agreementRegistry = createNewAgreementRegistry();
 
 		// make an agreement with fields of type address and add role qualifiers. Note: archetype is not used, so setting address to 'this'
 		ActiveAgreement agreement = new DefaultActiveAgreement(this, "RoleQualifierAgreement", this, "", false, parties, governingAgreements);
@@ -154,12 +209,7 @@ contract ActiveAgreementWorkflowTest {
 		bool success;
 		bytes32 errorMsg;
 
-		// service / test setup
-		agreementRegistry = new TestRegistry();
-		registryDb = new ActiveAgreementRegistryDb();
-		SystemOwned(registryDb).transferSystemOwnership(agreementRegistry);
-		AbstractDbUpgradeable(agreementRegistry).acceptDatabase(registryDb);
-		agreementRegistry.setBpmService(bpmService);
+		agreementRegistry = createNewAgreementRegistry();
 
 		ProcessModel pm;
 		ProcessDefinition formationPD;
@@ -245,12 +295,7 @@ contract ActiveAgreementWorkflowTest {
 		ProcessDefinition formationPD;
 		ProcessDefinition executionPD;
 	
-		// service / test setup
-		agreementRegistry = new TestRegistry();
-		registryDb = new ActiveAgreementRegistryDb();
-		SystemOwned(registryDb).transferSystemOwnership(agreementRegistry);
-		AbstractDbUpgradeable(agreementRegistry).acceptDatabase(registryDb);
-		agreementRegistry.setBpmService(bpmService);
+		agreementRegistry = createNewAgreementRegistry();
 
 		TestSignatureCheck signatureCheckApp = new TestSignatureCheck();
 		applicationRegistry.addApplication("AgreementSignatureCheck", BpmModel.ApplicationType.WEB, signatureCheckApp, bytes4(EMPTY), EMPTY);
@@ -406,12 +451,7 @@ contract ActiveAgreementWorkflowTest {
 		ProcessDefinition executionPD;
 		uint numberOfPIs;
 	
-		// service / test setup
-		agreementRegistry = new TestRegistry();
-		registryDb = new ActiveAgreementRegistryDb();
-		SystemOwned(registryDb).transferSystemOwnership(agreementRegistry);
-		AbstractDbUpgradeable(agreementRegistry).acceptDatabase(registryDb);
-		agreementRegistry.setBpmService(bpmService);
+		agreementRegistry = createNewAgreementRegistry();
 
 		userAccount1 = new DefaultUserAccount(this, address(0));
 		userAccount2 = new DefaultUserAccount(this, address(0));
@@ -517,6 +557,10 @@ contract ActiveAgreementWorkflowTest {
  */
 contract TestRegistry is DefaultActiveAgreementRegistry {
 
+	constructor (string _serviceIdArchetypeRegistry, string _serviceIdBpmService) public
+		DefaultActiveAgreementRegistry(_serviceIdArchetypeRegistry, _serviceIdBpmService) {
+	}
+
 	function getTrackedFormationProcess(address _agreement) public view returns (address) {
 		return ActiveAgreementRegistryDb(database).getAgreementFormationProcess(_agreement);
 	}
@@ -525,9 +569,6 @@ contract TestRegistry is DefaultActiveAgreementRegistry {
 		return ActiveAgreementRegistryDb(database).getAgreementExecutionProcess(_agreement);
 	}
 
-	function setBpmService(BpmService _bpmService) external {
-		bpmService = _bpmService;
-	}
 }
 
 contract TestSignatureCheck is AgreementSignatureCheck {

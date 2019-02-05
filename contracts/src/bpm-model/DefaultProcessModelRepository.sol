@@ -16,7 +16,7 @@ import "bpm-model/ProcessModelRepositoryDb.sol";
  * @title DefaultProcessModelRepository
  * @dev Default implementation of the ProcessModelRepository interface
  */
-contract DefaultProcessModelRepository is Versioned(1,1,0), ProcessModelRepository, AbstractDbUpgradeable {
+contract DefaultProcessModelRepository is Versioned(1,0,0), ProcessModelRepository, AbstractDbUpgradeable {
 	
 	/**
 	 * @dev Modifier to only allow calls to this ProcessModelRepository from a registered ProcessModel

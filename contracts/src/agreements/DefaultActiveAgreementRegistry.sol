@@ -703,7 +703,24 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), ArtifactsFinderEnab
 	 * @param _activeAgreement Address of active agreement
 	 * @param _eventLogFileReference the file reference of the event log of this agreement
 	 */
-	 function setEventLogReference(address _activeAgreement, string _eventLogFileReference) external {
+	function setEventLogReference(address _activeAgreement, string _eventLogFileReference) external {
 		ActiveAgreement(_activeAgreement).setEventLogReference(_eventLogFileReference);
-	 }
+	}
+
+	/**
+	 * @dev Returns the BpmService address
+	 * @return address the BpmService
+	 */
+	function getBpmService() external returns (address location) {
+        (location, ) = artifactsFinder.getArtifact(serviceIdBpmService);
+	}
+
+	/**
+	 * @dev Returns the ArchetypeRegistry address
+	 * @return address the ArchetypeRegistry
+	 */
+	function getArchetypeRegistry() external returns (address location) {
+        (location, ) = artifactsFinder.getArtifact(serviceIdArchetypeRegistry);
+	}
+
 }

@@ -144,3 +144,32 @@ jobs:
     key: $DeployParticipantsManager
     relation: eq
     val: "true"
+
+#####
+# Register object classes
+#####
+
+# TODO retrieve ArtifactsRegistry from DOUG
+
+- name: DefaultOrganizationImplementation
+  deploy:
+    contract: DefaultOrganization.bin
+    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib
+
+- name: ObjectClassOrganization
+  query-contract:
+    destination: $ParticipantsManager
+    bin: ParticipantsManager
+    function: OBJECT_CLASS_ORGANIZATION
+
+- name: RegisterOrganizationObjectClass
+  call:
+    destination: $ArtifactsRegistry
+    bin: DefaultArtifactsRegistry
+    function: registerArtifact
+    data:
+        - $ObjectClassOrganization
+        - $DefaultOrganizationImplementation
+        - [1,0,0]
+        - "true"
+

@@ -3,6 +3,8 @@ pragma solidity ^0.4.25;
 import "commons-base/BaseErrors.sol";
 import "commons-base/SystemOwned.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
+import "commons-management/ArtifactsRegistry.sol";
+import "commons-management/DefaultArtifactsRegistry.sol";
 
 import "agreements/DefaultActiveAgreementRegistry.sol";
 import "agreements/DefaultArchetypeRegistry.sol";
@@ -17,8 +19,6 @@ contract ActiveAgreementRegistryTest {
 
 	string constant SUCCESS = "success";
 	bytes32 EMPTY = "";
-
-	TestRegistry agreementRegistry;
 
 	address public activeAgreement;
 	address public activeAgreement2;
@@ -54,18 +54,49 @@ contract ActiveAgreementRegistryTest {
 	address[] governingAgreements;
 	address[] governingArchetypes;
 
-	ArchetypeRegistry public archRegistry = new DefaultArchetypeRegistry();
-	ArchetypeRegistryDb archRegistryDb = new ArchetypeRegistryDb();
+	ArchetypeRegistry archetypeRegistry;
+	BpmService bpmService;
+	ArtifactsRegistry artifactsRegistry;
+	string constant serviceIdArchetypeRegistry = "agreements-network/services/ArchetypeRegistry";
+
+	/**
+	 * @dev Constructor for the test creates the dependencies that the ActiveAgreementRegistry needs
+	 */
+	constructor () public {
+		// ArchetypeRegistry
+		ArchetypeRegistryDb archRegistryDb = new ArchetypeRegistryDb();
+		archetypeRegistry = new DefaultArchetypeRegistry();
+		archRegistryDb.transferSystemOwnership(archetypeRegistry);
+		require(AbstractDbUpgradeable(archetypeRegistry).acceptDatabase(archRegistryDb), "ArchetypeRegistryDb not set");
+		// ArtifactsRegistry
+		artifactsRegistry = new DefaultArtifactsRegistry();
+		artifactsRegistry.registerArtifact(serviceIdArchetypeRegistry, archetypeRegistry, Versioned(archetypeRegistry).getVersion(), true);
+	}
+
+	/**
+	 * @dev Creates and returns a new ActiveAgreementRegistry using an existing ArchetypeRegistry and BpmService.
+	 * This function can be used in the beginning of a test to have a fresh BpmService instance.
+	 */
+	function createNewAgreementRegistry() internal returns (ActiveAgreementRegistry) {
+		DefaultActiveAgreementRegistry newRegistry = new DefaultActiveAgreementRegistry(serviceIdArchetypeRegistry, "NO_BPM_SERVICE"); // Note: the functions in ActiveAgreementRegistry that require a BpmService are not part of this test and therefore the setup of BpmService is skipped!
+		ActiveAgreementRegistryDb registryDb = new ActiveAgreementRegistryDb();
+		SystemOwned(registryDb).transferSystemOwnership(newRegistry);
+		AbstractDbUpgradeable(newRegistry).acceptDatabase(registryDb);
+		newRegistry.setArtifactsFinder(artifactsRegistry);
+		// check that dependencies are wired correctly
+		require (address(newRegistry.getArchetypeRegistry()) != address(0), "ArchetypeRegistry in new ActiveAgreementRegistry not found");
+		require (address(newRegistry.getArchetypeRegistry()) == address(archetypeRegistry), "ArchetypeRegistry in ActiveAgreementRegistry address mismatch");
+		return newRegistry;
+	}
+
 
 	function testActiveAgreementRegistry() external returns (string) {
 
 		address addr;
 
-		ActiveAgreementRegistryDb registryDb = new ActiveAgreementRegistryDb();
+		ActiveAgreementRegistry agreementRegistry = createNewAgreementRegistry();
+
     	archetype = new DefaultArchetype(10, false, true, "archetype name", falseAddress, "description", falseAddress, falseAddress, emptyArray);
-		agreementRegistry = new TestRegistry();
-		SystemOwned(registryDb).transferSystemOwnership(agreementRegistry);
-		AbstractDbUpgradeable(agreementRegistry).acceptDatabase(registryDb);
 
 		if (address(agreementRegistry).call(bytes4(keccak256(abi.encodePacked(
 			"createAgreement(address,bytes32,address,bytes32,bytes32,bool,address[],bytes32,address[])"))), 
@@ -106,17 +137,9 @@ contract ActiveAgreementRegistryTest {
 
 		uint error;
 
-		SystemOwned(archRegistryDb).transferSystemOwnership(archRegistry);
-		AbstractDbUpgradeable(archRegistry).acceptDatabase(archRegistryDb);
-
-		ActiveAgreementRegistryDb registryDb = new ActiveAgreementRegistryDb();
-		agreementRegistry = new TestRegistry();
-		SystemOwned(registryDb).transferSystemOwnership(agreementRegistry);
-		AbstractDbUpgradeable(agreementRegistry).acceptDatabase(registryDb);
+		ActiveAgreementRegistry agreementRegistry = createNewAgreementRegistry();
 	
-		agreementRegistry.setArchetypeRegistry(archRegistry);
-
-		archetypeAddr = archRegistry.createArchetype(10, false, true, "archetype name", falseAddress, "description", falseAddress, falseAddress, EMPTY, emptyArray);
+		archetypeAddr = archetypeRegistry.createArchetype(10, false, true, "archetype name", falseAddress, "description", falseAddress, falseAddress, EMPTY, emptyArray);
 		if (archetypeAddr == 0x0) return "Archetype creation returned empty address";
 
 		activeAgreement = agreementRegistry.createAgreement(archetypeAddr, agreementName, this, dummyPrivateParametersFileRef, false, parties, EMPTY, emptyArray);
@@ -144,11 +167,11 @@ contract ActiveAgreementRegistryTest {
 		}
 
 		// creating a real package that contains the archetype for this agreement
-		(error, realPackageId) = archRegistry.createArchetypePackage(packageName, packageDesc, falseAddress, false, true);
+		(error, realPackageId) = archetypeRegistry.createArchetypePackage(packageName, packageDesc, falseAddress, false, true);
 		if (error != BaseErrors.NO_ERROR()) return "Failed to create archetype package via agreementRegistry";
 		if (realPackageId == "") return "Archetype package creation had no error, but package id is empty";
 
-		if (!address(archRegistry).call(bytes4(keccak256(abi.encodePacked("addArchetypeToPackage(bytes32,address)"))), realPackageId, archetypeAddr)) {
+		if (!address(archetypeRegistry).call(bytes4(keccak256(abi.encodePacked("addArchetypeToPackage(bytes32,address)"))), realPackageId, archetypeAddr)) {
 			return "Failed to add archetype to package";
 		}
 
@@ -181,10 +204,12 @@ contract ActiveAgreementRegistryTest {
 
 	function testGoverningAgreements() external returns (string) {
 		
-		employmentArchetype = archRegistry.createArchetype(10, false, true, "employmentArchetype", falseAddress, "employmentArchetype", falseAddress, falseAddress, EMPTY, emptyArray);
+		ActiveAgreementRegistry agreementRegistry = createNewAgreementRegistry();
+
+		employmentArchetype = archetypeRegistry.createArchetype(10, false, true, "employmentArchetype", falseAddress, "employmentArchetype", falseAddress, falseAddress, EMPTY, emptyArray);
 		
 		// trying to create a ndaAgreement with a governing employmentAgreement when the ndaArchetype does not have a governing employmentArchetype should fail
-		ndaArchetype = archRegistry.createArchetype(10, false, true, "ndaArchetype", falseAddress, "ndaArchetype", falseAddress, falseAddress, EMPTY, emptyArray);
+		ndaArchetype = archetypeRegistry.createArchetype(10, false, true, "ndaArchetype", falseAddress, "ndaArchetype", falseAddress, falseAddress, EMPTY, emptyArray);
 		employmentAgreement = agreementRegistry.createAgreement(employmentArchetype, agreementName, this, dummyPrivateParametersFileRef, false, parties, EMPTY, emptyArray);
 		governingAgreements.push(employmentAgreement);
 		if (address(agreementRegistry).call(bytes4(keccak256(abi.encodePacked(
@@ -196,7 +221,7 @@ contract ActiveAgreementRegistryTest {
 		// trying to create a ndaAgreement with no governing employmentAgreement when the ndaArchetype has a governing employmentArchetype should fail
 		governingArchetypes.push(employmentArchetype);
 		governingAgreements.length = 0;
-		ndaArchetype = archRegistry.createArchetype(10, false, true, "ndaArchetype", falseAddress, "ndaArchetype", falseAddress, falseAddress, EMPTY, governingArchetypes);
+		ndaArchetype = archetypeRegistry.createArchetype(10, false, true, "ndaArchetype", falseAddress, "ndaArchetype", falseAddress, falseAddress, EMPTY, governingArchetypes);
 		if (address(agreementRegistry).call(bytes4(keccak256(abi.encodePacked(
 			"createAgreement(address,bytes32,address,bytes32,bytes32,bytes32,bytes32,uint,bool,address[],bytes32,address[])"))),
 			ndaArchetype, agreementName, this, dummyPrivateParametersFileRef, false, parties, EMPTY, governingAgreements)) {
@@ -204,7 +229,7 @@ contract ActiveAgreementRegistryTest {
 		}
 
 		// trying to create a ndaAgreement with a unrelated governing agreement when the ndaArchetype has a governing employmentArchetype should fail
-		benefitsArchetype = archRegistry.createArchetype(10, false, true, "benefitsArchetype", falseAddress, "benefitsArchetype", falseAddress, falseAddress, EMPTY, emptyArray);
+		benefitsArchetype = archetypeRegistry.createArchetype(10, false, true, "benefitsArchetype", falseAddress, "benefitsArchetype", falseAddress, falseAddress, EMPTY, emptyArray);
 		benefitsAgreement = agreementRegistry.createAgreement(benefitsArchetype, agreementName, this, dummyPrivateParametersFileRef, false, parties, EMPTY, emptyArray);
 		governingAgreements.push(benefitsAgreement);
 		if (address(agreementRegistry).call(bytes4(keccak256(abi.encodePacked(
@@ -220,15 +245,5 @@ contract ActiveAgreementRegistryTest {
 		if (ndaAgreement == 0x0) return "Failed to create ndaAgreement with expected governing agreement employmentAgreement";
 		
 		return SUCCESS;
-	}
-}
-
-/**
- * @dev ActiveAgreementRegistry that exposes internal structures and functions for testing
- */
-contract TestRegistry is DefaultActiveAgreementRegistry {
-	
-	function setArchetypeRegistry(ArchetypeRegistry _archetypeRegistry) external {
-		archetypeRegistry = _archetypeRegistry;
 	}
 }
