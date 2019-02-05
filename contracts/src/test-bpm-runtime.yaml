@@ -154,20 +154,7 @@ jobs:
     contract: BpmServiceTest.bin
     instance: BpmServiceTest
     libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsImpl, TypeUtilsAPI:$TypeUtilsImpl, MappingsLib:$MappingsLib, BpmRuntimeLib:$BpmRuntimeLib, DataStorageUtils:$DataStorageUtils
-
-- name: setAppRegistry
-  call:
-    destination: $BpmServiceTest
-    bin: BpmServiceTest
-    function: setApplicationRegistry
-    data: [$ApplicationRegistry]
-
-- name: setProcessModelRepository
-  call:
-    destination: $BpmServiceTest
-    bin: BpmServiceTest
-    function: setProcessModelRepository
-    data: [$ProcessModelRepository]
+    data: [$ProcessModelRepository, $ApplicationRegistry]
 
 - name: testProcessGraphSequential
   call:

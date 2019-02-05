@@ -6,6 +6,8 @@ import "commons-utils/ArrayUtilsAPI.sol";
 import "commons-utils/TypeUtilsAPI.sol";
 import "commons-collections/AbstractDataStorage.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
+import "commons-management/ArtifactsRegistry.sol";
+import "commons-management/DefaultArtifactsRegistry.sol";
 import "commons-auth/ParticipantsManager.sol";
 import "commons-auth/DefaultParticipantsManager.sol";
 import "commons-auth/DefaultOrganization.sol";
@@ -79,18 +81,23 @@ contract BpmServiceTest {
 	string constant dummyModelFileReference = "{json grant}";
 	bytes32 EMPTY = "";
 
-	ProcessModelRepository repository;
+	ProcessModelRepository processModelRepository;
 	ApplicationRegistry applicationRegistry;
+	ArtifactsRegistry artifactsRegistry;
+	string constant serviceIdModelRepository = "agreements-network/services/ProcessModelRepository";
+	string constant serviceIdApplicationRegistry = "agreements-network/services/ApplicationRegistry";
 
 	// graph needs to be a storage variable to mimic behavior inside ProcessInstance
 	BpmRuntime.ProcessGraph graph;
 
-	function setApplicationRegistry(address _appRegistry) external {
+	constructor (address _processModelRepository, address _appRegistry) public {
+		require(_appRegistry != address(0) && _processModelRepository != address(0), "Service addresses required for testing not provided");
+		artifactsRegistry = new DefaultArtifactsRegistry();
+		artifactsRegistry.registerArtifact(serviceIdApplicationRegistry, _appRegistry, [1,1,0], true);
+		artifactsRegistry.registerArtifact(serviceIdModelRepository, _processModelRepository, [1,3,1], true);
+		// In addition to registering the dependencies in the ArtifactsRegistry, we also save them into storage vars for test convenience
 		applicationRegistry = ApplicationRegistry(_appRegistry);
-	}
-
-	function setProcessModelRepository(address _repository) external {
-		repository = ProcessModelRepository(_repository);
+		processModelRepository = ProcessModelRepository(_processModelRepository);
 	}
 	
 	/**
@@ -588,7 +595,7 @@ contract BpmServiceTest {
 
 		bytes32 bytes32Value;
 
-		(error, addr) = repository.createProcessModel("testModel2", "Test Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
+		(error, addr) = processModelRepository.createProcessModel("testModel2", "Test Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -670,7 +677,7 @@ contract BpmServiceTest {
 	 */
 	function testInternalProcessExecution() external returns (string) {
 
-		(error, addr) = repository.createProcessModel("testModel3", "Test Model 3", [1,0,0], modelAuthor, false, dummyModelFileReference);
+		(error, addr) = processModelRepository.createProcessModel("testModel3", "Test Model 3", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -736,7 +743,7 @@ contract BpmServiceTest {
 		bytes32 activityId;
 		uint8 state;
 
-		(error, addr) = repository.createProcessModel("routingModel", "Routing Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
+		(error, addr) = processModelRepository.createProcessModel("routingModel", "Routing Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -771,8 +778,6 @@ contract BpmServiceTest {
 		if (!success) return bytes32Value.toString();
 
 		TestBpmService service = getNewTestBpmService();
-		service.setProcessModelRepository(repository);
-		service.setApplicationRegistry(applicationRegistry);
 
 		// Start first process instance with Age not set (should take default transition to activity4)
 		ProcessInstance pi1 = service.createDefaultProcessInstance(pd, this, EMPTY);
@@ -827,7 +832,7 @@ contract BpmServiceTest {
 		bytes32 activityId;
 		uint8 state;
 
-		(error, addr) = repository.createProcessModel("loopingModel", "Looping Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
+		(error, addr) = processModelRepository.createProcessModel("loopingModel", "Looping Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -855,8 +860,6 @@ contract BpmServiceTest {
 		if (!valid) return errorMsg.toString();
 
 		TestBpmService service = getNewTestBpmService();
-		service.setProcessModelRepository(repository);
-		service.setApplicationRegistry(applicationRegistry);
 
 		// Start first process instance with Payments Made uninitialized
 		ProcessInstance pi = new DefaultProcessInstance(pd, this, EMPTY);
@@ -949,7 +952,7 @@ contract BpmServiceTest {
 		// re-usable variables for return values
 		bytes32 activityId;
 
-		(error, addr) = repository.createProcessModel("twoGatewayModel", "2 Gateway Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
+		(error, addr) = processModelRepository.createProcessModel("twoGatewayModel", "2 Gateway Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -984,8 +987,6 @@ contract BpmServiceTest {
 		if (!valid) return errorMsg.toString();
 
 		TestBpmService service = getNewTestBpmService();
-		service.setProcessModelRepository(repository);
-		service.setApplicationRegistry(applicationRegistry);
 
 		// Start first process instance with Payments Made uninitialized
 		ProcessInstance pi = new DefaultProcessInstance(pd, this, EMPTY);
@@ -1071,19 +1072,17 @@ contract BpmServiceTest {
 
 		// Init BpmService
 		TestBpmService service = getNewTestBpmService();
-		service.setProcessModelRepository(repository);
-		service.setApplicationRegistry(applicationRegistry);
 
 		TestData dataStorage = new TestData();
 		EventApplication eventApp = new EventApplication(service);
 		FailureServiceApplication serviceApp = new FailureServiceApplication();
 
-		(error, addr) = repository.createProcessModel("serviceApplicationsModel", "Service Applications", [1,0,0], modelAuthor, false, dummyModelFileReference);
+		(error, addr) = processModelRepository.createProcessModel("serviceApplicationsModel", "Service Applications", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
-		error = applicationRegistry.addApplication(serviceApp1Id, BpmModel.ApplicationType.EVENT, eventApp, bytes4(EMPTY), EMPTY);
-		error = applicationRegistry.addApplication(serviceApp2Id, BpmModel.ApplicationType.SERVICE, serviceApp, bytes4(EMPTY), EMPTY);
+		applicationRegistry.addApplication(serviceApp1Id, BpmModel.ApplicationType.EVENT, address(eventApp), bytes4(EMPTY), EMPTY);
+		applicationRegistry.addApplication(serviceApp2Id, BpmModel.ApplicationType.SERVICE, address(serviceApp), bytes4(EMPTY), EMPTY);
 
 		(error, addr) = pm.createProcessDefinition("ServiceApplicationProcess");
 		if (addr == 0x0) return "Unable to create a ProcessDefinition";
@@ -1178,7 +1177,7 @@ contract BpmServiceTest {
 		bytes32 dataStorageId = "agreement";
 		bytes32 dataPathOnProcess = "customAssignee";
 	
-		(error, addr) = repository.createProcessModel("conditionalPerformerModel", "Test Model CP", [1,0,0], modelAuthor, false, dummyModelFileReference);
+		(error, addr) = processModelRepository.createProcessModel("conditionalPerformerModel", "Test Model CP", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -1249,7 +1248,7 @@ contract BpmServiceTest {
 		error = applicationRegistry.addApplication("Webform1", BpmModel.ApplicationType.WEB, 0x0, bytes4(EMPTY), "MyCustomWebform");
 		if (error != BaseErrors.NO_ERROR()) return "Error registering WEB application for user task";
 
-		(error, addr) = repository.createProcessModel("testModelUserTasks", "UserTask Test Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
+		(error, addr) = processModelRepository.createProcessModel("testModelUserTasks", "UserTask Test Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -1377,7 +1376,7 @@ contract BpmServiceTest {
 
 		UserAccount user1 = new DefaultUserAccount(this, 0x0);
 	
-		(error, addr) = repository.createProcessModel("testModelAbort", "Abort Test Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
+		(error, addr) = processModelRepository.createProcessModel("testModelAbort", "Abort Test Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -1461,7 +1460,7 @@ contract BpmServiceTest {
 		signatories[1] = address(user2);
 		dataStorage.setDataValueAsAddressArray("SIGNATORIES", signatories);
 
-		(error, addr) = repository.createProcessModel("multiInstanceUserTasks", "Multi Instance User Tasks", [1,0,0], modelAuthor, false, dummyModelFileReference);
+		(error, addr) = processModelRepository.createProcessModel("multiInstanceUserTasks", "Multi Instance User Tasks", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
@@ -1545,16 +1544,14 @@ contract BpmServiceTest {
 		ProcessInstance[3] memory subProcesses;
 
 		TestBpmService service = getNewTestBpmService();
-		service.setProcessModelRepository(repository);
-		service.setApplicationRegistry(applicationRegistry);
 
 		// Two process models
-		(error, addr) = repository.createProcessModel("ModelA", "Model A", [1,0,0], modelAuthor, false, dummyModelFileReference);
+		(error, addr) = processModelRepository.createProcessModel("ModelA", "Model A", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create ProcessModel A";
 		ProcessModel pmA = ProcessModel(addr);
 		pmA.addParticipant(participantId1, address(this), EMPTY, EMPTY, 0x0);
 
-		(error, addr) = repository.createProcessModel("ModelB", "Model B", [1,0,0], modelAuthor, false, dummyModelFileReference);
+		(error, addr) = processModelRepository.createProcessModel("ModelB", "Model B", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create ProcessModel B";
 		ProcessModel pmB = ProcessModel(addr);
 
@@ -1647,12 +1644,16 @@ contract BpmServiceTest {
 	}
 
 	function getNewTestBpmService() internal returns (TestBpmService) {
-		TestBpmService service = new TestBpmService();
+		TestBpmService service = new TestBpmService(serviceIdModelRepository, serviceIdApplicationRegistry);
 		BpmServiceDb serviceDb = new BpmServiceDb();
 		SystemOwned(serviceDb).transferSystemOwnership(service);
 		AbstractDbUpgradeable(service).acceptDatabase(serviceDb);
-		service.setProcessModelRepository(repository);
-		service.setApplicationRegistry(applicationRegistry);
+		service.setArtifactsFinder(artifactsRegistry);
+		// check that service is wired correctly
+		require (address(service.getApplicationRegistry()) != address(0), "ApplicationRegistry in new BpmService not found");
+		require (address(service.getProcessModelRepository()) != address(0), "ProcessModelRepository in new BpmService not found");
+		require (address(service.getApplicationRegistry()) == address(applicationRegistry), "ApplicationRegistry in BpmService address mismatch");
+		require (address(service.getProcessModelRepository()) == address(processModelRepository), "ProcessModelRepository in BpmService address mismatch");
 		return service;
 	}
 
@@ -1668,12 +1669,8 @@ contract BpmServiceTest {
  */
 contract TestBpmService is DefaultBpmService {
 
-	function setProcessModelRepository(ProcessModelRepository _repo) external {
-		modelRepository = _repo;
-	}
-
-	function setApplicationRegistry(ApplicationRegistry _registry) external {
-		applicationRegistry = _registry;
+	constructor (string _appRegistryId, string _modelRepoId) public
+		DefaultBpmService(_appRegistryId, _modelRepoId) {
 	}
 
 	function addProcessInstance(ProcessInstance _pi) external {

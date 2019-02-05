@@ -7,7 +7,7 @@ import "commons-base/BaseErrors.sol";
 import "commons-collections/Mappings.sol";
 import "commons-collections/MappingsLib.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
-import "commons-management/ContractLocatorEnabled.sol";
+import "commons-management/ArtifactsFinderEnabled.sol";
 import "bpm-model/ProcessModelRepository.sol";
 import "bpm-model/ProcessDefinition.sol";
 import "bpm-model/ProcessModel.sol";
@@ -23,16 +23,29 @@ import "bpm-runtime/DefaultProcessInstance.sol";
  * @title DefaultBpmService
  * @dev Default implementation of the BpmService interface.
  */
-contract DefaultBpmService is Versioned(1,0,0), AbstractDbUpgradeable, ContractLocatorEnabled, BpmService {
+contract DefaultBpmService is Versioned(1,0,0), AbstractDbUpgradeable, ArtifactsFinderEnabled, BpmService {
 
     using BpmRuntimeLib for ProcessInstance;
 
-    //TODO these string should not be hardcoded. Inject via constructor after AN-307 fixed
-    string constant serviceIdProcessModelRepository = "ProcessModelRepository";
-    string constant serviceIdApplicationRegistry = "ApplicationRegistry";
+    string serviceIdProcessModelRepository;
+    string serviceIdApplicationRegistry;
 
-    ProcessModelRepository modelRepository;
-    ApplicationRegistry applicationRegistry;
+	/**
+	 * @dev Creates a new DefaultActiveAgreementsRegistry that uses the specified service IDs to resolve dependencies at runtime.
+	 * REVERTS if:
+	 * - any of the service ID dependencies are empty
+	 * @param _serviceIdProcessModelRepository the ID with which to resolve the ArchetypeRegistry dependency
+	 * @param _serviceIdApplicationRegistry the ID with which to resolve the BpmService dependency
+	 */
+	constructor (string _serviceIdProcessModelRepository, string _serviceIdApplicationRegistry) public {
+		ErrorsLib.revertIf(bytes(_serviceIdProcessModelRepository).length == 0,
+			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultActiveAgreementRegistry.constructor", "_serviceIdProcessModelRepository parameter must not be empty");
+		ErrorsLib.revertIf(bytes(_serviceIdApplicationRegistry).length == 0,
+			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultActiveAgreementRegistry.constructor", "_serviceIdApplicationRegistry parameter must not be empty");
+		serviceIdProcessModelRepository = _serviceIdProcessModelRepository;
+		serviceIdApplicationRegistry = _serviceIdApplicationRegistry;
+		addInterfaceSupport(ERC165_ID_Versioned);
+	}
 
 	/**
 	 * @dev Creates a new ProcessInstance based on the specified ProcessDefinition and starts its execution
@@ -65,7 +78,10 @@ contract DefaultBpmService is Versioned(1,0,0), AbstractDbUpgradeable, ContractL
         public
         returns (uint error, address)
     {
-        address pd = modelRepository.getProcessDefinition(_modelId, _processDefinitionId);
+   		(address repoAddress, ) = artifactsFinder.getArtifact(serviceIdProcessModelRepository);
+		ErrorsLib.revertIf(repoAddress == address(0),
+			ErrorsLib.DEPENDENCY_NOT_FOUND(), "DefaultBpmService.startProcessFromRepository", "ProcessModelRepository dependency not found in ArtifactsFinder");
+        address pd = ProcessModelRepository(repoAddress).getProcessDefinition(_modelId, _processDefinitionId);
         ErrorsLib.revertIf(pd == 0x0,
             ErrorsLib.RESOURCE_NOT_FOUND(), "DefaultBpmService.startProcessFromRepository", "Unable to find a ProcessDefinition for the given ID");
         return startProcess(pd, _activityInstanceId);
@@ -105,42 +121,6 @@ contract DefaultBpmService is Versioned(1,0,0), AbstractDbUpgradeable, ContractL
         processInstance.transferOwnership(msg.sender);
         ErrorsLib.revertIf(address(processInstance) == 0x0,
                 ErrorsLib.INVALID_STATE(), "DefaultBpmService.createDefaultProcessInstance", "Process Instance address empty");
-    }
-
-    /**
-     * @dev Overrides ContractLocatorEnabled.setContractLocator(address).
-     * Performs a lookup of dependencies for a ProcessModelRepository and an ApplicationRegistry.
-     * REVERTS if:
-     * - if any of the dependencies cannot be satisfied.
-     * @param _locator the ContractLocator to use
-     */
-    function setContractLocator(address _locator)
-        public
-    {
-        super.setContractLocator(_locator);
-        modelRepository = ProcessModelRepository(ContractLocator(_locator).getContract(serviceIdProcessModelRepository));
-        applicationRegistry = ApplicationRegistry(ContractLocator(_locator).getContract(serviceIdApplicationRegistry));
-        ErrorsLib.revertIf(address(modelRepository) == 0x0,
-			ErrorsLib.DEPENDENCY_NOT_FOUND(), "DefaultBpmService.setContractLocator", "ModelRepository not found");
-        ErrorsLib.revertIf(address(applicationRegistry) == 0x0,
-			ErrorsLib.DEPENDENCY_NOT_FOUND(), "DefaultBpmService.setContractLocator", "ApplicationRegistry not found");
-        ContractLocator(_locator).addContractChangeListener(serviceIdProcessModelRepository);
-        ContractLocator(_locator).addContractChangeListener(serviceIdApplicationRegistry);
-    }
-
-    /**
-     * @dev Implements ContractChangeListener.contractChanged(string,address) to update this contract's dependencies.
-     */
-    function contractChanged(string _name, address, address _newAddress)
-        external
-        pre_onlyByLocator
-    {
-        if (keccak256(abi.encodePacked(_name)) == keccak256(abi.encodePacked(serviceIdProcessModelRepository))){
-            modelRepository = ProcessModelRepository(_newAddress);
-        }
-        else if (keccak256(abi.encodePacked(_name)) == keccak256(abi.encodePacked(serviceIdApplicationRegistry))){
-            applicationRegistry = ApplicationRegistry(_newAddress);
-        }
     }
 
 	/**
@@ -320,7 +300,8 @@ contract DefaultBpmService is Versioned(1,0,0), AbstractDbUpgradeable, ContractL
      * @return the ProcessModelRepository
      */
     function getProcessModelRepository() external view returns (ProcessModelRepository) {
-        return modelRepository;
+        (address location, ) = artifactsFinder.getArtifact(serviceIdProcessModelRepository);
+        return ProcessModelRepository(location);
     }
 
 	/**
@@ -328,18 +309,8 @@ contract DefaultBpmService is Versioned(1,0,0), AbstractDbUpgradeable, ContractL
 	 * @return the ApplicationRegistry
 	 */
     function getApplicationRegistry() external view returns (ApplicationRegistry) {
-        return applicationRegistry;
-    }
-
-	/**
-	 * @dev Overwrites the Upgradeable.upgrade(address) function to remove this contract as a contract change listener.
-	 */
-    function upgrade(address _successor) public returns (bool success) {
-        success = super.upgrade(_successor);
-        if (success && address(locator) != address(0)) {
-            locator.removeContractChangeListener(serviceIdApplicationRegistry);
-            locator.removeContractChangeListener(serviceIdProcessModelRepository);
-        }
+        (address location, ) = artifactsFinder.getArtifact(serviceIdApplicationRegistry);
+        return ApplicationRegistry(location);
     }
 
 }
