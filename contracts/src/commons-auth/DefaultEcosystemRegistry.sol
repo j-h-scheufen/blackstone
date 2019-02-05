@@ -3,7 +3,6 @@ pragma solidity ^0.4.25;
 import "commons-base/ErrorsLib.sol";
 import "commons-base/Versioned.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
-import "commons-management/ContractLocatorEnabled.sol";
 
 import "commons-auth/Ecosystem.sol";
 import "commons-auth/DefaultEcosystem.sol";
