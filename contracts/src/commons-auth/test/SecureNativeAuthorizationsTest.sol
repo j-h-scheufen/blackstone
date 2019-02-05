@@ -32,8 +32,7 @@ contract SecureNativeAuthorizationsTest {
     function testFunctions() external returns (string) {
         // Confirm contract has correct initial authorizations
         
-        //TODO *ALL* hasBase invocations disabled until resolution of https://github.com/monax/cli/pull/1385
-        
+       
 //        if (sNativeAuthorizations.hasBase(this, SET_BASE_AUTHORIZATION)) return "Expected setBase: true";
 //        if (sNativeAuthorizations.hasBase(this, HAS_ROLE_AUTHORIZATION)) return "Expected hasRole: true";
 //

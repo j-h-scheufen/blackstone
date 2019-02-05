@@ -26,12 +26,9 @@ jobs:
   - name: AgreementsAPI
     build:
       contract: agreements/AgreementsAPI.sol
-  - name: ContractManagerDb
+  - name: DefaultArtifactsRegistry
     build:
-      contract: commons-management/ContractManagerDb.sol
-  - name: ContractManager
-    build:
-      contract: commons-management/DefaultContractManager.sol
+      contract: commons-management/DefaultArtifactsRegistry.sol
   - name: DefaultDoug
     build:
       contract: commons-management/DefaultDoug.sol

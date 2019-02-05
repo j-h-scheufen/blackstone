@@ -20,6 +20,7 @@ contract AbstractUpgradeable is Versioned, UpgradeOwned, AbstractERC165, Upgrade
     constructor() internal {
         upgradeOwner = msg.sender;
         addInterfaceSupport(ERC165_ID_Upgradeable);
+        addInterfaceSupport(ERC165_ID_Versioned);
     }
 
     /**

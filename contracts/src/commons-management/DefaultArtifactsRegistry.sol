@@ -1,18 +1,33 @@
 pragma solidity ^0.4.25;
 
 import "commons-base/ErrorsLib.sol";
+import "commons-base/SystemOwned.sol";
 
 import "commons-management/Management.sol";
+import "commons-management/AbstractDelegateTarget.sol";
 import "commons-management/ArtifactsRegistry.sol";
 
 /**
  * @title DefaultArtifactRegistry
  * @dev Default implementation of the ArtifactRegistry interface
  */
-contract DefaultArtifactsRegistry is ArtifactsRegistry {
+contract DefaultArtifactsRegistry is ArtifactsRegistry, AbstractDelegateTarget, SystemOwned {
 
     mapping (string => Management.Artifact) artifacts;
     string[] artifactIds;
+
+	/**
+	 * @dev Initializes this DefaultArtifactsFactory by setting the systemOwner to the msg.sender
+     * This function replaces the constructor as a means to set storage variables.
+	 * REVERTS if:
+	 * - the contract had already been initialized before
+	 */
+	function initialize()
+		external
+		pre_post_initialize
+	{
+        systemOwner = msg.sender;
+    }
 
     /**
      * @dev Registers an artifact with the provided information.
@@ -29,7 +44,7 @@ contract DefaultArtifactsRegistry is ArtifactsRegistry {
             ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultArtifactsRegistry.registerArtifact", "_artifactId and _location must not be empty");
         address current = artifacts[_artifactId].locations[keccak256(abi.encodePacked(_version))];
         ErrorsLib.revertIf(current != address(0) && current != _location, 
-            ErrorsLib.OVERWRITE_NOT_ALLOWED(), "DefaultArtifactsRegistry.registerArtifact", "An artifact with the same ID, but a different address is already registered");
+            ErrorsLib.OVERWRITE_NOT_ALLOWED(), "DefaultArtifactsRegistry.registerArtifact", "An artifact with the same ID and version, but a different address is already registered");
         if (!artifacts[_artifactId].exists) {
             artifactIds.push(_artifactId);
             artifacts[_artifactId].exists = true;

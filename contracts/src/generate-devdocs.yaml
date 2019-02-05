@@ -120,27 +120,27 @@ jobs:
     binpath: ../../docs/docdev/commons-management
     instance: all
 
-- name: ContractLocator
+- name: ArtifactsRegistry
   build:
-    contract: commons-management/ContractLocator.sol
+    contract: commons-management/ArtifactsRegistry.sol
     binpath: ../../docs/docdev/commons-management
     instance: all
 
-- name: ContractLocatorEnabled
+- name: ArtifactsFinder
   build:
-    contract: commons-management/ContractLocatorEnabled.sol
+    contract: commons-management/ArtifactsFinder.sol
     binpath: ../../docs/docdev/commons-management
     instance: all
 
-- name: ContractManager
+- name: ArtifactsFinderEnabled
   build:
-    contract: commons-management/ContractManager.sol
+    contract: commons-management/ArtifactsFinderEnabled.sol
     binpath: ../../docs/docdev/commons-management
     instance: all
 
-- name: ContractManagerDb
+- name: DefaultArtifactsFactory
   build:
-    contract: commons-management/ContractManagerDb.sol
+    contract: commons-management/DefaultArtifactsFactory.sol
     binpath: ../../docs/docdev/commons-management
     instance: all
 
@@ -150,9 +150,33 @@ jobs:
     binpath: ../../docs/docdev/commons-management
     instance: all
 
-- name: DefaultContractManager
+- name: ObjectProxy
   build:
-    contract: commons-management/DefaultContractManager.sol
+    contract: commons-management/ObjectProxy.sol
+    binpath: ../../docs/docdev/commons-management
+    instance: all
+
+- name: AbstractDelegateProxy
+  build:
+    contract: commons-management/AbstractDelegateProxy.sol
+    binpath: ../../docs/docdev/commons-management
+    instance: all
+
+- name: AbstractDelegateTarget
+  build:
+    contract: commons-management/AbstractDelegateTarget.sol
+    binpath: ../../docs/docdev/commons-management
+    instance: all
+
+- name: ObjectFactory
+  build:
+    contract: commons-management/ObjectFactory.sol
+    binpath: ../../docs/docdev/commons-management
+    instance: all
+
+- name: AbstractObjectFactory
+  build:
+    contract: commons-management/AbstractObjectFactory.sol
     binpath: ../../docs/docdev/commons-management
     instance: all
 
@@ -189,6 +213,12 @@ jobs:
 - name: OwnedDelegateProxy
   build:
     contract: commons-management/OwnedDelegateProxy.sol
+    binpath: ../../docs/docdev/commons-management
+    instance: all
+
+- name: OwnedDelegateUnstructuredProxy
+  build:
+    contract: commons-management/OwnedDelegateUnstructuredProxy.sol
     binpath: ../../docs/docdev/commons-management
     instance: all
 

@@ -11,8 +11,8 @@ import "commons-management/DefaultArtifactsRegistry.sol";
 
 contract ArtifactsRegistryTest {
 
-    string keyService1 = "io.monax/agreements-network/services/Service1";
-    string keyService2 = "io.monax/agreements-network/services/Service2";
+    string keyService1 = "agreements-network/services/Service1";
+    string keyService2 = "agreements-network/services/Service2";
 
     string constant EMPTY_STRING = "";
 
@@ -96,7 +96,7 @@ contract DefaultTestService is Versioned, AbstractDbUpgradeable {
 contract TestServiceWithDependency is DefaultTestService, ArtifactsFinderEnabled {
 
     address dependency1;
-    string dep1Name = "io.monax/agreements-network/services/Service2";
+    string dep1Name = "agreements-network/services/Service2";
 
     constructor(uint8[3] _version) DefaultTestService(_version) public {
 

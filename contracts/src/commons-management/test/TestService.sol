@@ -1,10 +1,9 @@
 pragma solidity ^0.4.25;
 
 import "commons-management/AbstractUpgradeable.sol";
-import "commons-management/ContractLocatorEnabled.sol";
-import "commons-management/ContractLocator.sol";
+import "commons-management/ArtifactsFinderEnabled.sol";
 
-contract TestService is AbstractUpgradeable, ContractLocatorEnabled {
+contract TestService is AbstractUpgradeable, ArtifactsFinderEnabled {
 
     bytes32 public name;
     uint16 public status;
@@ -23,17 +22,16 @@ contract TestService is AbstractUpgradeable, ContractLocatorEnabled {
         status = _status;
     }
 
-    function setContractLocator(address _locator) public {
-        super.setContractLocator(_locator);
+    function refreshDependencies() public {
         if (bytes(dependencyKey).length > 0) {
-            dependencyService = ContractLocator(_locator).getContract(dependencyKey);
+            (dependencyService, ) = ArtifactsFinder(artifactsFinder).getArtifact(dependencyKey);
             require(dependencyService != 0x0, "dependency not found");
-            ContractLocator(_locator).addContractChangeListener(dependencyKey);
         }
     }
 
-    function contractChanged(string, address, address _contractNew) external pre_onlyByLocator {
-        dependencyService = _contractNew;
+    function setArtifactsFinder(address _finder) public {
+        super.setArtifactsFinder(_finder);
+        refreshDependencies();
     }
 
     function migrateFrom(address) public returns (bool success) {
@@ -42,12 +40,5 @@ contract TestService is AbstractUpgradeable, ContractLocatorEnabled {
 
     function migrateTo(address) public returns (bool success) {
         success = true;
-    }
-
-    function upgrade(address _successor) public returns (bool success) { 
-        success = super.upgrade(_successor);
-        if (success && address(locator) != address(0)) {
-            locator.removeContractChangeListener(dependencyKey);
-        }
     }
 }

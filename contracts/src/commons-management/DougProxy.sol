@@ -2,14 +2,14 @@ pragma solidity ^0.4.25;
 
 import "commons-base/ErrorsLib.sol";
 import "commons-management/OwnedDelegateProxy.sol";
-import "commons-management/StorageDefManager.sol";
+import "commons-management/StorageDefRegistry.sol";
 
 /**
  * @title DougProxy
  * @dev Proxy contract for Doug instances. Once deployed, this contract can be used as the singleton access point for Doug functions
  * covering future Doug upgrades.
  */
-contract DougProxy is OwnedDelegateProxy, StorageDefManager {
+contract DougProxy is OwnedDelegateProxy, StorageDefRegistry {
 
     /**
      * @dev Modifier to only allow access by the owner.
@@ -24,8 +24,7 @@ contract DougProxy is OwnedDelegateProxy, StorageDefManager {
      * @dev Creates a new DougProxy with the given Doug instance as the proxied contract and sets the systemOwner to msg.sender
      * @param _doug an address of a Doug instance
      */
-    constructor(address _doug) public OwnedDelegateProxy(_doug) {
-       
+    constructor (address _doug) public OwnedDelegateProxy(_doug) {
     }
 
     /**

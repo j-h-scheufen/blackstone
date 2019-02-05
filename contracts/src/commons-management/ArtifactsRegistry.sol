@@ -1,12 +1,14 @@
 pragma solidity ^0.4.25;
 
+import "commons-base/SystemOwnerTransferable.sol";
+
 import "commons-management/ArtifactsFinder.sol";
 
 /**
  * @title ArtifactsRegistry
  * @dev A place to store smart contract artifacts by name and version and track the active version.
  */
-contract ArtifactsRegistry is ArtifactsFinder {
+contract ArtifactsRegistry is ArtifactsFinder, SystemOwnerTransferable {
 
     /**
      * @dev Registers an artifact with the provided information.

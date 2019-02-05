@@ -1,11 +1,11 @@
 pragma solidity ^0.4.25;
 
 /**
- * @dev Provides the storage layout for a wrapped manager contract.
+ * @dev Provides the storage layout for a wrapped registry contract.
  */
-contract StorageDefManager {
+contract StorageDefRegistry {
 
-    address internal manager;
+    address internal registry;
 
     /**
      * @dev Internal constructor to enforce abstract contract.

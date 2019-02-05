@@ -16,13 +16,21 @@ interface DOUG {
      * @param _address the address of the contract
      * @return true if successful, false otherwise
      */
-    function deployContract(string _id, address _address) external returns (bool success);
+    function deploy(string _id, address _address) external returns (bool success);
+
+    /**
+     * @dev Registers the contract with the given address under the specified ID.
+     * @param _id the ID under which to register the contract
+     * @param _address the address of the contract
+     * @return true if successful, false otherwise
+     */
+    function register(string _id, address _address) external returns (uint8[3] version);
 
     /**
      * @dev Returns the address of a contract registered under the given ID.
      * @param _id the ID under which the contract is registered
      * @return the contract's address
      */
-    function lookupContract(string _id) external view returns (address contractAddress);
+    function lookup(string _id) external view returns (address contractAddress);
 
 }

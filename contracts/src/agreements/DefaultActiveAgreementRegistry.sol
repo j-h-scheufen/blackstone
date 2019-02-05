@@ -5,8 +5,9 @@ import "commons-base/BaseErrors.sol";
 import "commons-collections/Mappings.sol";
 import "commons-collections/MappingsLib.sol";
 import "commons-events/AbstractEventListener.sol";
+import "commons-management/ArtifactsFinder.sol";
+import "commons-management/ArtifactsFinderEnabled.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
-import "commons-management/ContractLocatorEnabled.sol";
 import "commons-auth/ParticipantsManager.sol";
 import "commons-utils/ArrayUtilsAPI.sol";
 import "bpm-runtime/BpmRuntime.sol";
@@ -25,19 +26,31 @@ import "agreements/ArchetypeRegistry.sol";
  * @title DefaultActiveAgreementRegistry Interface
  * @dev A contract interface to create and manage Active Agreements.
  */
-contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListener, AbstractDbUpgradeable, ContractLocatorEnabled, ActiveAgreementRegistry {
+contract DefaultActiveAgreementRegistry is Versioned(1,0,0), ArtifactsFinderEnabled, AbstractEventListener, AbstractDbUpgradeable, ActiveAgreementRegistry {
 
 	using ArrayUtilsAPI for address[];
 
 	// Temporary mapping to detect duplicates in address[] _governingAgreements
 	mapping(address => uint) duplicateMap;
 
-	//TODO these string should not be hardcoded. Inject via constructor after AN-307 fixed
-	string constant serviceIdArchetypeRegistry = "ArchetypeRegistry";
-	string constant serviceIdBpmService = "BpmService";
+	string serviceIdArchetypeRegistry;
+	string serviceIdBpmService;
 
-	ArchetypeRegistry archetypeRegistry;
-	BpmService bpmService;
+	/**
+	 * @dev Creates a new DefaultActiveAgreementsRegistry that uses the specified service IDs to resolve dependencies at runtime.
+	 * REVERTS if:
+	 * - any of the service ID dependencies are empty
+	 * @param _serviceIdArchetypeRegistry the ID with which to resolve the ArchetypeRegistry dependency
+	 * @param _serviceIdBpmService the ID with which to resolve the BpmService dependency
+	 */
+	constructor (string _serviceIdArchetypeRegistry, string _serviceIdBpmService) {
+		ErrorsLib.revertIf(bytes(_serviceIdArchetypeRegistry).length == 0,
+			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultActiveAgreementRegistry.constructor", "_serviceIdArchetypeRegistry parameter must not be empty");
+		ErrorsLib.revertIf(bytes(_serviceIdBpmService).length == 0,
+			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultActiveAgreementRegistry.constructor", "_serviceIdBpmService parameter must not be empty");
+		serviceIdArchetypeRegistry = _serviceIdArchetypeRegistry;
+		serviceIdBpmService = _serviceIdBpmService;
+	}
 
 	/**
 	 * verifies that the msg.sender is an agreement known to this registry
@@ -180,6 +193,7 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 	/**
 	 * @dev Adds an agreement to given collection
 	 * REVERTS if:
+	 * - the ArchetypeRegistry dependency cannot be found via the ArtifactsFinder
 	 * - a collection with the given ID is not found
 	 * - the agreement's archetype is part of the collection's package
 	 * @param _collectionId the bytes32 collection id
@@ -187,6 +201,11 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 	 */
 	function addAgreementToCollection(bytes32 _collectionId, address _agreement) public {
 		bytes32 packageId;
+		// we deliberately accept the fact that the artifactsFinder could still be 0x0, if the contract was never initialized correctly
+		// However, when deployed through DOUG, the artifactsFinder is set, so we avoid having to check every time.
+		ArchetypeRegistry archetypeRegistry = ArchetypeRegistry(artifactsFinder.getArtifact(serviceIdArchetypeRegistry));
+		ErrorsLib.revertIf(address(archetypeRegistry) == address(0),
+			ErrorsLib.DEPENDENCY_NOT_FOUND(), "DefaultActiveAgreementsRegistry.addAgreementToCollection", "ArchetypeRegistry dependency not found in ArtifactsFinder");
 		address archetype = ActiveAgreement(_agreement).getArchetype();
 		( , , , packageId) = ActiveAgreementRegistryDb(database).getCollectionData(_collectionId);
 		ErrorsLib.revertIf(packageId == "",
@@ -226,6 +245,11 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 	{
 		ErrorsLib.revertIf(address(_agreement) == address(0),
 			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultActiveAgreementRegistry.startProcessLifecycle", "The provided ActiveAgreement must exist");
+		// we deliberately accept the fact that the artifactsFinder could still be 0x0, if the contract was never initialized correctly
+		// However, when deployed through DOUG, the artifactsFinder is set, so we avoid having to check every time.
+		BpmService bpmService = BpmService(artifactsFinder.getArtifact(serviceIdBpmService));
+		ErrorsLib.revertIf(address(bpmService) == address(0),
+			ErrorsLib.DEPENDENCY_NOT_FOUND(), "DefaultActiveAgreementsRegistry.startProcessLifecycle", "BpmService dependency not found in ArtifactsFinder");
 
 		// FORMATION PROCESS
 		if (Archetype(_agreement.getArchetype()).getFormationProcessDefinition() != address(0)) {
@@ -265,6 +289,11 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 		address pd = Archetype(_agreement.getArchetype()).getFormationProcessDefinition();
 		ErrorsLib.revertIf(pd == 0x0,
 			ErrorsLib.RESOURCE_NOT_FOUND(), "DefaultActiveAgreementRegistry.createFormationProcess", "No ProcessDefinition found on the agreement's archetype");
+		// we deliberately accept the fact that the artifactsFinder could still be 0x0, if the contract was never initialized correctly
+		// However, when deployed through DOUG, the artifactsFinder is set, so we avoid having to check every time.
+		BpmService bpmService = BpmService(artifactsFinder.getArtifact(serviceIdBpmService));
+		ErrorsLib.revertIf(address(bpmService) == address(0),
+			ErrorsLib.DEPENDENCY_NOT_FOUND(), "DefaultActiveAgreementsRegistry.createFormationProcess", "BpmService dependency not found in ArtifactsFinder");
 		processInstance = bpmService.createDefaultProcessInstance(pd, msg.sender, bytes32(""));
 		processInstance.addProcessStateChangeListener(this);
 		processInstance.setDataValueAsAddress(DATA_ID_AGREEMENT, address(_agreement));
@@ -283,6 +312,11 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 		address pd = Archetype(_agreement.getArchetype()).getExecutionProcessDefinition();
 		ErrorsLib.revertIf(pd == 0x0,
 			ErrorsLib.RESOURCE_NOT_FOUND(), "DefaultActiveAgreementRegistry.createExecutionProcess", "No ProcessDefinition found on the agreement's archetype");
+		// we deliberately accept the fact that the artifactsFinder could still be 0x0, if the contract was never initialized correctly
+		// However, when deployed through DOUG, the artifactsFinder is set, so we avoid having to check every time.
+		BpmService bpmService = BpmService(artifactsFinder.getArtifact(serviceIdBpmService));
+		ErrorsLib.revertIf(address(bpmService) == address(0),
+			ErrorsLib.DEPENDENCY_NOT_FOUND(), "DefaultActiveAgreementsRegistry.createExecutionProcess", "BpmService dependency not found in ArtifactsFinder");
 		processInstance = bpmService.createDefaultProcessInstance(pd, msg.sender, bytes32(""));
 		processInstance.addProcessStateChangeListener(this);
 		processInstance.setDataValueAsAddress(DATA_ID_AGREEMENT, address(_agreement));
@@ -355,49 +389,6 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 			}
 		}
 	}
-
-	/**
-	 * @dev Returns the BpmService address
-	 * @return address the BpmService
-	 */
-	function getBpmService() external returns (address) {
-		return address(bpmService);
-	}
-
-	/**
-	 * @dev Returns the ArchetypeRegistry address
-	 * @return address the ArchetypeRegistry
-	 */
-	function getArchetypeRegistry() external returns (address) {
-		return address(archetypeRegistry);
-	}
-
-    /**
-     * @dev Overrides ContractLocatorEnabled.setContractLocator(address)
-     */
-    function setContractLocator(address _locator) public {
-        super.setContractLocator(_locator);
-        archetypeRegistry = ArchetypeRegistry(ContractLocator(_locator).getContract(serviceIdArchetypeRegistry));
-        bpmService = BpmService(ContractLocator(_locator).getContract(serviceIdBpmService));
-        ErrorsLib.revertIf(address(archetypeRegistry) == 0x0,
-			ErrorsLib.DEPENDENCY_NOT_FOUND(), "DefaultActiveAgreementRegistry.setContractLocator", "ArchetypeRegistry not found");
-        ErrorsLib.revertIf(address(bpmService) == 0x0,
-			ErrorsLib.DEPENDENCY_NOT_FOUND(), "DefaultActiveAgreementRegistry.setContractLocator", "BpmService not found");
-        ContractLocator(_locator).addContractChangeListener(serviceIdArchetypeRegistry);
-        ContractLocator(_locator).addContractChangeListener(serviceIdBpmService);
-    }
-
-    /**
-     * @dev Implements ContractLocatorEnabled.setContractLocator(address)
-     */
-    function contractChanged(string _name, address, address _newAddress) external pre_onlyByLocator {
-        if (keccak256(abi.encodePacked(_name)) == keccak256(abi.encodePacked(serviceIdArchetypeRegistry))){
-            archetypeRegistry = ArchetypeRegistry(_newAddress);
-        }
-        else if (keccak256(abi.encodePacked(_name)) == keccak256(abi.encodePacked(serviceIdBpmService))){
-            bpmService = BpmService(_newAddress);
-        }
-    }
 
     /**
      * @dev Gets number of activeAgreements
@@ -687,6 +678,11 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractEventListen
 					// keep track of the execution process for the agreement
 					// NOTE: we're currently not checking if there is already a tracked execution process, because no execution path can currently lead to that situation
 					ActiveAgreementRegistryDb(database).setAgreementExecutionProcess(address(agreement), address(newPi));
+					// we deliberately accept the fact that the artifactsFinder could still be 0x0, if the contract was never initialized correctly
+					// However, when deployed through DOUG, the artifactsFinder is set, so we avoid having to check every time.
+					BpmService bpmService = BpmService(artifactsFinder.getArtifact(serviceIdBpmService));
+					ErrorsLib.revertIf(address(bpmService) == address(0),
+						ErrorsLib.DEPENDENCY_NOT_FOUND(), "DefaultActiveAgreementsRegistry.createFormationProcess", "BpmService dependency not found in ArtifactsFinder");
 					bpmService.startProcessInstance(newPi); // Note: Disregarding the error code here. If there was an error in the execution process, it should either REVERT or leave the PI in INTERRUPTED state
 				}
 			}

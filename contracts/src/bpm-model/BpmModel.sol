@@ -7,7 +7,7 @@ import "commons-collections/DataStorageUtils.sol";
  * @dev This library defines the data structures and internal functions for BPM modeling.
  */
 library BpmModel {
-	
+
     enum ModelElementType {ACTIVITY,GATEWAY}   
     enum ActivityType {TASK,SUBPROCESS}
     // TaskTypes were reduced/modified from BPMN spec (USER,MANUAL,SERVICE,SCRIPT,RULE,SEND,RECEIVE) to fit better to EVM reality

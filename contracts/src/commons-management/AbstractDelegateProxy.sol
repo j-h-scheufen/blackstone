@@ -9,6 +9,11 @@ import "commons-base/ErrorsLib.sol";
 contract AbstractDelegateProxy {
 
     /**
+     * @dev Private constructor
+     */
+    constructor() internal {}
+
+    /**
      * @dev Returns the address of the proxied conract to which all calls will be delegated.
      * @return the address of the contract used as delegate
      */

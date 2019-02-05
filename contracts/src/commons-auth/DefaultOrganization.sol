@@ -13,7 +13,7 @@ import "commons-auth/UserAccount.sol";
  * @title DefaultOrganization
  * @dev the default implementation of the Organization interface.
  */
-contract DefaultOrganization is Organization, AbstractDelegateTarget, AbstractERC165 {
+contract DefaultOrganization is Organization, AbstractDelegateTarget, AbstractERC165, Versioned {
 
 	//TODO as a DelegateTarget we need to make sure the functions on this contract cannot be called directly. All functions can be guarded by checking for initialized. Only initialize() must not be callable unless through the proxy ...
 	

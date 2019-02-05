@@ -6,8 +6,6 @@ import "commons-utils/TypeUtilsAPI.sol";
 
 import "commons-management/ArtifactsRegistry.sol";
 import "commons-management/DefaultArtifactsRegistry.sol";
-import "commons-management/ContractManagerDb.sol";
-import "commons-management/DefaultContractManager.sol";
 import "commons-management/ObjectProxy.sol";
 
 contract ObjectProxyTest {
