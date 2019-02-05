@@ -35,7 +35,7 @@ contract DefaultDoug is StorageDefProxied, StorageDefOwner, StorageDefRegistry, 
      * @dev Registers the contract with the given address under the specified ID and performs a deployment
      * procedure which involves dependency injection and upgrades from previously deployed contracts with
      * the same ID.
-	 * If the given contract implements ContractLocatorEnabled, it will be passed an instance of the ContractManager, so that
+	 * If the given contract implements ArtifactsFinderEnabled, it will be passed an instance of the ArtifactsRegistry, so that
 	 * it can perform dependency lookups and register for changes.
 	 * REVERTS if:
 	 * - the provided contract is Upgradeable, but this DOUG contract is not the upgradeOwner

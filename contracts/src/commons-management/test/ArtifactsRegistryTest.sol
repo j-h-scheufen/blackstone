@@ -17,7 +17,7 @@ contract ArtifactsRegistryTest {
     string constant EMPTY_STRING = "";
 
     // the ERC165 ID of ArtifactsFinderEnabled
-    bytes4 constant ERC165_ID_ContractLocatorEnabled = bytes4(keccak256(abi.encodePacked("setArtifactsFinder(address)")));
+    bytes4 constant ERC165_ID_ArtifactsFinderEnabled = bytes4(keccak256(abi.encodePacked("setArtifactsFinder(address)")));
 
     function testArtifactsRegistry() external returns (string) {
 
@@ -91,7 +91,7 @@ contract DefaultTestService is Versioned, AbstractDbUpgradeable {
 }
 
 /**
- * @dev Extends the DefaultTestService with capabilities for dependency injection via a ContractLocator
+ * @dev Extends the DefaultTestService with capabilities for dependency injection via a ArtifactsFinder
  */
 contract TestServiceWithDependency is DefaultTestService, ArtifactsFinderEnabled {
 
