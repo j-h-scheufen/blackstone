@@ -22,7 +22,6 @@ contract ActiveAgreementRegistryTest {
 
 	address public activeAgreement;
 	address public activeAgreement2;
-	DefaultArchetype archetype;
 	address public archetypeAddr;
 	address public falseAddress = 0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa;
 	string dummyPrivateParametersFileRef = "{json grant}";
@@ -54,7 +53,8 @@ contract ActiveAgreementRegistryTest {
 	address[] governingAgreements;
 	address[] governingArchetypes;
 
-	DefaultActiveAgreement defaultAgreement = new DefaultActiveAgreement();
+	DefaultActiveAgreement defaultAgreementImpl = new DefaultActiveAgreement();
+	DefaultArchetype defaultArchetypeImpl = new DefaultArchetype();
 	ArchetypeRegistry archetypeRegistry;
 	BpmService bpmService;
 	ArtifactsRegistry artifactsRegistry;
@@ -72,6 +72,8 @@ contract ActiveAgreementRegistryTest {
 		// ArtifactsRegistry
 		artifactsRegistry = new DefaultArtifactsRegistry();
 		artifactsRegistry.registerArtifact(serviceIdArchetypeRegistry, archetypeRegistry, Versioned(archetypeRegistry).getVersion(), true);
+        artifactsRegistry.registerArtifact(archetypeRegistry.OBJECT_CLASS_ARCHETYPE(), defaultArchetypeImpl, defaultArchetypeImpl.getVersion(), true);
+		ArtifactsFinderEnabled(archetypeRegistry).setArtifactsFinder(artifactsRegistry);
 	}
 
 	/**
@@ -84,7 +86,7 @@ contract ActiveAgreementRegistryTest {
 		SystemOwned(registryDb).transferSystemOwnership(newRegistry);
 		AbstractDbUpgradeable(newRegistry).acceptDatabase(registryDb);
 		newRegistry.setArtifactsFinder(artifactsRegistry);
-        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_AGREEMENT(), defaultAgreement, defaultAgreement.getVersion(), true);
+        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_AGREEMENT(), defaultAgreementImpl, defaultAgreementImpl.getVersion(), true);
 		// check that dependencies are wired correctly
 		require (address(newRegistry.getArchetypeRegistry()) != address(0), "ArchetypeRegistry in new ActiveAgreementRegistry not found");
 		require (address(newRegistry.getArchetypeRegistry()) == address(archetypeRegistry), "ArchetypeRegistry in ActiveAgreementRegistry address mismatch");
@@ -98,7 +100,7 @@ contract ActiveAgreementRegistryTest {
 
 		ActiveAgreementRegistry agreementRegistry = createNewAgreementRegistry();
 
-    	archetype = new DefaultArchetype(10, false, true, "archetype name", falseAddress, "description", falseAddress, falseAddress, emptyArray);
+    	archetypeAddr = archetypeRegistry.createArchetype(10, false, true, "archetype name", falseAddress, "description", falseAddress, falseAddress, EMPTY, emptyArray);
 
 		if (address(agreementRegistry).call(bytes4(keccak256(abi.encodePacked(
 			"createAgreement(address,bytes32,address,bytes32,bytes32,bool,address[],bytes32,address[])"))), 
@@ -106,7 +108,7 @@ contract ActiveAgreementRegistryTest {
 				return "Expected error NULL_PARAM_NOT_ALLOWED for empty archetype address";
 		}
 
-		activeAgreement = agreementRegistry.createAgreement(archetype, agreementName, this, dummyPrivateParametersFileRef, false, parties, EMPTY, emptyArray);
+		activeAgreement = agreementRegistry.createAgreement(archetypeAddr, agreementName, this, dummyPrivateParametersFileRef, false, parties, EMPTY, emptyArray);
 		if (activeAgreement == 0x0) return "Agreement creation returned empty address";
 
 		if (agreementRegistry.getActiveAgreementAtIndex(0) != activeAgreement) return "ActiveAgreement at index 0 not as expected";
@@ -121,7 +123,7 @@ contract ActiveAgreementRegistryTest {
 		bool retIsPrivate;
 		(retArchetype, retName, retCreator, returnedFileRef, , , retIsPrivate, , , ) = agreementRegistry.getActiveAgreementData(activeAgreement);
 		
-		if (retArchetype != address(archetype)) return "getActiveAgreementData returned wrong archetype";
+		if (retArchetype != archetypeAddr) return "getActiveAgreementData returned wrong archetype";
 		if (bytes(retName).length != bytes(agreementName).length) return "getActiveAgreementData returned wrong name";
 		if (retCreator != address(this)) return "getActiveAgreementData returned wrong creator";
 		if (keccak256(abi.encodePacked(returnedFileRef)) != keccak256(abi.encodePacked(dummyPrivateParametersFileRef))) return "getActiveAgreementData returned wrong private parameters file reference";

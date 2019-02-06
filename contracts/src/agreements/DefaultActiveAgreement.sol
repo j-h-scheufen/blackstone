@@ -17,7 +17,7 @@ import "agreements/AgreementsAPI.sol";
 import "agreements/Archetype.sol";
 import "agreements/ActiveAgreement.sol";
 
-contract DefaultActiveAgreement is Versioned(1,0,0), ActiveAgreement, AbstractDelegateTarget, AbstractERC165, AbstractDataStorage, AbstractAddressScopes, DefaultEventEmitter {
+contract DefaultActiveAgreement is Versioned(1,0,0), AbstractDelegateTarget, AbstractERC165, AbstractDataStorage, AbstractAddressScopes, DefaultEventEmitter, ActiveAgreement {
 	
 	using ArrayUtilsAPI for address[];
 	using TypeUtilsAPI for bytes32;

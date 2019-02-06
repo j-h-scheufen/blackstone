@@ -2,12 +2,37 @@ pragma solidity ^0.4.25;
 
 import "commons-base/Named.sol";
 import "commons-utils/DataTypes.sol";
+import "commons-standards/ERC165.sol";
 
 /**
  * @title Archetype Interface
  * @dev API for interaction with an agreement archetype
  */
-contract Archetype is Named {
+contract Archetype is Named, ERC165 {
+
+	event LogArchetypeCreation(
+		bytes32 indexed eventId,
+		address archetypeAddress,
+		string name,
+		string description,
+		uint32 price,
+		address author,
+		bool active,
+		bool isPrivate,
+		address successor,
+		address formationProcessDefinition,
+		address executionProcessDefinition
+	);
+
+	event LogGoverningArchetypeUpdate(
+		bytes32 indexed eventId,
+		address archetypeAddress,
+		address governingArchetypeAddress,
+		string governingArchetypeName
+	);
+
+	bytes32 public constant EVENT_ID_ARCHETYPES = "AN://archetypes";
+	bytes32 public constant EVENT_ID_GOVERNING_ARCHETYPES = "AN://governing-archetypes";
 
 	/**
 	 * @dev Adds the document specified by the external reference to the archetype under the given name

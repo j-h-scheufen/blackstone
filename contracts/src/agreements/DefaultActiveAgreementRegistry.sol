@@ -10,7 +10,6 @@ import "commons-management/ArtifactsFinderEnabled.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
 import "commons-management/AbstractObjectFactory.sol";
 import "commons-management/ObjectProxy.sol";
-import "commons-auth/ParticipantsManager.sol";
 import "commons-utils/ArrayUtilsAPI.sol";
 import "bpm-runtime/BpmRuntime.sol";
 import "bpm-runtime/BpmService.sol";
@@ -94,7 +93,7 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractObjectFacto
 	{
 		validateAgreementRequirements(_archetype, _name, _governingAgreements);
         activeAgreement = new ObjectProxy(artifactsFinder, OBJECT_CLASS_AGREEMENT);
-        DefaultActiveAgreement(address(activeAgreement)).initialize(_archetype, _name, _creator, _privateParametersFileReference, _isPrivate, _parties, _governingAgreements);
+        DefaultActiveAgreement(activeAgreement).initialize(_archetype, _name, _creator, _privateParametersFileReference, _isPrivate, _parties, _governingAgreements);
 		register(activeAgreement, _name);
 		if (_collectionId != "") {
 			addAgreementToCollection(_collectionId, activeAgreement);

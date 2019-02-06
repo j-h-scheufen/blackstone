@@ -82,7 +82,8 @@ contract ActiveAgreementWorkflowTest {
 	ProcessModelRepository processModelRepository;
 	ApplicationRegistry applicationRegistry;
 
-	DefaultActiveAgreement defaultAgreement = new DefaultActiveAgreement();
+	DefaultActiveAgreement defaultAgreementImpl = new DefaultActiveAgreement();
+	DefaultArchetype defaultArchetypeImpl = new DefaultArchetype();
 	ArtifactsRegistry artifactsRegistry;
 	string constant serviceIdBpmService = "agreements-network/services/BpmService";
 	string constant serviceIdArchetypeRegistry = "agreements-network/services/ArchetypeRegistry";
@@ -122,6 +123,8 @@ contract ActiveAgreementWorkflowTest {
 		artifactsRegistry.registerArtifact(serviceIdArchetypeRegistry, address(archetypeRegistry), Versioned(archetypeRegistry).getVersion(), true);
 		artifactsRegistry.registerArtifact(serviceIdModelRepository, address(processModelRepository), Versioned(processModelRepository).getVersion(), true);
 		artifactsRegistry.registerArtifact(serviceIdApplicationRegistry, address(applicationRegistry), Versioned(applicationRegistry).getVersion(), true);
+        artifactsRegistry.registerArtifact(archetypeRegistry.OBJECT_CLASS_ARCHETYPE(), defaultArchetypeImpl, defaultArchetypeImpl.getVersion(), true);
+		ArtifactsFinderEnabled(archetypeRegistry).setArtifactsFinder(artifactsRegistry);
 		ArtifactsFinderEnabled(bpmService).setArtifactsFinder(artifactsRegistry);
 	}
 
@@ -135,7 +138,7 @@ contract ActiveAgreementWorkflowTest {
 		SystemOwned(agreementRegistryDb).transferSystemOwnership(newRegistry);
 		AbstractDbUpgradeable(newRegistry).acceptDatabase(agreementRegistryDb);
 		ArtifactsFinderEnabled(newRegistry).setArtifactsFinder(artifactsRegistry);
-        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_AGREEMENT(), defaultAgreement, defaultAgreement.getVersion(), true);
+        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_AGREEMENT(), defaultAgreementImpl, defaultAgreementImpl.getVersion(), true);
 		// check that dependencies are wired correctly
 		require (address(newRegistry.getArchetypeRegistry()) != address(0), "ArchetypeRegistry in new ActiveAgreementRegistry not found");
 		require (address(newRegistry.getArchetypeRegistry()) == address(archetypeRegistry), "ArchetypeRegistry in ActiveAgreementRegistry address mismatch");

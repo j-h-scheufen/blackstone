@@ -2,12 +2,15 @@ pragma solidity ^0.4.25;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/ErrorsLib.sol";
+import "commons-base/Versioned.sol";
 import "commons-utils/ArrayUtilsAPI.sol";
 import "commons-utils/TypeUtilsAPI.sol";
 import "commons-utils/DataTypes.sol";
 import "commons-collections/Mappings.sol";
 import "commons-collections/MappingsLib.sol";
 import "documents-commons/Documents.sol";
+import "commons-standards/AbstractERC165.sol";
+import "commons-management/AbstractDelegateTarget.sol";
 
 import "agreements/Archetype.sol";
 
@@ -15,7 +18,7 @@ import "agreements/Archetype.sol";
  * @title DefaultArchetype
  * @dev Default agreements network archetype
  */
-contract DefaultArchetype is Archetype {
+contract DefaultArchetype is Versioned(1,0,0), AbstractDelegateTarget, AbstractERC165, Archetype {
 
 	using ArrayUtilsAPI for bytes32[];
 	using TypeUtilsAPI for string;
@@ -53,7 +56,8 @@ contract DefaultArchetype is Archetype {
 	address[] governingArchetypes;
 
 	/**
-	 * @dev Constructor
+	 * @dev Initializes this ActiveAgreement with the provided parameters. This function replaces the
+	 * contract constructor, so it can be used as the delegate target for an ObjectProxy.
 	 * @param _name name
 	 * @param _author author
 	 * @param _description description
@@ -63,7 +67,10 @@ contract DefaultArchetype is Archetype {
 	 * @param _executionProcess the address of a ProcessDefinition that orchestrates the agreement execution
 	 * @param _governingArchetypes array of governing archetype addresses (optional)
 	 */
-	constructor(uint32 _price, bool _isPrivate, bool _active, string _name, address _author, string _description, address _formationProcess, address _executionProcess, address[] _governingArchetypes) public {
+	function initialize(uint32 _price, bool _isPrivate, bool _active, string _name, address _author, string _description, address _formationProcess, address _executionProcess, address[] _governingArchetypes)
+		external
+		pre_post_initialize
+	{
 		name = _name;
 		author = _author;
 		description = _description;
@@ -73,6 +80,28 @@ contract DefaultArchetype is Archetype {
 		formationProcessDefinition = _formationProcess;
 		executionProcessDefinition = _executionProcess;
 		governingArchetypes = _governingArchetypes;
+		// NOTE: some of the parameters for the event must be read from storage, otherwise "stack too deep" compilation errors occur
+		emit LogArchetypeCreation(
+			EVENT_ID_ARCHETYPES,
+			address(this),
+			_name,
+			_description,
+			price,
+			author,
+			active,
+			privateFlag,
+			successor,
+			formationProcessDefinition,
+			executionProcessDefinition
+		);
+		for (uint i = 0; i < _governingArchetypes.length; i++) {
+			emit LogGoverningArchetypeUpdate(
+				EVENT_ID_GOVERNING_ARCHETYPES, 
+				address(this), 
+				_governingArchetypes[i],
+				Archetype(_governingArchetypes[i]).getName()
+			);
+		}
 	}
 
 	/**

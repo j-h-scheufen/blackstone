@@ -4,6 +4,8 @@ import "commons-base/SystemOwned.sol";
 import "commons-utils/TypeUtilsAPI.sol";
 import "commons-standards/IsoCountries100.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
+import "commons-management/ArtifactsRegistry.sol";
+import "commons-management/DefaultArtifactsRegistry.sol";
 
 import "agreements/Agreements.sol";
 import "agreements/DefaultArchetype.sol";
@@ -17,8 +19,6 @@ contract ArchetypeRegistryTest {
 	bytes32 EMPTY = "";
 	IsoCountries100 isoCountries;
 
-	ArchetypeRegistry public registry = new DefaultArchetypeRegistry(); // public for testing getArchetypeData 
-	ArchetypeRegistryDb registryDb = new ArchetypeRegistryDb();
 	address falseAddress = 0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa;
 
 	string name = "archetype name";
@@ -47,9 +47,28 @@ contract ArchetypeRegistryTest {
 	address[] ndaGovArchetypes;
 	address[] emptyArray;
 
+	DefaultArchetype defaultArchetype = new DefaultArchetype();
+	ArtifactsRegistry artifactsRegistry;
+	
 	constructor (address _isoCountries) public {
 		require(_isoCountries != address(0), "The test contract requires an instance of IsoCountries");
 		isoCountries = IsoCountries100(_isoCountries);
+		// ArtifactsRegistry
+		artifactsRegistry = new DefaultArtifactsRegistry();
+	}
+
+	/**
+	 * @dev Creates and returns a new ArchetypeRegistry using an existing ArchetypeRegistry and BpmService.
+	 * This function can be used in the beginning of a test to have a fresh BpmService instance.
+	 */
+	function createNewArchetypeRegistry() internal returns (ArchetypeRegistry) {
+		DefaultArchetypeRegistry newRegistry = new DefaultArchetypeRegistry();
+		ArchetypeRegistryDb registryDb = new ArchetypeRegistryDb();
+		SystemOwned(registryDb).transferSystemOwnership(newRegistry);
+		AbstractDbUpgradeable(newRegistry).acceptDatabase(registryDb);
+		newRegistry.setArtifactsFinder(artifactsRegistry);
+        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_ARCHETYPE(), defaultArchetype, defaultArchetype.getVersion(), true);
+		return newRegistry;
 	}
 
 	/**
@@ -57,8 +76,7 @@ contract ArchetypeRegistryTest {
 	 */
 	function testArchetypeCreation() external returns (string) {
 
-		SystemOwned(registryDb).transferSystemOwnership(registry);
-		AbstractDbUpgradeable(registry).acceptDatabase(registryDb);
+		ArchetypeRegistry registry = createNewArchetypeRegistry();
 
 		uint error;
 		address archetype;
@@ -153,6 +171,8 @@ contract ArchetypeRegistryTest {
 
 	function testArchetypeSuccessor() external returns (string) {
 
+		ArchetypeRegistry registry = createNewArchetypeRegistry();
+
 		address successor;
 
 		droneArchetype = registry.createArchetype(10, false, true, name, falseAddress, description, falseAddress, falseAddress, EMPTY, addrArrayWithDupes);
@@ -171,6 +191,9 @@ contract ArchetypeRegistryTest {
 	}
 
 	function testArchetypePackages() external returns (string) {
+
+		ArchetypeRegistry registry = createNewArchetypeRegistry();
+
 		uint error;
 		bool active;
 	
@@ -219,6 +242,9 @@ contract ArchetypeRegistryTest {
 	}
 
 	function testGoverningArchetypes() external returns (string) {
+
+		ArchetypeRegistry registry = createNewArchetypeRegistry();
+
 		address archetype;
 		string memory employmentArchName = "Employment Archetype";
 

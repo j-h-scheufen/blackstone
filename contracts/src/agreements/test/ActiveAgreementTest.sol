@@ -16,7 +16,6 @@ contract ActiveAgreementTest {
 	string constant EMPTY_STRING = "";
 	bytes32 constant EMPTY = "";
 
-	DefaultArchetype archetype;
 	address falseAddress = 0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa;
 	string dummyPrivateParametersFileRef = "{json grant}";
 	uint maxNumberOfEvents = 5;
@@ -38,6 +37,7 @@ contract ActiveAgreementTest {
 
 		address result;
 		ActiveAgreement agreement;
+		Archetype archetype;
 		signer1 = new DefaultUserAccount(this, address(0));
 		signer2 = new DefaultUserAccount(this, address(0));
 
@@ -46,7 +46,8 @@ contract ActiveAgreementTest {
 		parties.push(address(signer1));
 		parties.push(address(signer2));
 
-		archetype = new DefaultArchetype(10, false, true, "archetype name", falseAddress, "description", falseAddress, falseAddress, emptyArray);
+		archetype = new DefaultArchetype();
+		DefaultArchetype(archetype).initialize(10, false, true, "archetype name", falseAddress, "description", falseAddress, falseAddress, emptyArray);
 		agreement = new DefaultActiveAgreement();
 		DefaultActiveAgreement(agreement).initialize(archetype, agreementName, this, dummyPrivateParametersFileRef, false, parties, emptyArray);
 		agreement.setDataValueAsAddressArray(bogusId, bogusArray);
@@ -75,7 +76,8 @@ contract ActiveAgreementTest {
 	function testActiveAgreementSigning() external returns (string) {
 
 		bool success;
-	  ActiveAgreement agreement;
+	  	ActiveAgreement agreement;
+		Archetype archetype;
 		signer1 = new DefaultUserAccount(this, address(0));
 		signer2 = new DefaultUserAccount(this, address(0));
 
@@ -90,7 +92,8 @@ contract ActiveAgreementTest {
 		parties.push(address(signer1));
 		parties.push(address(org1));
 
-		archetype = new DefaultArchetype(10, false, true, "archetype name", falseAddress, "description", falseAddress, falseAddress, emptyArray);
+		archetype = new DefaultArchetype();
+		DefaultArchetype(archetype).initialize(10, false, true, "archetype name", falseAddress, "description", falseAddress, falseAddress, emptyArray);
 		agreement = new DefaultActiveAgreement();
 		DefaultActiveAgreement(agreement).initialize(archetype, agreementName, this, dummyPrivateParametersFileRef, false, parties, emptyArray);
 
@@ -136,6 +139,7 @@ contract ActiveAgreementTest {
 		bool success;
 		ActiveAgreement agreement1;
 		ActiveAgreement agreement2;
+		Archetype archetype;
 		signer1 = new DefaultUserAccount(this, address(0));
 		signer2 = new DefaultUserAccount(this, address(0));
 
@@ -144,7 +148,8 @@ contract ActiveAgreementTest {
 		parties.push(address(signer1));
 		parties.push(address(signer2));
 
-		archetype = new DefaultArchetype(10, false, true, "archetype name", falseAddress, "description", falseAddress, falseAddress, emptyArray);
+		archetype = new DefaultArchetype();
+		DefaultArchetype(archetype).initialize(10, false, true, "archetype name", falseAddress, "description", falseAddress, falseAddress, emptyArray);
 		agreement1 = new DefaultActiveAgreement();
 		DefaultActiveAgreement(agreement1).initialize(archetype, "Agreement1", this, dummyPrivateParametersFileRef, false, parties, emptyArray);
 		agreement2 = new DefaultActiveAgreement();

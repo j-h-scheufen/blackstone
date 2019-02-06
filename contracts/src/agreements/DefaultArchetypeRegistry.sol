@@ -2,9 +2,14 @@ pragma solidity ^0.4.25;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/ErrorsLib.sol";
+import "commons-base/Versioned.sol";
 import "commons-collections/Mappings.sol";
 import "commons-collections/MappingsLib.sol";
+import "commons-management/ArtifactsFinder.sol";
+import "commons-management/ArtifactsFinderEnabled.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
+import "commons-management/AbstractObjectFactory.sol";
+import "commons-management/ObjectProxy.sol";
 import "bpm-model/ProcessDefinition.sol";
 
 import "agreements/ArchetypeRegistry.sol";
@@ -16,7 +21,7 @@ import "agreements/Agreements.sol";
  * @title DefaultArchetypeRegistry
  * @dev Creates and tracks archetypes
  */
-contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, AbstractDbUpgradeable {
+contract DefaultArchetypeRegistry is Versioned(1,0,0), AbstractObjectFactory, ArtifactsFinderEnabled, AbstractDbUpgradeable, ArchetypeRegistry {
 	
 	// SQLSOL metadata
 	string constant TABLE_ARCHETYPES = "ARCHETYPES";
@@ -29,6 +34,14 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 
 	// Temporary mapping to detect duplicates in governing archetypes
 	mapping(address => uint) duplicateMap;
+
+	/**
+	 * @dev Creates a new DefaultArchetypeRegistry
+	 */
+	constructor () public {
+        // support for Versioned needs to be added since Versioned does not come with ERC165 inheritance due to being in the lowest bundle commons-base
+        addInterfaceSupport(ERC165_ID_Versioned);
+	}
 
 	/**
 	 * @dev Creates a new archetype
@@ -56,41 +69,17 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), ArchetypeRegistry, Abstra
 		address _executionProcess, 
 		bytes32 _packageId, 
 		address[] _governingArchetypes) 
-		external returns (address archetype)
+		external
+		returns (address archetype)
 	{
 		ErrorsLib.revertIf(bytes(_name).length == 0 || _author == 0x0,
 			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultArchetypeRegistry.createArchetype", "Archetype name and author address must not be empty");
 		verifyNoDuplicates(_governingArchetypes);
-		archetype = new DefaultArchetype(_price, _isPrivate, _active, _name, _author, _description,  _formationProcess, _executionProcess, _governingArchetypes);
-		registerArchetype(archetype, _name);
-		for (uint i = 0; i < _governingArchetypes.length; i++) {
-			emit LogGoverningArchetypeUpdate(
-				EVENT_ID_GOVERNING_ARCHETYPES, 
-				archetype, 
-				_governingArchetypes[i],
-				Archetype(_governingArchetypes[i]).getName()
-			);
-		}
+		archetype = new ObjectProxy(artifactsFinder, OBJECT_CLASS_ARCHETYPE);
+		DefaultArchetype(archetype).initialize(_price, _isPrivate, _active, _name, _author, _description,  _formationProcess, _executionProcess, _governingArchetypes);
+		// since this is a newly created archetype address, we can safely ignore the return value of the DB.addArchetype() function
+		ArchetypeRegistryDb(database).addArchetype(archetype, _name);
 		if (_packageId != "") addArchetypeToPackage(_packageId, archetype);
-	}
-
-	function registerArchetype(address _archetype, string _name) internal {
-		uint error = ArchetypeRegistryDb(database).addArchetype(_archetype, _name);
-		ErrorsLib.revertIf(error != BaseErrors.NO_ERROR(), 
-			ErrorsLib.RESOURCE_ALREADY_EXISTS(), "DefaultArchetypeRegistry.createArchetype", "Archetype already exists");
-		emit LogArchetypeCreation(
-			EVENT_ID_ARCHETYPES,
-			_archetype,
-			Archetype(_archetype).getName(),
-			Archetype(_archetype).getDescription(),
-			Archetype(_archetype).getPrice(),
-			Archetype(_archetype).getAuthor(),
-			Archetype(_archetype).isActive(),
-			Archetype(_archetype).isPrivate(),
-			Archetype(_archetype).getSuccessor(),
-			Archetype(_archetype).getFormationProcessDefinition(),
-			Archetype(_archetype).getExecutionProcessDefinition()
-		);
 	}
 
 	/**

@@ -11,20 +11,6 @@ import "agreements/Agreements.sol";
  */
 contract ArchetypeRegistry is Upgradeable {
 
-	event LogArchetypeCreation(
-		bytes32 indexed eventId,
-		address archetypeAddress,
-		string name,
-		string description,
-		uint32 price,
-		address author,
-		bool active,
-		bool isPrivate,
-		address successor,
-		address formationProcessDefinition,
-		address executionProcessDefinition
-	);
-
 	event LogArchetypeSuccessorUpdate(
 		bytes32 indexed eventId,
 		address archetypeAddress,
@@ -88,12 +74,7 @@ contract ArchetypeRegistry is Upgradeable {
 		bytes32 region
 	);
 
-	event LogGoverningArchetypeUpdate(
-		bytes32 indexed eventId,
-		address archetypeAddress,
-		address governingArchetypeAddress,
-		string governingArchetypeName
-	);
+    string public constant OBJECT_CLASS_ARCHETYPE = "agreements.Archetype";
 
 	bytes32 public constant EVENT_ID_ARCHETYPES = "AN://archetypes";
 	bytes32 public constant EVENT_ID_ARCHETYPE_PACKAGES = "AN://archetype-packages";
@@ -101,7 +82,6 @@ contract ArchetypeRegistry is Upgradeable {
 	bytes32 public constant EVENT_ID_ARCHETYPE_PARAMETERS = "AN://archetype/parameters";
 	bytes32 public constant EVENT_ID_ARCHETYPE_DOCUMENTS = "AN://archetype/documents";
 	bytes32 public constant EVENT_ID_ARCHETYPE_JURISDICTIONS = "AN://archetype/jurisdictions";
-	bytes32 public constant EVENT_ID_GOVERNING_ARCHETYPES = "AN://governing-archetypes";
 
 	/**
 	 * @dev Creates a new archetype

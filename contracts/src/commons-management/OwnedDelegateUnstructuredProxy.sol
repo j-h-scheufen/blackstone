@@ -55,7 +55,7 @@ contract OwnedDelegateUnstructuredProxy is AbstractDelegateProxy {
      * REVERTS if:
      * - the msg.sender is not the owner
      */
-    function setDelegate(address _delegateAddress) {
+    function setDelegate(address _delegateAddress) external {
         ErrorsLib.revertIf(msg.sender != getOwner(),
             ErrorsLib.UNAUTHORIZED(), "OwnedDelegateUnstructuredProxy.setDelegate", "The msg.sender is not the owner");
         bytes32 delegatePos = storagePositionDelegateTarget;
