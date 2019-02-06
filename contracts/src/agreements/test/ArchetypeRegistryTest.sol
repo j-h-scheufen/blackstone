@@ -200,7 +200,7 @@ contract ArchetypeRegistryTest {
 		droneArchetype = registry.createArchetype(10, false, true, name, falseAddress, description, falseAddress, falseAddress, EMPTY, addrArrayWithDupes);
 		if (droneArchetype == 0x0) return "droneArchetype address empty after creation";
 
-		if (address(registry).call(bytes4(keccak256(abi.encodePacked("addArchetypeToPackage(bytes32,address)"))), fakePackageId, droneArchetype)) {
+		if (address(registry).call(abi.encodeWithSignature("addArchetypeToPackage(bytes32,address)"), fakePackageId, droneArchetype)) {
 			return "Expected RESOURCE_NOT_FOUND for non-existent package id";
 		}
 
@@ -219,8 +219,9 @@ contract ArchetypeRegistryTest {
 		( , , , , active) = registry.getArchetypePackageData(dronePackageId);
 		if (!active) return "dronePackage should be active";
 
-		(error, dronePackageId) = registry.createArchetypePackage(dronePackageName, dronePackageDesc, packageAuthor, true, true);
-		if (error != BaseErrors.RESOURCE_ALREADY_EXISTS()) return "Expected failure when creating package with duplicate name/author";
+		if (address(registry).call(abi.encodeWithSignature("createArchetypePackage(string,string,address,bool,bool)"), dronePackageName, dronePackageDesc, packageAuthor, true, true)) {
+			return "Creating a package with duplicate name/author should revert";
+		}
 		
 		(error, buildingPackageId) = registry.createArchetypePackage(buildingPackageName, buildingPackageDesc, packageAuthor, false, true);
 		if (error != BaseErrors.NO_ERROR()) return "It should create a new package";

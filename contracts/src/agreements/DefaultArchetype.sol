@@ -39,12 +39,10 @@ contract DefaultArchetype is Versioned(1,0,0), AbstractDelegateTarget, AbstractE
 	bool active;
 	bool privateFlag;
 	address successor;
-
 	address formationProcessDefinition;
 	address executionProcessDefinition;
 
 	Mappings.Bytes32UintMap parameterTypes;
-	bytes32[] parameters;
 
 	mapping(string => Documents.DocumentReference) documents;
 	string[] documentNames;
@@ -123,6 +121,12 @@ contract DefaultArchetype is Versioned(1,0,0), AbstractDelegateTarget, AbstractE
 		documentNames.push(_name);
 		documents[_name].reference = _fileReference;
 		documents[_name].exists = true;
+		emit LogArchetypeDocumentUpdate(
+			EVENT_ID_ARCHETYPE_DOCUMENTS,
+			address(this),
+			_name,
+			_fileReference
+		);
 		error = BaseErrors.NO_ERROR();
 	}
 
@@ -137,26 +141,34 @@ contract DefaultArchetype is Versioned(1,0,0), AbstractDelegateTarget, AbstractE
 	function addParameter(DataTypes.ParameterType _parameterType, bytes32 _parameterName) external returns (uint error, uint position) {
 		if (_parameterName == "")
 			return (BaseErrors.NULL_PARAM_NOT_ALLOWED(), 0);
-		if (parameters.contains(_parameterName))
+		if (parameterTypes.exists(_parameterName))
 			return (BaseErrors.RESOURCE_ALREADY_EXISTS(), 0);
 
-		parameters.push(_parameterName);
 		parameterTypes.insert(_parameterName, uint8(_parameterType));
-		return (BaseErrors.NO_ERROR(), parameterTypes.rows[_parameterName].keyIdx);
+		position = parameterTypes.rows[_parameterName].keyIdx;
+		emit LogArchetypeParameterUpdate(
+			EVENT_ID_ARCHETYPE_PARAMETERS,
+			address(this),
+			_parameterName,
+			uint8(_parameterType),
+			position
+		);
+		return (BaseErrors.NO_ERROR(), position);
 	}
 
 	/**
 	 * @dev Adds the given jurisdiction in the form of a country code and region identifier to this archetype.
 	 * References codes defined via IsoCountries interface implementations.
 	 * If the region is empty, the jurisdiction will only reference the country and the regions will be emptied, i.e. any prior regions for that country will be removed.
-	 * @param _country a ISO- code, e.g. 'US'
+	 * REVERTS if:
+	 * - the provided country is empty
+	 * @param _country a ISO-code, e.g. 'US'
 	 * @param _region a region identifier from a IsoCountries contract
-	 * @return BaseErrors.NO_ERROR() if successful, and key of jurisdiction just added
-	 * 	       BaseErrors.INVALID_PARAM_VALUE() if _country is not in the DataTypes enum,
+	 * @return BaseErrors.NO_ERROR() if successful, and key of jurisdiction was added
 	 */
 	function addJurisdiction(bytes2 _country, bytes32 _region) external returns (uint error, bytes32 key) {
-		if (_country == "")
-			return (BaseErrors.NULL_PARAM_NOT_ALLOWED(), "");
+		ErrorsLib.revertIf(_country == "",
+			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultArchetype.addJurisdiction", "Country must not be empty");
 
 		if (_region == "") {
 			// for a jurisdiction represented by a country ONLY, we need to use an artificial bytes32 key
@@ -177,6 +189,13 @@ contract DefaultArchetype is Versioned(1,0,0), AbstractDelegateTarget, AbstractE
 		}
 		jurisdictions[key].country = _country;
 		jurisdictions[key].region = _region;
+
+		emit LogArchetypeJurisdictionUpdate(
+			EVENT_ID_ARCHETYPE_JURISDICTIONS,
+			address(this),
+			_country,
+			_region
+		);
 
 		return (BaseErrors.NO_ERROR(), key);
 	}
@@ -233,6 +252,7 @@ contract DefaultArchetype is Versioned(1,0,0), AbstractDelegateTarget, AbstractE
 	 */
 	function setPrice(uint32 _price) external {
 		price = _price;
+		emit LogArchetypePriceUpdate(EVENT_ID_ARCHETYPES, address(this), _price);
 	}
 
 	/**
@@ -263,21 +283,18 @@ contract DefaultArchetype is Versioned(1,0,0), AbstractDelegateTarget, AbstractE
 	 * @return size number of parameters
 	 */
 	function getNumberOfParameters() external view returns (uint size) {
-		return parameters.length;
+		return parameterTypes.keys.length;
 	}
 
 	/**
 	 * @dev Gets parameter at index
 	 * @param _index index
-	 * @return error error TBD
 	 * @return parameter parameter
 	 */
-	function getParameterAtIndex(uint _index) external view returns (uint error, bytes32 parameter) {
-		error = BaseErrors.NO_ERROR();
-		if (_index >= parameters.length)
-			error = BaseErrors.INDEX_OUT_OF_BOUNDS();
-		else
-			parameter = parameters[_index];
+	function getParameterAtIndex(uint _index) external view returns (bytes32 parameter) {
+		ErrorsLib.revertIf(parameterTypes.keys.length < _index,
+			ErrorsLib.INVALID_INPUT(), "DefaultArchetype.getParameterAtIndex", "The specified index is out of bounds");
+		parameter = parameterTypes.keys[_index];
 	}
 
 	/**
@@ -424,6 +441,7 @@ contract DefaultArchetype is Versioned(1,0,0), AbstractDelegateTarget, AbstractE
 		ErrorsLib.revertIf(Archetype(_successor).getSuccessor() == address(this), ErrorsLib.INVALID_INPUT(), "DefaultArchetype.setSuccessor", "Successor circular dependency not allowed");
 		active = false;
 		successor = _successor;
+		emit LogArchetypeSuccessorUpdate(EVENT_ID_ARCHETYPES, address(this), _successor);
 	}
 
 	/**
@@ -440,6 +458,7 @@ contract DefaultArchetype is Versioned(1,0,0), AbstractDelegateTarget, AbstractE
 	function activate() external {
 		ErrorsLib.revertIf(successor != 0x0, ErrorsLib.INVALID_STATE(), "DefaultArchetype.activate", "Archetype with a successor cannot be activated");
 		active = true;
+		emit LogArchetypeActivation(EVENT_ID_ARCHETYPES, address(this), true);
 	}
 
 	/**
@@ -447,5 +466,6 @@ contract DefaultArchetype is Versioned(1,0,0), AbstractDelegateTarget, AbstractE
 	 */
 	function deactivate() external {
 		active = false;
+		emit LogArchetypeActivation(EVENT_ID_ARCHETYPES, address(this), false);
 	}
 }

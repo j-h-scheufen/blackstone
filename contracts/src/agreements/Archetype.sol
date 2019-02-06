@@ -31,7 +31,50 @@ contract Archetype is Named, ERC165 {
 		string governingArchetypeName
 	);
 
+	event LogArchetypeSuccessorUpdate(
+		bytes32 indexed eventId,
+		address archetypeAddress,
+		address successor
+	);
+
+	event LogArchetypePriceUpdate(
+		bytes32 indexed eventId,
+		address archetypeAddress,
+		uint32 price
+	);
+
+	event LogArchetypeActivation(
+		bytes32 indexed eventId,
+		address archetypeAddress,
+		bool active
+	);
+
+	event LogArchetypeParameterUpdate(
+		bytes32 indexed eventId,
+		address archetypeAddress,
+		bytes32 parameterName,
+		uint8 parameterType,
+		uint position
+	);
+
+	event LogArchetypeDocumentUpdate(
+		bytes32 indexed eventId,
+		address archetypeAddress,
+		string documentKey,
+		string documentReference
+	);
+
+	event LogArchetypeJurisdictionUpdate(
+		bytes32 indexed eventId,
+		address archetypeAddress,
+		bytes2 country,
+		bytes32 region
+	);
+
 	bytes32 public constant EVENT_ID_ARCHETYPES = "AN://archetypes";
+	bytes32 public constant EVENT_ID_ARCHETYPE_PARAMETERS = "AN://archetypes/parameters";
+	bytes32 public constant EVENT_ID_ARCHETYPE_DOCUMENTS = "AN://archetypes/documents";
+	bytes32 public constant EVENT_ID_ARCHETYPE_JURISDICTIONS = "AN://archetypes/jurisdictions";
 	bytes32 public constant EVENT_ID_GOVERNING_ARCHETYPES = "AN://governing-archetypes";
 
 	/**
@@ -102,10 +145,9 @@ contract Archetype is Named, ERC165 {
 	/**
 	 * @dev Gets parameter at index
 	 * @param _index index
-	 * @return error error TBD
 	 * @return customField parameter
 	 */
-	function getParameterAtIndex(uint _index) external view returns (uint error, bytes32 parameter);
+	function getParameterAtIndex(uint _index) external view returns (bytes32 parameter);
 
 	/**
 	 * @dev Gets parameter data type

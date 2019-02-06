@@ -314,7 +314,7 @@
   },
   {
     "TableName": "ARCHETYPE_PARAMETERS",
-    "Filter": "Log1Text = 'AN://archetype/parameters'",
+    "Filter": "Log1Text = 'AN://archetypes/parameters'",
     "Columns": {
       "archetypeAddress": {
         "name": "archetype_address",
@@ -339,7 +339,7 @@
   },
   {
     "TableName": "ARCHETYPE_DOCUMENTS",
-    "Filter": "Log1Text = 'AN://archetype/documents'",
+    "Filter": "Log1Text = 'AN://archetypes/documents'",
     "Columns": {
       "archetypeAddress": {
         "name": "archetype_address",
@@ -359,7 +359,7 @@
   },
   {
     "TableName": "ARCHETYPE_JURISDICTIONS",
-    "Filter": "Log1Text = 'AN://archetype/jurisdictions'",
+    "Filter": "Log1Text = 'AN://archetypes/jurisdictions'",
     "Columns": {
       "archetypeAddress": {
         "name": "archetype_address",

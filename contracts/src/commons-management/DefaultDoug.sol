@@ -47,7 +47,7 @@ contract DefaultDoug is StorageDefProxied, StorageDefOwner, StorageDefRegistry, 
     function deploy(string _id, address _address) external pre_onlyByOwner returns (bool success) {
 		uint8[3] memory version = ERC165Utils.implementsInterface(_address, getERC165IdVersioned()) ?
 			Versioned(_address).getVersion() : [0,0,0];
-		(address existingArtifact, uint8[3] memory existingVersion) = ArtifactsRegistry(registry).getArtifact(_id);
+		(address existingArtifact, ) = ArtifactsRegistry(registry).getArtifact(_id);
 
 		if (ERC165Utils.implementsInterface(_address, getERC165IdUpgradeable())) {
 			ErrorsLib.revertIf(UpgradeOwned(_address).getUpgradeOwner() != address(this),

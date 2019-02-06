@@ -11,24 +11,6 @@ import "agreements/Agreements.sol";
  */
 contract ArchetypeRegistry is Upgradeable {
 
-	event LogArchetypeSuccessorUpdate(
-		bytes32 indexed eventId,
-		address archetypeAddress,
-		address successor
-	);
-
-	event LogArchetypePriceUpdate(
-		bytes32 indexed eventId,
-		address archetypeAddress,
-		uint32 price
-	);
-
-	event LogArchetypeActive(
-		bytes32 indexed eventId,
-		address archetypeAddress,
-		bool active
-	);
-
 	event LogArchetypePackageCreation(
 		bytes32 indexed eventId,
 		bytes32 packageId,
@@ -39,7 +21,7 @@ contract ArchetypeRegistry is Upgradeable {
 		bool active
 	);
 
-	event LogArchetypePackageActive(
+	event LogArchetypePackageActivation(
 		bytes32 indexed eventId,
 		bytes32 packageId,
 		bool active
@@ -52,36 +34,11 @@ contract ArchetypeRegistry is Upgradeable {
 		string archetypeName
 	);
 
-	event LogArchetypeParameterUpdate(
-		bytes32 indexed eventId,
-		address archetypeAddress,
-		bytes32 parameterName,
-		uint8 parameterType,
-		uint position		
-	);
-
-	event LogArchetypeDocumentUpdate(
-		bytes32 indexed eventId,
-		address archetypeAddress,
-		string documentKey,
-		string documentReference
-	);
-
-	event LogArchetypeJurisdictionUpdate(
-		bytes32 indexed eventId,
-		address archetypeAddress,
-		bytes2 country,
-		bytes32 region
-	);
-
     string public constant OBJECT_CLASS_ARCHETYPE = "agreements.Archetype";
 
 	bytes32 public constant EVENT_ID_ARCHETYPES = "AN://archetypes";
 	bytes32 public constant EVENT_ID_ARCHETYPE_PACKAGES = "AN://archetype-packages";
 	bytes32 public constant EVENT_ID_ARCHETYPE_PACKAGE_MAP = "AN://archetype-to-package";
-	bytes32 public constant EVENT_ID_ARCHETYPE_PARAMETERS = "AN://archetype/parameters";
-	bytes32 public constant EVENT_ID_ARCHETYPE_DOCUMENTS = "AN://archetype/documents";
-	bytes32 public constant EVENT_ID_ARCHETYPE_JURISDICTIONS = "AN://archetype/jurisdictions";
 
 	/**
 	 * @dev Creates a new archetype
