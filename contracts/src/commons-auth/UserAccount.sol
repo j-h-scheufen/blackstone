@@ -1,12 +1,13 @@
 pragma solidity ^0.4.25;
 
 import "commons-base/Owned.sol";
+import "commons-standards/ERC165.sol";
 
 /**
  * @title UserAccount Interface
  * @dev API for interacting with a user account
  */
-contract UserAccount is Owned {
+contract UserAccount is ERC165, Owned {
 
    event LogUserCreation(
         bytes32 indexed eventId,
@@ -14,10 +15,15 @@ contract UserAccount is Owned {
         address owner
     );
 
-	/**
-	 * @dev Event IDs
-	 */
     bytes32 public constant EVENT_ID_USER_ACCOUNTS = "AN://user-accounts";
+
+	/**
+	 * @dev Initializes this DefaultOrganization with the specified owner and/or ecosystem . This function replaces the
+	 * contract constructor, so it can be used as the delegate target for an ObjectProxy.
+     * @param _owner public external address of individual owner
+     * @param _ecosystem address of an ecosystem
+     */
+    function initialize(address _owner, address _ecosystem) external;
 
     /**
      * @dev Forwards a call to the specified target using the given bytes message.

@@ -65,7 +65,16 @@ contract DefaultArchetype is Versioned(1,0,0), AbstractDelegateTarget, AbstractE
 	 * @param _executionProcess the address of a ProcessDefinition that orchestrates the agreement execution
 	 * @param _governingArchetypes array of governing archetype addresses (optional)
 	 */
-	function initialize(uint32 _price, bool _isPrivate, bool _active, string _name, address _author, string _description, address _formationProcess, address _executionProcess, address[] _governingArchetypes)
+	function initialize(
+		uint32 _price,
+		bool _isPrivate,
+		bool _active,
+		string _name,
+		address _author,
+		string _description,
+		address _formationProcess,
+		address _executionProcess,
+		address[] _governingArchetypes)
 		external
 		pre_post_initialize
 	{

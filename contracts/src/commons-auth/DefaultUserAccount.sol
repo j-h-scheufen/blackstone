@@ -1,8 +1,11 @@
 pragma solidity ^0.4.25;
 
 import "commons-base/ErrorsLib.sol";
+import "commons-base/Versioned.sol";
 import "commons-collections/Mappings.sol";
 import "commons-collections/MappingsLib.sol";
+import "commons-standards/AbstractERC165.sol";
+import "commons-management/AbstractDelegateTarget.sol";
 
 import "commons-auth/UserAccount.sol";
 import "commons-auth/Ecosystem.sol";
@@ -12,7 +15,7 @@ import "commons-auth/Governance.sol";
  * @title DefaultUserAccount
  * @dev The default implementation of a UserAccount
  */
-contract DefaultUserAccount is UserAccount {
+contract DefaultUserAccount is Versioned(1,0,0), AbstractERC165, AbstractDelegateTarget, UserAccount {
 
     using MappingsLib for Mappings.AddressBoolMap;
 
@@ -37,15 +40,16 @@ contract DefaultUserAccount is UserAccount {
         _;
     }
 
-    /**
-     * @dev Creates a new UserAccount belonging to the specified owner and/or ecosystem.
+	/**
+	 * @dev Initializes this DefaultOrganization with the specified owner and/or ecosystem . This function replaces the
+	 * contract constructor, so it can be used as the delegate target for an ObjectProxy.
      * One or both owner/ecosystem are required to be set to guarantee another entity has control over this UserAccount
      * REVERTS if:
      * - both owner and ecosystem are empty.
      * @param _owner public external address of individual owner (optional)
      * @param _ecosystem address of an ecosystem (optional)
      */
-    constructor(address _owner, address _ecosystem) public {
+    function initialize(address _owner, address _ecosystem) external {
         ErrorsLib.revertIf(_owner == address(0) && _ecosystem == address(0),
             ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultUserAccount.constructor", "One of owner or ecosystem must be provided");
         owner = _owner;
@@ -53,6 +57,8 @@ contract DefaultUserAccount is UserAccount {
             account.ecosystems.insertOrUpdate(_ecosystem, true);
         }
         account.exists = true;
+        // support for Versioned needs to be added since Versioned does not come with ERC165 inheritance due to being in the lowest bundle commons-base
+		addInterfaceSupport(ERC165_ID_Versioned);
         emit LogUserCreation(
             EVENT_ID_USER_ACCOUNTS,
             address(this),

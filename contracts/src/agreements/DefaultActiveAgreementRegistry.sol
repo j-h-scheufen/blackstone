@@ -93,7 +93,7 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractObjectFacto
 	{
 		validateAgreementRequirements(_archetype, _name, _governingAgreements);
         activeAgreement = new ObjectProxy(artifactsFinder, OBJECT_CLASS_AGREEMENT);
-        DefaultActiveAgreement(activeAgreement).initialize(_archetype, _name, _creator, _privateParametersFileReference, _isPrivate, _parties, _governingAgreements);
+        ActiveAgreement(activeAgreement).initialize(_archetype, _name, _creator, _privateParametersFileReference, _isPrivate, _parties, _governingAgreements);
 		register(activeAgreement, _name);
 		if (_collectionId != "") {
 			addAgreementToCollection(_collectionId, activeAgreement);

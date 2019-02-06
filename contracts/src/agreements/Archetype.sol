@@ -78,6 +78,30 @@ contract Archetype is Named, ERC165 {
 	bytes32 public constant EVENT_ID_GOVERNING_ARCHETYPES = "AN://governing-archetypes";
 
 	/**
+	 * @dev Initializes this ActiveAgreement with the provided parameters. This function replaces the
+	 * contract constructor, so it can be used as the delegate target for an ObjectProxy.
+	 * @param _name name
+	 * @param _author author
+	 * @param _description description
+	 * @param _isPrivate determines if this archetype's documents are encrypted
+	 * @param _active determines if this archetype is active
+	 * @param _formationProcess the address of a ProcessDefinition that orchestrates the agreement formation
+	 * @param _executionProcess the address of a ProcessDefinition that orchestrates the agreement execution
+	 * @param _governingArchetypes array of governing archetype addresses
+	 */
+	function initialize(
+		uint32 _price,
+		bool _isPrivate,
+		bool _active,
+		string _name,
+		address _author,
+		string _description,
+		address _formationProcess,
+		address _executionProcess,
+		address[] _governingArchetypes)
+		external;
+
+	/**
 	 * @dev Adds the document specified by the external reference to the archetype under the given name
 	 * @param _name name
 	 * @param _fileReference the external reference to the document

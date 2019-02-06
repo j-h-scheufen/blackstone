@@ -82,7 +82,27 @@ contract ActiveAgreement is Named, ERC165, DataStorage, AddressScopes, Signable,
 	// Internal EventListener event
 	bytes32 public constant EVENT_ID_STATE_CHANGED = "AGREEMENT_STATE_CHANGED";
 
-
+	/**
+	 * @dev Initializes this ActiveAgreement with the provided parameters. This function replaces the
+	 * contract constructor, so it can be used as the delegate target for an ObjectProxy.
+	 * @param _archetype archetype address
+	 * @param _name name
+	 * @param _creator the account that created this agreement
+	 * @param _privateParametersFileReference the file reference to the private parameters
+	 * @param _isPrivate if agreement is private
+	 * @param _parties the signing parties to the agreement
+	 * @param _governingAgreements array of agreement addresses which govern this agreement
+	 */
+	function initialize(
+		address _archetype, 
+		string _name, 
+		address _creator, 
+		string _privateParametersFileReference, 
+		bool _isPrivate, 
+		address[] _parties, 
+		address[] _governingAgreements)
+		external;
+		
 	/**
 	 * @dev Returns the number governing agreements for this agreement
 	 * @return the number of governing agreements

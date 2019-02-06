@@ -1268,8 +1268,10 @@ contract BpmServiceTest {
 
 		//TODO missing test coverage of the authorizePerformer function / completeActivity for users in different department settings
 
-		UserAccount user1 = new DefaultUserAccount(this, 0x0);
-		UserAccount organizationUser = new DefaultUserAccount(this, 0x0);
+		UserAccount user1 = new DefaultUserAccount();
+		user1.initialize(this, 0x0);
+		UserAccount organizationUser = new DefaultUserAccount();
+		organizationUser.initialize(this, 0x0);
 		DefaultOrganization org1 = new DefaultOrganization();
 		org1.initialize(emptyAddressArray, EMPTY_STRING);
 		if (!org1.addUserToDepartment(organizationUser, EMPTY)) return "Unable to add user account to organization default department";
@@ -1404,7 +1406,8 @@ contract BpmServiceTest {
 
 		TestBpmService service = createNewTestBpmService();
 
-		UserAccount user1 = new DefaultUserAccount(this, 0x0);
+		UserAccount user1 = new DefaultUserAccount();
+		user1.initialize(this, 0x0);
 	
 		(error, addr) = processModelRepository.createProcessModel("testModelAbort", "Abort Test Model", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == 0x0) return "Unable to create a ProcessModel";
@@ -1479,8 +1482,10 @@ contract BpmServiceTest {
 
 		bytes32 bytes32Value;
 
-		UserAccount user1 = new DefaultUserAccount(this, 0x0);
-		UserAccount user2 = new DefaultUserAccount(this, 0x0);
+		UserAccount user1 = new DefaultUserAccount();
+		user1.initialize(this, 0x0);
+		UserAccount user2 = new DefaultUserAccount();
+		user2.initialize(this, 0x0);
 
 		TestBpmService service = createNewTestBpmService();
 

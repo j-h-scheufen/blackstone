@@ -67,7 +67,7 @@ contract DefaultArchetypeRegistry is Versioned(1,0,0), AbstractObjectFactory, Ar
 			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultArchetypeRegistry.createArchetype", "Archetype name and author address must not be empty");
 		verifyNoDuplicates(_governingArchetypes);
 		archetype = new ObjectProxy(artifactsFinder, OBJECT_CLASS_ARCHETYPE);
-		DefaultArchetype(archetype).initialize(_price, _isPrivate, _active, _name, _author, _description,  _formationProcess, _executionProcess, _governingArchetypes);
+		Archetype(archetype).initialize(_price, _isPrivate, _active, _name, _author, _description,  _formationProcess, _executionProcess, _governingArchetypes);
 		// since this is a newly created archetype address, we can safely ignore the return value of the DB.addArchetype() function
 		ArchetypeRegistryDb(database).addArchetype(archetype, _name);
 		if (_packageId != "") addArchetypeToPackage(_packageId, archetype);

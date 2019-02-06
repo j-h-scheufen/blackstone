@@ -38,7 +38,8 @@ contract DefaultParticipantsManager is Versioned(1,0,0), AbstractObjectFactory, 
      * @return the address of the created UserAccount
      */
     function createUserAccount(bytes32 _id, address _owner, address _ecosystem) external returns (address userAccount) {
-        userAccount = new DefaultUserAccount(_owner, _ecosystem);
+        userAccount = new ObjectProxy(artifactsFinder, OBJECT_CLASS_USER_ACCOUNT);
+        UserAccount(userAccount).initialize(_owner, _ecosystem);
         uint error = ParticipantsManagerDb(database).addUserAccount(userAccount);
         if (error == BaseErrors.NO_ERROR()) {
             if (_id != "" && _ecosystem != 0x0) {

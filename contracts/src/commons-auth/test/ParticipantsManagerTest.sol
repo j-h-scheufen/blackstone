@@ -24,7 +24,8 @@ contract ParticipantsManagerTest {
     bytes32 id;
     
     ArtifactsRegistry artifacts = new DefaultArtifactsRegistry();
-    DefaultOrganization defaultOrganization = new DefaultOrganization();
+    DefaultOrganization defaultOrganizationImpl = new DefaultOrganization();
+    DefaultUserAccount defaultUserAccountImpl = new DefaultUserAccount();
     ParticipantsManager participantsManager;
     Ecosystem myEcosystem;
 
@@ -41,7 +42,8 @@ contract ParticipantsManagerTest {
     function createNewParticipantsManager() internal returns (ParticipantsManager manager) {
 		manager =  new DefaultParticipantsManager();
         ArtifactsFinderEnabled(manager).setArtifactsFinder(artifacts);
-        artifacts.registerArtifact(manager.OBJECT_CLASS_ORGANIZATION(), defaultOrganization, defaultOrganization.getVersion(), true);
+        artifacts.registerArtifact(manager.OBJECT_CLASS_ORGANIZATION(), defaultOrganizationImpl, defaultOrganizationImpl.getVersion(), true);
+        artifacts.registerArtifact(manager.OBJECT_CLASS_USER_ACCOUNT(), defaultUserAccountImpl, defaultUserAccountImpl.getVersion(), true);
 		ParticipantsManagerDb database = new ParticipantsManagerDb();
 		SystemOwned(database).transferSystemOwnership(manager);
 		AbstractDbUpgradeable(manager).acceptDatabase(database);
@@ -58,7 +60,8 @@ contract ParticipantsManagerTest {
         myEcosystem = new DefaultEcosystem();
         myEcosystem.addExternalAddress(address(ecosystemCaller));
 
-        TestUserAccount user1 = new TestUserAccount(address(ownerCaller), address(myEcosystem));
+        TestUserAccount user1 = new TestUserAccount();
+        user1.initialize(address(ownerCaller), address(myEcosystem));
         myEcosystem.addUserAccount("user1", user1);
 
         // first test failure
@@ -188,8 +191,10 @@ contract ParticipantsManagerTest {
         (error, addr) = participantsManager.createOrganization(emptyAdmins, "Unassigned");
         Organization org1 = Organization(addr);
 
-        UserAccount user1 = new DefaultUserAccount(participantsManager, 0x0);
-        UserAccount user2 = new DefaultUserAccount(participantsManager, 0x0);
+        UserAccount user1 = new DefaultUserAccount();
+        user1.initialize(participantsManager, 0x0);
+        UserAccount user2 = new DefaultUserAccount();
+        user2.initialize(participantsManager, 0x0);
 		
         // Test special handling of the default department in the organization
         if (!org1.departmentExists(org1.DEFAULT_DEPARTMENT_ID()))
@@ -276,9 +281,12 @@ contract ParticipantsManagerTest {
         org.initialize(emptyAdmins, EMPTY_STRING);
         bytes32 dep1Id = "department";
 
-        UserAccount user1 = new DefaultUserAccount(participantsManager, 0x0);
-        UserAccount user2 = new DefaultUserAccount(participantsManager, 0x0);
-        UserAccount user3 = new DefaultUserAccount(participantsManager, 0x0);
+        UserAccount user1 = new DefaultUserAccount();
+        user1.initialize(participantsManager, 0x0);
+        UserAccount user2 = new DefaultUserAccount();
+        user2.initialize(participantsManager, 0x0);
+        UserAccount user3 = new DefaultUserAccount();
+        user3.initialize(participantsManager, 0x0);
 
         // User1 -> default department
         // User2 -> Department 1
@@ -306,11 +314,6 @@ contract ParticipantsManagerTest {
 }
 
 contract TestUserAccount is DefaultUserAccount {
-
-    constructor(address _owner, address _ecosystem) public
-        DefaultUserAccount(_owner, _ecosystem) {
-        
-    }
 
     function authorizedCall()
         external view

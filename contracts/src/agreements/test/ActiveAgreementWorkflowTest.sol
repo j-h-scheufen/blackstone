@@ -160,7 +160,7 @@ contract ActiveAgreementWorkflowTest {
 
 		// make an agreement with fields of type address and add role qualifiers. Note: archetype is not used, so setting address to 'this'
 		ActiveAgreement agreement = new DefaultActiveAgreement();
-		DefaultActiveAgreement(agreement).initialize(this, "RoleQualifierAgreement", this, "", false, parties, governingAgreements);
+		agreement.initialize(this, "RoleQualifierAgreement", this, "", false, parties, governingAgreements);
 		agreement.setDataValueAsBytes32("AgreementRoleField43", "SellerRole");
 		// Adding two scopes to the agreement:
 		// 1. Buyer context: a fixed scope for the msg.sender
@@ -310,10 +310,14 @@ contract ActiveAgreementWorkflowTest {
 		// ORGS/USERS
 		//
 		// create additional users via constructor
-		userAccount1 = new DefaultUserAccount(this, address(0));
-		userAccount2 = new DefaultUserAccount(this, address(0));
-		userAccount3 = new DefaultUserAccount(this, address(0));
-		nonPartyAccount = new DefaultUserAccount(this, address(0));
+		userAccount1 = new DefaultUserAccount();
+		userAccount1.initialize(this, address(0));
+		userAccount2 = new DefaultUserAccount();
+		userAccount2.initialize(this, address(0));
+		userAccount3 = new DefaultUserAccount();
+		userAccount3.initialize(this, address(0));
+		nonPartyAccount = new DefaultUserAccount();
+		nonPartyAccount.initialize(this, address(0));
 
 		org1 = new DefaultOrganization();
 		org1.initialize(approvers, EMPTY_STRING);
@@ -459,8 +463,10 @@ contract ActiveAgreementWorkflowTest {
 	
 		agreementRegistry = createNewAgreementRegistry();
 
-		userAccount1 = new DefaultUserAccount(this, address(0));
-		userAccount2 = new DefaultUserAccount(this, address(0));
+		userAccount1 = new DefaultUserAccount();
+		userAccount1.initialize(this, address(0));
+		userAccount2 = new DefaultUserAccount();
+		userAccount2.initialize(this, address(0));
 		delete parties;
 		parties.push(userAccount1);
 		parties.push(userAccount2);
