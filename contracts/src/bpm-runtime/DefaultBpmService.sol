@@ -6,6 +6,7 @@ import "commons-auth/Ecosystem.sol";
 import "commons-base/BaseErrors.sol";
 import "commons-collections/Mappings.sol";
 import "commons-collections/MappingsLib.sol";
+import "commons-management/AbstractObjectFactory.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
 import "commons-management/ArtifactsFinderEnabled.sol";
 import "bpm-model/ProcessModelRepository.sol";
@@ -23,7 +24,7 @@ import "bpm-runtime/DefaultProcessInstance.sol";
  * @title DefaultBpmService
  * @dev Default implementation of the BpmService interface.
  */
-contract DefaultBpmService is Versioned(1,0,0), AbstractDbUpgradeable, ArtifactsFinderEnabled, BpmService {
+contract DefaultBpmService is AbstractVersionedArtifact(1,0,0), AbstractObjectFactory, ArtifactsFinderEnabled, AbstractDbUpgradeable, BpmService {
 
     using BpmRuntimeLib for ProcessInstance;
 
@@ -44,7 +45,6 @@ contract DefaultBpmService is Versioned(1,0,0), AbstractDbUpgradeable, Artifacts
 			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultActiveAgreementRegistry.constructor", "_serviceIdApplicationRegistry parameter must not be empty");
 		serviceIdProcessModelRepository = _serviceIdProcessModelRepository;
 		serviceIdApplicationRegistry = _serviceIdApplicationRegistry;
-		addInterfaceSupport(ERC165_ID_Versioned);
 	}
 
 	/**

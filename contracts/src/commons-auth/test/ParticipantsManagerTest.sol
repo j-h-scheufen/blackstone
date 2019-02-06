@@ -42,8 +42,8 @@ contract ParticipantsManagerTest {
     function createNewParticipantsManager() internal returns (ParticipantsManager manager) {
 		manager =  new DefaultParticipantsManager();
         ArtifactsFinderEnabled(manager).setArtifactsFinder(artifacts);
-        artifacts.registerArtifact(manager.OBJECT_CLASS_ORGANIZATION(), defaultOrganizationImpl, defaultOrganizationImpl.getVersion(), true);
-        artifacts.registerArtifact(manager.OBJECT_CLASS_USER_ACCOUNT(), defaultUserAccountImpl, defaultUserAccountImpl.getVersion(), true);
+        artifacts.registerArtifact(manager.OBJECT_CLASS_ORGANIZATION(), defaultOrganizationImpl, defaultOrganizationImpl.getArtifactVersion(), true);
+        artifacts.registerArtifact(manager.OBJECT_CLASS_USER_ACCOUNT(), defaultUserAccountImpl, defaultUserAccountImpl.getArtifactVersion(), true);
 		ParticipantsManagerDb database = new ParticipantsManagerDb();
 		SystemOwned(database).transferSystemOwnership(manager);
 		AbstractDbUpgradeable(manager).acceptDatabase(database);

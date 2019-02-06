@@ -119,11 +119,11 @@ contract ActiveAgreementWorkflowTest {
 		require(AbstractDbUpgradeable(applicationRegistry).acceptDatabase(appDb), "ApplicationRegistryDb not set");
 		// ArtifactsRegistry
 		artifactsRegistry = new DefaultArtifactsRegistry();
-		artifactsRegistry.registerArtifact(serviceIdBpmService, address(bpmService), Versioned(bpmService).getVersion(), true);
-		artifactsRegistry.registerArtifact(serviceIdArchetypeRegistry, address(archetypeRegistry), Versioned(archetypeRegistry).getVersion(), true);
-		artifactsRegistry.registerArtifact(serviceIdModelRepository, address(processModelRepository), Versioned(processModelRepository).getVersion(), true);
-		artifactsRegistry.registerArtifact(serviceIdApplicationRegistry, address(applicationRegistry), Versioned(applicationRegistry).getVersion(), true);
-        artifactsRegistry.registerArtifact(archetypeRegistry.OBJECT_CLASS_ARCHETYPE(), defaultArchetypeImpl, defaultArchetypeImpl.getVersion(), true);
+		artifactsRegistry.registerArtifact(serviceIdBpmService, address(bpmService), bpmService.getArtifactVersion(), true);
+		artifactsRegistry.registerArtifact(serviceIdArchetypeRegistry, address(archetypeRegistry), archetypeRegistry.getArtifactVersion(), true);
+		artifactsRegistry.registerArtifact(serviceIdModelRepository, address(processModelRepository), processModelRepository.getArtifactVersion(), true);
+		artifactsRegistry.registerArtifact(serviceIdApplicationRegistry, address(applicationRegistry), applicationRegistry.getArtifactVersion(), true);
+        artifactsRegistry.registerArtifact(archetypeRegistry.OBJECT_CLASS_ARCHETYPE(), defaultArchetypeImpl, defaultArchetypeImpl.getArtifactVersion(), true);
 		ArtifactsFinderEnabled(archetypeRegistry).setArtifactsFinder(artifactsRegistry);
 		ArtifactsFinderEnabled(bpmService).setArtifactsFinder(artifactsRegistry);
 	}
@@ -138,7 +138,7 @@ contract ActiveAgreementWorkflowTest {
 		SystemOwned(agreementRegistryDb).transferSystemOwnership(newRegistry);
 		AbstractDbUpgradeable(newRegistry).acceptDatabase(agreementRegistryDb);
 		ArtifactsFinderEnabled(newRegistry).setArtifactsFinder(artifactsRegistry);
-        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_AGREEMENT(), defaultAgreementImpl, defaultAgreementImpl.getVersion(), true);
+        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_AGREEMENT(), defaultAgreementImpl, defaultAgreementImpl.getArtifactVersion(), true);
 		// check that dependencies are wired correctly
 		require (address(newRegistry.getArchetypeRegistry()) != address(0), "ArchetypeRegistry in new ActiveAgreementRegistry not found");
 		require (address(newRegistry.getArchetypeRegistry()) == address(archetypeRegistry), "ArchetypeRegistry in ActiveAgreementRegistry address mismatch");

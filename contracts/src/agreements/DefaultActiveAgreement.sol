@@ -1,7 +1,6 @@
 pragma solidity ^0.4.25;
 
 import "commons-base/ErrorsLib.sol";
-import "commons-base/Versioned.sol";
 import "commons-utils/ArrayUtilsAPI.sol";
 import "commons-utils/TypeUtilsAPI.sol";
 import "commons-collections/Mappings.sol";
@@ -9,15 +8,15 @@ import "commons-collections/MappingsLib.sol";
 import "commons-collections/AbstractDataStorage.sol";
 import "commons-collections/AbstractAddressScopes.sol";
 import "commons-events/DefaultEventEmitter.sol";
-import "commons-standards/AbstractERC165.sol";
 import "commons-management/AbstractDelegateTarget.sol";
+import "commons-management/AbstractVersionedArtifact.sol";
 
 import "agreements/Agreements.sol";
 import "agreements/AgreementsAPI.sol";
 import "agreements/Archetype.sol";
 import "agreements/ActiveAgreement.sol";
 
-contract DefaultActiveAgreement is Versioned(1,0,0), AbstractDelegateTarget, AbstractERC165, AbstractDataStorage, AbstractAddressScopes, DefaultEventEmitter, ActiveAgreement {
+contract DefaultActiveAgreement is AbstractVersionedArtifact(1,0,0), AbstractDelegateTarget, AbstractDataStorage, AbstractAddressScopes, DefaultEventEmitter, ActiveAgreement {
 	
 	using ArrayUtilsAPI for address[];
 	using TypeUtilsAPI for bytes32;

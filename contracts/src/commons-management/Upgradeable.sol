@@ -1,10 +1,12 @@
 pragma solidity ^0.4.25;
 
+import "commons-management/VersionedArtifact.sol";
+
 /**
  * @title Upgradeable
- * @dev Interface for contracts that support a being upgraded.
+ * @dev Interface for contracts that support being upgraded.
  */
-contract Upgradeable {
+contract Upgradeable is VersionedArtifact {
 
 	bytes4 public constant ERC165_ID_Upgradeable = bytes4(keccak256(abi.encodePacked("upgrade(address)")));
 

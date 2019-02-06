@@ -1,6 +1,7 @@
 pragma solidity ^0.4.25;
 
 import "commons-management/Upgradeable.sol";
+import "commons-management/ObjectFactory.sol";
 
 import "bpm-model/ProcessModel.sol";
 import "bpm-model/BpmModel.sol";
@@ -9,7 +10,7 @@ import "bpm-model/BpmModel.sol";
  * @title ProcessModelRepository Interface
  * @dev Manages registered ProcessModel instances with their past and active versions.
  */
-contract ProcessModelRepository is Upgradeable {
+contract ProcessModelRepository is ObjectFactory, Upgradeable {
 	
 	event LogProcessModelActivation(
 		bytes32 indexed eventId,

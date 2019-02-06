@@ -1,7 +1,8 @@
 pragma solidity ^0.4.25;
 
-import "commons-base/AbstractNamedElement.sol";
 import "commons-base/Versioned.sol";
+import "commons-base/NamedElement.sol";
+import "commons-management/VersionedArtifact.sol";
 
 import "bpm-model/BpmModel.sol";
 
@@ -9,7 +10,7 @@ import "bpm-model/BpmModel.sol";
  * @title ProcessModel Interface
  * @dev Versionized container providing a namespace for a set of business process definitions and their artifacts. 
  */
-contract ProcessModel is Versioned, AbstractNamedElement {
+contract ProcessModel is VersionedArtifact, Versioned, NamedElement {
 
 	event LogProcessModelCreation(
 		bytes32 indexed eventId,

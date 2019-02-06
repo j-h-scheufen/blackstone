@@ -10,7 +10,7 @@ contract TestService is AbstractUpgradeable, ArtifactsFinderEnabled {
     string public dependencyKey;
     address public dependencyService;
 
-    constructor(uint8[3] _v, string _depKey) public Versioned(_v[0],_v[1],_v[2]) {
+    constructor(uint8[3] _v, string _depKey) public AbstractVersionedArtifact(_v[0],_v[1],_v[2]) {
         dependencyKey = _depKey;
     }
 

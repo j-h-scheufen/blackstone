@@ -39,7 +39,10 @@ contract DefaultArtifactsRegistry is ArtifactsRegistry, AbstractDelegateTarget, 
      * @param _version the semantic version of the artifact
      * @param _activeVersion whether this version of the artifact should be tracked as the active version
      */
-    function registerArtifact(string _artifactId, address _artifactAddress, uint8[3] _version, bool _activeVersion) external {
+    function registerArtifact(string _artifactId, address _artifactAddress, uint8[3] _version, bool _activeVersion)
+        external
+        // pre_onlyBySystemOwner
+    {
         ErrorsLib.revertIf(bytes(_artifactId).length == 0 || _artifactAddress == address(0),
             ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultArtifactsRegistry.registerArtifact", "_artifactId and _artifactAddress must not be empty");
         address existingLocationForVersion = artifacts[_artifactId].locations[keccak256(abi.encodePacked(_version))];
@@ -73,7 +76,10 @@ contract DefaultArtifactsRegistry is ArtifactsRegistry, AbstractDelegateTarget, 
      * @param _artifactId the ID of the artifact
      * @param _version the semantic version of the artifact
      */
-    function setActiveVersion(string _artifactId, uint8[3] _version) external {
+    function setActiveVersion(string _artifactId, uint8[3] _version)
+        external
+        // pre_onlyBySystemOwner
+    {
         address current = artifacts[_artifactId].locations[keccak256(abi.encodePacked(_version))];
         ErrorsLib.revertIf(current == address(0),
             ErrorsLib.RESOURCE_NOT_FOUND(), "DefaultArtifactsRegistry.setActiveVersion", "The specified ID and version is not registered");

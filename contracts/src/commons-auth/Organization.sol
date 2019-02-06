@@ -1,13 +1,13 @@
 pragma solidity ^0.4.25;
 
-import "commons-standards/ERC165.sol";
+import "commons-management/VersionedArtifact.sol";
 
 /**
  * @title Organization Interface
  * @dev Describes functionality of a contract representing an organization in an ecosystem application.
  * Also provides access to constants required when dealing with organizations.
  */
-contract Organization is ERC165 {
+contract Organization is VersionedArtifact {
 
     event LogOrganizationCreation(
         bytes32 indexed eventId,

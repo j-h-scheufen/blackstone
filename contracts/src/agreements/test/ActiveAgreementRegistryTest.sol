@@ -71,8 +71,8 @@ contract ActiveAgreementRegistryTest {
 		require(AbstractDbUpgradeable(archetypeRegistry).acceptDatabase(archRegistryDb), "ArchetypeRegistryDb not set");
 		// ArtifactsRegistry
 		artifactsRegistry = new DefaultArtifactsRegistry();
-		artifactsRegistry.registerArtifact(serviceIdArchetypeRegistry, archetypeRegistry, Versioned(archetypeRegistry).getVersion(), true);
-        artifactsRegistry.registerArtifact(archetypeRegistry.OBJECT_CLASS_ARCHETYPE(), defaultArchetypeImpl, defaultArchetypeImpl.getVersion(), true);
+		artifactsRegistry.registerArtifact(serviceIdArchetypeRegistry, archetypeRegistry, archetypeRegistry.getArtifactVersion(), true);
+        artifactsRegistry.registerArtifact(archetypeRegistry.OBJECT_CLASS_ARCHETYPE(), defaultArchetypeImpl, defaultArchetypeImpl.getArtifactVersion(), true);
 		ArtifactsFinderEnabled(archetypeRegistry).setArtifactsFinder(artifactsRegistry);
 	}
 
@@ -86,7 +86,7 @@ contract ActiveAgreementRegistryTest {
 		SystemOwned(registryDb).transferSystemOwnership(newRegistry);
 		AbstractDbUpgradeable(newRegistry).acceptDatabase(registryDb);
 		newRegistry.setArtifactsFinder(artifactsRegistry);
-        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_AGREEMENT(), defaultAgreementImpl, defaultAgreementImpl.getVersion(), true);
+        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_AGREEMENT(), defaultAgreementImpl, defaultAgreementImpl.getArtifactVersion(), true);
 		// check that dependencies are wired correctly
 		require (address(newRegistry.getArchetypeRegistry()) != address(0), "ArchetypeRegistry in new ActiveAgreementRegistry not found");
 		require (address(newRegistry.getArchetypeRegistry()) == address(archetypeRegistry), "ArchetypeRegistry in ActiveAgreementRegistry address mismatch");

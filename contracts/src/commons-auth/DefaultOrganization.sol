@@ -1,10 +1,9 @@
 pragma solidity ^0.4.25;
 
 import "commons-base/ErrorsLib.sol";
-import "commons-base/Versioned.sol";
 import "commons-utils/ArrayUtilsAPI.sol";
-import "commons-standards/AbstractERC165.sol";
 import "commons-management/AbstractDelegateTarget.sol";
+import "commons-management/AbstractVersionedArtifact.sol";
 
 import "commons-auth/Governance.sol";
 import "commons-auth/Organization.sol";
@@ -14,7 +13,7 @@ import "commons-auth/UserAccount.sol";
  * @title DefaultOrganization
  * @dev the default implementation of the Organization interface.
  */
-contract DefaultOrganization is Versioned(1,0,0), AbstractERC165, AbstractDelegateTarget, Organization {
+contract DefaultOrganization is AbstractVersionedArtifact(1,0,0), AbstractDelegateTarget, Organization {
 
 	//TODO as a DelegateTarget we need to make sure the functions on this contract cannot be called directly. All functions can be guarded by checking for initialized. Only initialize() must not be callable unless through the proxy ...
 	
@@ -67,7 +66,6 @@ contract DefaultOrganization is Versioned(1,0,0), AbstractERC165, AbstractDelega
 		}
 		addDepartment(DEFAULT_DEPARTMENT_ID, defaultDepartmentName);
 		addInterfaceSupport(ERC165_ID_Organization);
-		addInterfaceSupport(ERC165_ID_Versioned);
 		emit LogOrganizationCreation(
 			EVENT_ID_ORGANIZATION_ACCOUNTS,
 			address(this),

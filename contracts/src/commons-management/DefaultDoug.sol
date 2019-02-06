@@ -10,6 +10,7 @@ import "commons-standards/ERC165Utils.sol";
 import "commons-management/StorageDefProxied.sol";
 import "commons-management/StorageDefRegistry.sol";
 import "commons-management/DOUG.sol";
+import "commons-management/VersionedArtifact.sol";
 import "commons-management/ArtifactsRegistry.sol";
 import "commons-management/ArtifactsFinderEnabled.sol";
 import "commons-management/UpgradeOwned.sol";
@@ -45,8 +46,8 @@ contract DefaultDoug is StorageDefProxied, StorageDefOwner, StorageDefRegistry, 
      * @return true if successful, false otherwise
 	 */
     function deploy(string _id, address _address) external pre_onlyByOwner returns (bool success) {
-		uint8[3] memory version = ERC165Utils.implementsInterface(_address, getERC165IdVersioned()) ?
-			Versioned(_address).getVersion() : [0,0,0];
+		uint8[3] memory version = ERC165Utils.implementsInterface(_address, getERC165IdVersionedArtifact()) ?
+			VersionedArtifact(_address).getArtifactVersion() : [0,0,0];
 		(address existingArtifact, ) = ArtifactsRegistry(registry).getArtifact(_id);
 
 		if (ERC165Utils.implementsInterface(_address, getERC165IdUpgradeable())) {
@@ -56,12 +57,12 @@ contract DefaultDoug is StorageDefProxied, StorageDefOwner, StorageDefRegistry, 
 		if (existingArtifact != 0x0 &&
 			ERC165Utils.implementsInterface(existingArtifact, getERC165IdUpgradeable()) &&
 			ERC165Utils.implementsInterface(_address, getERC165IdUpgradeable()) &&
-			Versioned(existingArtifact).compareVersion(_address) > 0)
+			VersionedArtifact(existingArtifact).compareArtifactVersion(_address) > 0) //TODO this can break. We assume that all artifacts are VersionedArtifacts here
 		{
 			ErrorsLib.revertIf(!Upgradeable(existingArtifact).upgrade(_address),
 				ErrorsLib.INVALID_STATE(), "DefaultDoug.deploy", "Failed to upgrade from an existing contract with the same ID");
 		}
-        // setting ArtifactsFinder gives the contract the chance to bootstrap, load dependencies, and initialize
+        // setting ArtifactsFinder gives the contract the chance to bootstrap, load dependencies, initialize, or keep the ArtifactsFinder reference for lookups at runtime
         if (ERC165Utils.implementsInterface(_address, getERC165ArtifactsFinderEnabled())) {
             ArtifactsFinderEnabled(_address).setArtifactsFinder(registry);
         }
@@ -84,8 +85,8 @@ contract DefaultDoug is StorageDefProxied, StorageDefOwner, StorageDefRegistry, 
 	 * @return version - the version under which the contract was registered.
      */
     function register(string _id, address _address) external returns (uint8[3] version) {
-		if (ERC165Utils.implementsInterface(_address, getERC165IdVersioned())) {
-			version = Versioned(_address).getVersion();
+		if (ERC165Utils.implementsInterface(_address, getERC165IdVersionedArtifact())) {
+			version = VersionedArtifact(_address).getArtifactVersion();
 		}
 		ArtifactsRegistry(registry).registerArtifact(_id, _address, version, true);
 	}
@@ -99,6 +100,7 @@ contract DefaultDoug is StorageDefProxied, StorageDefOwner, StorageDefRegistry, 
 	 * - the specified ID and version combination does not exist
 	 */
 	function setActiveVersion(string _id, uint8[3] _version) external {
+		// TODO this can cause problems when downgrading a service that already has the DB migrated. Either disallow switching to a lower version here or implement downgrading
 		ArtifactsRegistry(registry).setActiveVersion(_id, _version);
 	}
 
@@ -135,23 +137,23 @@ contract DefaultDoug is StorageDefProxied, StorageDefOwner, StorageDefRegistry, 
 
 	/**
 	 * @dev Internal pure function to return the ERC165 ID for the Upgreadable interface
-	 * This avoids storing the ID as a field in this contract which would not be usable in a proxied scenario.
+	 * This avoids storing and initializing the ID as a field in this contract which would not be usable in a proxied scenario.
 	 */
 	function getERC165IdUpgradeable() internal pure returns (bytes4) {
 		return bytes4(keccak256(abi.encodePacked("upgrade(address)")));
 	}
 
 	/**
-	 * @dev Internal pure function to return the ERC165 ID for the Versioned interface
-	 * This avoids storing the ID as a field in this contract which would not be usable in a proxied scenario.
+	 * @dev Internal pure function to return the ERC165 ID for the ArtifactVersioned interface
+	 * This avoids storing and initializing the ID as a field in this contract which would not be usable in a proxied scenario.
 	 */
-	function getERC165IdVersioned() internal pure returns (bytes4) {
-		return bytes4(keccak256(abi.encodePacked("getVersion()")));
+	function getERC165IdVersionedArtifact() internal pure returns (bytes4) {
+		return bytes4(keccak256(abi.encodePacked("getArtifactVersion()")));
 	}
 
 	/**
 	 * @dev Internal pure function to return the ERC165 ID for the ArtifactsFinderEnabled interface
-	 * This avoids storing the ID as a field in this contract which would not be usable in a proxied scenario.
+	 * This avoids storing and initializing the ID as a field in this contract which would not be usable in a proxied scenario.
 	 */
 	function getERC165ArtifactsFinderEnabled() internal pure returns (bytes4) {
 		return bytes4(keccak256(abi.encodePacked("setArtifactsFinder(address)")));

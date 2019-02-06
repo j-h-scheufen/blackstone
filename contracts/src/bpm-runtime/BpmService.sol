@@ -1,7 +1,7 @@
 pragma solidity ^0.4.25;
 
-import "bpm-model/ProcessModelRepository.sol";
 import "commons-management/Upgradeable.sol";
+import "bpm-model/ProcessModelRepository.sol";
 
 import "bpm-runtime/ApplicationRegistry.sol";
 import "bpm-runtime/ProcessInstance.sol";
@@ -11,7 +11,7 @@ import "bpm-runtime/BpmServiceDb.sol";
  * @title BpmService Interface
  * @dev Manages manual tasks, processes, and their data.
  */
-contract BpmService is Upgradeable {
+contract BpmService is ObjectFactory, Upgradeable {
 
 	/**
 	 * @dev Gets the ProcessModelRepository address for this BpmService

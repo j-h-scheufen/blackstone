@@ -2,7 +2,6 @@ pragma solidity ^0.4.25;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/ErrorsLib.sol";
-import "commons-base/Versioned.sol";
 import "commons-collections/Mappings.sol";
 import "commons-collections/MappingsLib.sol";
 import "commons-management/ArtifactsFinder.sol";
@@ -21,18 +20,10 @@ import "agreements/Agreements.sol";
  * @title DefaultArchetypeRegistry
  * @dev Creates and tracks archetypes
  */
-contract DefaultArchetypeRegistry is Versioned(1,0,0), AbstractObjectFactory, ArtifactsFinderEnabled, AbstractDbUpgradeable, ArchetypeRegistry {
+contract DefaultArchetypeRegistry is AbstractVersionedArtifact(1,0,0), AbstractObjectFactory, ArtifactsFinderEnabled, AbstractDbUpgradeable, ArchetypeRegistry {
 	
 	// Temporary mapping to detect duplicates in governing archetypes
 	mapping(address => uint) duplicateMap;
-
-	/**
-	 * @dev Creates a new DefaultArchetypeRegistry
-	 */
-	constructor () public {
-        // support for Versioned needs to be added since Versioned does not come with ERC165 inheritance due to being in the lowest bundle commons-base
-        addInterfaceSupport(ERC165_ID_Versioned);
-	}
 
 	/**
 	 * @dev Creates a new archetype

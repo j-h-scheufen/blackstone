@@ -2,8 +2,12 @@ pragma solidity ^0.4.25;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/ErrorsLib.sol";
+import "commons-base/AbstractVersioned.sol";
+import "commons-base/AbstractNamedElement.sol";
 import "commons-collections/Mappings.sol";
 import "commons-collections/MappingsLib.sol";
+import "commons-management/AbstractVersionedArtifact.sol";
+import "commons-management/AbstractDelegateTarget.sol";
 
 import "bpm-model/BpmModel.sol";
 import "bpm-model/DefaultProcessDefinition.sol";
@@ -12,7 +16,7 @@ import "bpm-model/DefaultProcessDefinition.sol";
  * @title DefaultProcessModel
  * @dev Default implementation of the ProcessModel interface 
  */
-contract DefaultProcessModel is ProcessModel {
+contract DefaultProcessModel is AbstractVersionedArtifact(1,0,0), AbstractDelegateTarget, AbstractVersioned, AbstractNamedElement, ProcessModel {
 
 	using MappingsLib for Mappings.Bytes32AddressMap;
 	using MappingsLib for Mappings.Bytes32UintMap;
@@ -36,7 +40,7 @@ contract DefaultProcessModel is ProcessModel {
 	 * @param _modelFileReference the reference to the external model file from which this ProcessModel originated
 	 */
 	constructor(bytes32 _id, string _name, uint8[3] _version, address _author, bool _isPrivate, string _modelFileReference)
-		Versioned(_version[0], _version[1], _version[2])
+		AbstractVersioned(_version[0], _version[1], _version[2])
 		AbstractNamedElement(_id, _name)
 		public
 	{

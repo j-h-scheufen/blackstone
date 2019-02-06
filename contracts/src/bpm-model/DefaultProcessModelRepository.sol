@@ -5,6 +5,8 @@ import "commons-utils/ArrayUtilsAPI.sol";
 import "commons-collections/Mappings.sol";
 import "commons-collections/MappingsLib.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
+import "commons-management/AbstractObjectFactory.sol";
+import "commons-management/ArtifactsFinderEnabled.sol";
 
 import "bpm-model/ProcessModel.sol";
 import "bpm-model/BpmModel.sol";
@@ -16,7 +18,7 @@ import "bpm-model/ProcessModelRepositoryDb.sol";
  * @title DefaultProcessModelRepository
  * @dev Default implementation of the ProcessModelRepository interface
  */
-contract DefaultProcessModelRepository is Versioned(1,0,0), ProcessModelRepository, AbstractDbUpgradeable {
+contract DefaultProcessModelRepository is AbstractVersionedArtifact(1,0,0), AbstractObjectFactory, ArtifactsFinderEnabled, AbstractDbUpgradeable, ProcessModelRepository {
 	
 	/**
 	 * @dev Modifier to only allow calls to this ProcessModelRepository from a registered ProcessModel
@@ -138,9 +140,9 @@ contract DefaultProcessModelRepository is Versioned(1,0,0), ProcessModelReposito
 		ProcessModel m = DefaultProcessModel(_model);
 		id = m.getId();
 		name = m.getName();
-		versionMajor = m.major();
-		versionMinor = m.minor();
-		versionPatch = m.patch();
+		versionMajor = m.getVersionMajor();
+		versionMinor = m.getVersionMinor();
+		versionPatch = m.getVersionPatch();
 		author = m.getAuthor();
 		isPrivate = m.isPrivate();
 		active = ProcessModelRepositoryDb(database).getActiveModel(m.getId()) == _model;

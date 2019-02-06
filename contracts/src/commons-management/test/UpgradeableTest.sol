@@ -1,6 +1,7 @@
 pragma solidity ^0.4.25;
 
 import "commons-management/AbstractUpgradeable.sol";
+import "commons-management/AbstractVersionedArtifact.sol";
 
 contract UpgradeableTest {
 
@@ -24,7 +25,7 @@ contract UpgradeDummy is AbstractUpgradeable {
     bytes32 public state;
     uint public num;
 
-    constructor(bytes32 _state, uint _num, uint8 maj, uint8 min, uint8 p) Versioned(maj, min, p) public {
+    constructor(bytes32 _state, uint _num, uint8 maj, uint8 min, uint8 p) AbstractVersionedArtifact(maj, min, p) public {
         state = _state;
         num = _num;
     }

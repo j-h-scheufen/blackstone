@@ -17,11 +17,9 @@ jobs:
   - name: UpgradeableTest
     build:
       contract: commons-management/test/UpgradeableTest.sol
-      instance: all
   - name: ArtifactsRegistryTest
     build:
       contract: commons-management/test/ArtifactsRegistryTest.sol
-      instance: all
   - name: DougTest
     build:
       contract: commons-management/test/DougTest.sol

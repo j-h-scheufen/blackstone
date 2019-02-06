@@ -47,7 +47,7 @@ contract ArchetypeRegistryTest {
 	address[] ndaGovArchetypes;
 	address[] emptyArray;
 
-	DefaultArchetype defaultArchetype = new DefaultArchetype();
+	DefaultArchetype defaultArchetypeImpl = new DefaultArchetype();
 	ArtifactsRegistry artifactsRegistry;
 	
 	constructor (address _isoCountries) public {
@@ -67,7 +67,7 @@ contract ArchetypeRegistryTest {
 		SystemOwned(registryDb).transferSystemOwnership(newRegistry);
 		AbstractDbUpgradeable(newRegistry).acceptDatabase(registryDb);
 		newRegistry.setArtifactsFinder(artifactsRegistry);
-        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_ARCHETYPE(), defaultArchetype, defaultArchetype.getVersion(), true);
+        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_ARCHETYPE(), defaultArchetypeImpl, defaultArchetypeImpl.getArtifactVersion(), true);
 		return newRegistry;
 	}
 

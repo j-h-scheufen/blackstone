@@ -4,8 +4,8 @@ import "commons-base/Named.sol";
 import "commons-collections/DataStorage.sol";
 import "commons-collections/AddressScopes.sol";
 import "commons-events/EventEmitter.sol";
-import "commons-standards/ERC165.sol";
 import "documents-commons/Signable.sol";
+import "commons-management/VersionedArtifact.sol";
 
 import "agreements/Agreements.sol";
 
@@ -13,7 +13,7 @@ import "agreements/Agreements.sol";
  * @title ActiveAgreement Interface
  * @dev API for interaction with an Active Agreement
  */
-contract ActiveAgreement is Named, ERC165, DataStorage, AddressScopes, Signable, EventEmitter {
+contract ActiveAgreement is VersionedArtifact, Named, DataStorage, AddressScopes, Signable, EventEmitter {
 
 	event LogAgreementCreation(
 		bytes32 indexed eventId,

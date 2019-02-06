@@ -108,8 +108,8 @@ contract BpmServiceTest {
 		require(AbstractDbUpgradeable(applicationRegistry).acceptDatabase(appDb), "ApplicationRegistryDb not set");
 		// ArtifactsRegistry
 		artifactsRegistry = new DefaultArtifactsRegistry();
-		artifactsRegistry.registerArtifact(serviceIdModelRepository, processModelRepository, Versioned(processModelRepository).getVersion(), true);
-		artifactsRegistry.registerArtifact(serviceIdApplicationRegistry, applicationRegistry, Versioned(applicationRegistry).getVersion(), true);
+		artifactsRegistry.registerArtifact(serviceIdModelRepository, processModelRepository, processModelRepository.getArtifactVersion(), true);
+		artifactsRegistry.registerArtifact(serviceIdApplicationRegistry, applicationRegistry, applicationRegistry.getArtifactVersion(), true);
 	}
 
 	/**

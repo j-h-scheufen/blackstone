@@ -29,7 +29,7 @@ contract ProcessModelTest {
 		if (bytes(pm.getName()).length != bytes(modelName).length) return "ProcessModel Name not set correctly";
 		if (pm.getAuthor() != author) return "ProcessModel Author not set correctly";
 		if (pm.isPrivate() != false) return "ProcessModel expected to be public";
-		if (pm.major() != 1 || pm.minor() != 2 || pm.patch() != 3) return "ProcessModel Version not set correctly";
+		if (pm.getVersionMajor() != 1 || pm.getVersionMinor() != 2 || pm.getVersionPatch() != 3) return "ProcessModel Version not set correctly";
 		string memory modelFileRef = pm.getModelFileReference();
 		if (keccak256(abi.encodePacked(modelFileRef)) != keccak256(abi.encodePacked(dummyModelFileReference))) return "model file reference should match";
 

@@ -18,15 +18,7 @@ import "commons-auth/Organization.sol";
  * @title DefaultParticipantsManager
  * @dev Default implementation of the ParticipantsManager interface.
  */
-contract DefaultParticipantsManager is Versioned(1,0,0), AbstractObjectFactory, ArtifactsFinderEnabled, AbstractDbUpgradeable, ParticipantsManager {
-
-	/**
-	 * @dev Creates a new DefaultParticipantsManager
-	 */
-	constructor () public {
-        // support for Versioned needs to be added since Versioned does not come with ERC165 inheritance due to being in the lowest bundle commons-base
-        addInterfaceSupport(ERC165_ID_Versioned);
-    }
+contract DefaultParticipantsManager is AbstractVersionedArtifact(1,0,0), AbstractObjectFactory, ArtifactsFinderEnabled, AbstractDbUpgradeable, ParticipantsManager {
 
     /**
      * @dev Creates and registers a UserAccount, and optionally establishes the connection of the user to an ecosystem, if an address is provided

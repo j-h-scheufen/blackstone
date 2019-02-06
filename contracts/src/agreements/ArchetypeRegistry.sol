@@ -1,5 +1,6 @@
 pragma solidity ^0.4.25;
 
+import "commons-management/ObjectFactory.sol";
 import "commons-management/Upgradeable.sol";
 
 import "agreements/Archetype.sol";
@@ -9,7 +10,7 @@ import "agreements/Agreements.sol";
  * @title ArchetypeRegistry Interface
  * @dev A contract interface to create and manage Archetype objects.
  */
-contract ArchetypeRegistry is Upgradeable {
+contract ArchetypeRegistry is ObjectFactory, Upgradeable {
 
 	event LogArchetypePackageCreation(
 		bytes32 indexed eventId,

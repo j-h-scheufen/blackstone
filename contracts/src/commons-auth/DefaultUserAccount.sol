@@ -1,11 +1,11 @@
 pragma solidity ^0.4.25;
 
 import "commons-base/ErrorsLib.sol";
-import "commons-base/Versioned.sol";
 import "commons-collections/Mappings.sol";
 import "commons-collections/MappingsLib.sol";
 import "commons-standards/AbstractERC165.sol";
 import "commons-management/AbstractDelegateTarget.sol";
+import "commons-management/AbstractVersionedArtifact.sol";
 
 import "commons-auth/UserAccount.sol";
 import "commons-auth/Ecosystem.sol";
@@ -15,7 +15,7 @@ import "commons-auth/Governance.sol";
  * @title DefaultUserAccount
  * @dev The default implementation of a UserAccount
  */
-contract DefaultUserAccount is Versioned(1,0,0), AbstractERC165, AbstractDelegateTarget, UserAccount {
+contract DefaultUserAccount is AbstractVersionedArtifact(1,0,0), AbstractDelegateTarget, UserAccount {
 
     using MappingsLib for Mappings.AddressBoolMap;
 
@@ -57,8 +57,6 @@ contract DefaultUserAccount is Versioned(1,0,0), AbstractERC165, AbstractDelegat
             account.ecosystems.insertOrUpdate(_ecosystem, true);
         }
         account.exists = true;
-        // support for Versioned needs to be added since Versioned does not come with ERC165 inheritance due to being in the lowest bundle commons-base
-		addInterfaceSupport(ERC165_ID_Versioned);
         emit LogUserCreation(
             EVENT_ID_USER_ACCOUNTS,
             address(this),

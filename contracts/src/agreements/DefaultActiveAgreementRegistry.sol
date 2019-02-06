@@ -27,7 +27,7 @@ import "agreements/ArchetypeRegistry.sol";
  * @title DefaultActiveAgreementRegistry Interface
  * @dev A contract interface to create and manage Active Agreements.
  */
-contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractObjectFactory, ArtifactsFinderEnabled, AbstractEventListener, AbstractDbUpgradeable, ActiveAgreementRegistry {
+contract DefaultActiveAgreementRegistry is AbstractVersionedArtifact(1,0,0), AbstractObjectFactory, ArtifactsFinderEnabled, AbstractEventListener, AbstractDbUpgradeable, ActiveAgreementRegistry {
 
 	using ArrayUtilsAPI for address[];
 
@@ -51,8 +51,6 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractObjectFacto
 			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultActiveAgreementRegistry.constructor", "_serviceIdBpmService parameter must not be empty");
 		serviceIdArchetypeRegistry = _serviceIdArchetypeRegistry;
 		serviceIdBpmService = _serviceIdBpmService;
-        // support for Versioned needs to be added since Versioned does not come with ERC165 inheritance due to being in the lowest bundle commons-base
-        addInterfaceSupport(ERC165_ID_Versioned);
 	}
 
 	/**

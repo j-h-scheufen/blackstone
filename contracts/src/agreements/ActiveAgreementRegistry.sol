@@ -9,7 +9,7 @@ import "agreements/ActiveAgreement.sol";
  * @title ActiveAgreementRegistry Interface
  * @dev A contract interface to create and manage Active Agreements.
  */
-contract ActiveAgreementRegistry is ProcessStateChangeListener, Upgradeable {
+contract ActiveAgreementRegistry is ObjectFactory, Upgradeable, ProcessStateChangeListener {
 
 	event LogAgreementFormationProcessUpdate(
 		bytes32 indexed eventId, 

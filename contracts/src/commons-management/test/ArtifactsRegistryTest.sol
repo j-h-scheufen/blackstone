@@ -1,9 +1,9 @@
 pragma solidity ^0.4.25;
 
 import "commons-base/SystemOwned.sol";
-import "commons-base/Versioned.sol";
 import "commons-standards/ERC165Utils.sol";
 
+import "commons-management/AbstractVersionedArtifact.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
 import "commons-management/ArtifactsFinderEnabled.sol";
 import "commons-management/ArtifactsRegistry.sol";
@@ -89,9 +89,9 @@ contract ArtifactsRegistryTest {
 /**
  * @dev A versioned service implementation with an upgradeable DB
  */
-contract DefaultTestService is Versioned, AbstractDbUpgradeable {
+contract DefaultTestService is AbstractDbUpgradeable {
 
-    constructor(uint8[3] _version) Versioned(_version[0], _version[1], _version[2]) public {
+    constructor(uint8[3] _version) AbstractVersionedArtifact(_version[0], _version[1], _version[2]) public {
 
     }
 

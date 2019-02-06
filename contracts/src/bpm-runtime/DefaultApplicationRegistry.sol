@@ -11,7 +11,7 @@ import "bpm-runtime/ApplicationRegistryDb.sol";
  * @title ApplicationRegistry
  * @dev Default implementation of the ApplicationRegistry interface
  */
-contract DefaultApplicationRegistry is Versioned(1,0,0), ApplicationRegistry, AbstractDbUpgradeable {
+contract DefaultApplicationRegistry is AbstractVersionedArtifact(1,0,0), AbstractDbUpgradeable, ApplicationRegistry {
 
 	/**
 	 * @dev Adds a Service application with the given parameters to this ApplicationRegistry

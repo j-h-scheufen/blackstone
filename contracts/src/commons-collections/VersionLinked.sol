@@ -2,8 +2,7 @@ pragma solidity ^0.4.25;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/Owned.sol";
-
-import "commons-base/Versioned.sol";
+import "commons-base/AbstractVersioned.sol";
 
 /**
  * @title VersionLinked
@@ -11,7 +10,7 @@ import "commons-base/Versioned.sol";
  * There are restrictions that must be fulfilled in order to link instances together, e.g. all instances must have the same owner.
  * A new element can be inserted through any VersionLinked instance that is already connected and the new element will be passed along the versions to find its appropriate placement in the list.
  */
-contract VersionLinked is Owned, Versioned {
+contract VersionLinked is AbstractVersioned, Owned {
 	
 	VersionLinked currentPredecessor;
 	VersionLinked currentSuccessor;
@@ -20,7 +19,9 @@ contract VersionLinked is Owned, Versioned {
 	 * @dev Constructor - Sets the msg.sender as the owner.
 	 * @param _version the version of this VersionLinked contract
 	 */
-	constructor(uint8[3] _version) Versioned(_version[0], _version[1], _version[2]) public {
+	constructor(uint8[3] _version)
+		AbstractVersioned(_version[0], _version[1], _version[2]) public
+	{
 		owner = msg.sender;
 	}
 	

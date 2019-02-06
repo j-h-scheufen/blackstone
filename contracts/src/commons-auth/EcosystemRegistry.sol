@@ -1,12 +1,13 @@
 pragma solidity ^0.4.25;
 
 import "commons-management/Upgradeable.sol";
+import "commons-management/ObjectFactory.sol";
 
 /**
  * @title EcosystemRegistry Interface
  * @dev The interface describing interaction with an Ecosystem
  */
-contract EcosystemRegistry is Upgradeable {
+contract EcosystemRegistry is ObjectFactory, Upgradeable {
 
     /**
      * @dev Registers the given Ecosystem in this registry.

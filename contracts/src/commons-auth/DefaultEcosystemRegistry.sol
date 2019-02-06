@@ -1,8 +1,9 @@
 pragma solidity ^0.4.25;
 
 import "commons-base/ErrorsLib.sol";
-import "commons-base/Versioned.sol";
+import "commons-management/AbstractObjectFactory.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
+import "commons-management/ArtifactsFinderEnabled.sol";
 
 import "commons-auth/Ecosystem.sol";
 import "commons-auth/DefaultEcosystem.sol";
@@ -13,7 +14,7 @@ import "commons-auth/EcosystemRegistryDb.sol";
  * @title DefaultEcosystemRegistry
  * @dev Default implementation of the EcosystemRegistry interface.
  */
-contract DefaultEcosystemRegistry is Versioned(1,0,0), AbstractDbUpgradeable, EcosystemRegistry {
+contract DefaultEcosystemRegistry is AbstractVersionedArtifact(1,0,0), AbstractObjectFactory, ArtifactsFinderEnabled, AbstractDbUpgradeable, EcosystemRegistry {
 
     /**
      * @dev Registers the given Ecosystem in this registry.

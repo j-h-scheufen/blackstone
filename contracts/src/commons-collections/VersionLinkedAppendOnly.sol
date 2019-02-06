@@ -2,10 +2,9 @@ pragma solidity ^0.4.25;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/Owned.sol";
+import "commons-base/AbstractVersioned.sol";
 
-import "commons-base/Versioned.sol";
-
-contract VersionLinkedAppendOnly is Owned, Versioned {
+contract VersionLinkedAppendOnly is AbstractVersioned, Owned {
 
   VersionLinkedAppendOnly latest;
   VersionLinkedAppendOnly successor;
@@ -18,7 +17,9 @@ contract VersionLinkedAppendOnly is Owned, Versioned {
     _;
   }
 
-  constructor(uint8[3] _version) Versioned(_version[0], _version[1], _version[2]) public {
+  constructor(uint8[3] _version)
+    AbstractVersioned(_version[0], _version[1], _version[2]) public
+  {
     owner = msg.sender;
     latest = this;
   }

@@ -2,15 +2,14 @@ pragma solidity ^0.4.25;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/ErrorsLib.sol";
-import "commons-base/Versioned.sol";
 import "commons-utils/ArrayUtilsAPI.sol";
 import "commons-utils/TypeUtilsAPI.sol";
 import "commons-utils/DataTypes.sol";
 import "commons-collections/Mappings.sol";
 import "commons-collections/MappingsLib.sol";
 import "documents-commons/Documents.sol";
-import "commons-standards/AbstractERC165.sol";
 import "commons-management/AbstractDelegateTarget.sol";
+import "commons-management/AbstractVersionedArtifact.sol";
 
 import "agreements/Archetype.sol";
 
@@ -18,7 +17,7 @@ import "agreements/Archetype.sol";
  * @title DefaultArchetype
  * @dev Default agreements network archetype
  */
-contract DefaultArchetype is Versioned(1,0,0), AbstractDelegateTarget, AbstractERC165, Archetype {
+contract DefaultArchetype is AbstractVersionedArtifact(1,0,0), AbstractDelegateTarget, Archetype {
 
 	using ArrayUtilsAPI for bytes32[];
 	using TypeUtilsAPI for string;

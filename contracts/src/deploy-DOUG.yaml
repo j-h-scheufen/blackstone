@@ -94,7 +94,7 @@ jobs:
 - name: ChangeArtifactsRegistrySystemOwnerShip
   call:
     destination: $ArtifactsRegistry
-    bin: ArtifactsRegistry
+    bin: DefaultArtifactsRegistry
     function: transferSystemOwnership
     data: [$DOUG]
 

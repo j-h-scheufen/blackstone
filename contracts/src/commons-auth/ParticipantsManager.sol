@@ -7,7 +7,7 @@ import "commons-management/ObjectFactory.sol";
  * @title ParticipantsManager Interface
  * @dev Manages organizational structures.
  */
-contract ParticipantsManager is Upgradeable, ObjectFactory {
+contract ParticipantsManager is ObjectFactory, Upgradeable {
 
     string public constant OBJECT_CLASS_ORGANIZATION = "commons.auth.Organization";
     string public constant OBJECT_CLASS_USER_ACCOUNT = "commons.auth.UserAccount";

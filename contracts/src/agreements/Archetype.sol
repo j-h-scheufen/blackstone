@@ -2,13 +2,14 @@ pragma solidity ^0.4.25;
 
 import "commons-base/Named.sol";
 import "commons-utils/DataTypes.sol";
-import "commons-standards/ERC165.sol";
+import "commons-management/VersionedArtifact.sol";
+
 
 /**
  * @title Archetype Interface
  * @dev API for interaction with an agreement archetype
  */
-contract Archetype is Named, ERC165 {
+contract Archetype is VersionedArtifact, Named {
 
 	event LogArchetypeCreation(
 		bytes32 indexed eventId,

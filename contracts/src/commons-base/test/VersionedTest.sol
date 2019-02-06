@@ -1,6 +1,7 @@
 pragma solidity ^0.4.25;
 
 import "commons-base/Versioned.sol";
+import "commons-base/AbstractVersioned.sol";
 
 contract VersionedTest {
 
@@ -10,19 +11,19 @@ contract VersionedTest {
     function testCompare() external returns (string) {
 
         // Test access functions
-        SubContract sub = new SubContract([2,5,17]);
+        VersionedContract sub = new VersionedContract([2,5,17]);
         if (sub.getVersion()[0] != 2) return "getVersion()[0] expected to be 2"; 
         if (sub.getVersion()[1] != 5) return "getVersion()[0] expected to be 5"; 
         if (sub.getVersion()[2] != 17) return "getVersion()[0] expected to be 17"; 
-        if (sub.major() != 2) return "major() expected to be 2";
-        if (sub.minor() != 5) return "minor() expected to be 5";
-        if (sub.patch() != 17) return "patch() expected to be 17";
+        if (sub.getVersionMajor() != 2) return "getVersionMajor() expected to be 2";
+        if (sub.getVersionMinor() != 5) return "getVersionMinor() expected to be 5";
+        if (sub.getVersionPatch() != 17) return "getVersionPatch() expected to be 17";
 
         // Test comparison
-        Versioned v731 = new Versioned(7, 3, 1);
-        Versioned v731_2 = new Versioned(7, 3, 1);
-        Versioned v020 = new Versioned(0, 2, 0);
-        Versioned v240 = new Versioned(2, 4, 0);
+        Versioned v731 = new VersionedContract([7, 3, 1]);
+        Versioned v731_2 = new VersionedContract([7, 3, 1]);
+        Versioned v020 = new VersionedContract([0, 2, 0]);
+        Versioned v240 = new VersionedContract([2, 4, 0]);
 
         if( v731.compareVersion(v731_2) != 0 ) { return "Comparison (7.3.1 = 7.3.1) failed"; }
         if( v731.compareVersion(v240) != -1 ) { return  "Comparison (7.3.1 > 2.4.0) failed"; }
@@ -36,9 +37,9 @@ contract VersionedTest {
     }
 }
 
-contract SubContract is Versioned {
+contract VersionedContract is AbstractVersioned {
 
-    constructor(uint8[3] _version) Versioned(_version[0], _version[1], _version[2]) public {
+    constructor(uint8[3] _version) AbstractVersioned(_version[0], _version[1], _version[2]) public {
 
     }
 }

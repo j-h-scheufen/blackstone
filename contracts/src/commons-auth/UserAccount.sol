@@ -1,13 +1,13 @@
 pragma solidity ^0.4.25;
 
 import "commons-base/Owned.sol";
-import "commons-standards/ERC165.sol";
+import "commons-management/VersionedArtifact.sol";
 
 /**
  * @title UserAccount Interface
  * @dev API for interacting with a user account
  */
-contract UserAccount is ERC165, Owned {
+contract UserAccount is VersionedArtifact, Owned {
 
    event LogUserCreation(
         bytes32 indexed eventId,
