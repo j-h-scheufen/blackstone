@@ -39,7 +39,8 @@ contract ParticipantsManagerTest {
      * @dev Internal helper function to initiate a new ParticipantsManager with an empty database.
      */
     function createNewParticipantsManager() internal returns (ParticipantsManager manager) {
-		manager =  new DefaultParticipantsManager(artifacts);
+		manager =  new DefaultParticipantsManager();
+        ArtifactsFinderEnabled(manager).setArtifactsFinder(artifacts);
         artifacts.registerArtifact(manager.OBJECT_CLASS_ORGANIZATION(), defaultOrganization, [1,0,0], true);
 		ParticipantsManagerDb database = new ParticipantsManagerDb();
 		SystemOwned(database).transferSystemOwnership(manager);

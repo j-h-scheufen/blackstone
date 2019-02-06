@@ -5,6 +5,7 @@ import "commons-base/BaseErrors.sol";
 import "commons-management/AbstractObjectFactory.sol";
 import "commons-management/ObjectProxy.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
+import "commons-management/ArtifactsFinderEnabled.sol";
 
 import "commons-auth/Ecosystem.sol";
 import "commons-auth/ParticipantsManager.sol";
@@ -17,13 +18,14 @@ import "commons-auth/Organization.sol";
  * @title DefaultParticipantsManager
  * @dev Default implementation of the ParticipantsManager interface.
  */
-contract DefaultParticipantsManager is Versioned(1,0,0), ParticipantsManager, AbstractObjectFactory, AbstractDbUpgradeable {
+contract DefaultParticipantsManager is Versioned(1,0,0), AbstractObjectFactory, ArtifactsFinderEnabled, AbstractDbUpgradeable, ParticipantsManager {
 
-    constructor (address _artifactsRegistry) public {
-   		ErrorsLib.revertIf(_artifactsRegistry == address(0),
-			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultParticipantsManager.constructor", "ArtifactsRegistry address must not be empty");
-		artifactsRegistry = _artifactsRegistry;
-        addInterfaceSupport(ERC165_ID_ObjectFactory);
+	/**
+	 * @dev Creates a new DefaultParticipantsManager
+	 */
+	constructor () public {
+        // support for Versioned needs to be added since Versioned does not come with ERC165 inheritance due to being in the lowest bundle commons-base
+        addInterfaceSupport(ERC165_ID_Versioned);
     }
 
     /**
@@ -64,7 +66,7 @@ contract DefaultParticipantsManager is Versioned(1,0,0), ParticipantsManager, Ab
             approvers = _initialApprovers;
         }
 
-        organization = new ObjectProxy(artifactsRegistry, OBJECT_CLASS_ORGANIZATION);
+        organization = new ObjectProxy(artifactsFinder, OBJECT_CLASS_ORGANIZATION);
         Organization(address(organization)).initialize(approvers, _defaultDepartmentName);
         error = ParticipantsManagerDb(database).addOrganization(organization);
         ErrorsLib.revertIf(error != BaseErrors.NO_ERROR(),
