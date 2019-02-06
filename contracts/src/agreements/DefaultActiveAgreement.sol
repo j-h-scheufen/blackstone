@@ -1,6 +1,7 @@
 pragma solidity ^0.4.25;
 
 import "commons-base/ErrorsLib.sol";
+import "commons-base/Versioned.sol";
 import "commons-utils/ArrayUtilsAPI.sol";
 import "commons-utils/TypeUtilsAPI.sol";
 import "commons-collections/Mappings.sol";
@@ -8,13 +9,15 @@ import "commons-collections/MappingsLib.sol";
 import "commons-collections/AbstractDataStorage.sol";
 import "commons-collections/AbstractAddressScopes.sol";
 import "commons-events/DefaultEventEmitter.sol";
+import "commons-standards/AbstractERC165.sol";
+import "commons-management/AbstractDelegateTarget.sol";
 
 import "agreements/Agreements.sol";
 import "agreements/AgreementsAPI.sol";
 import "agreements/Archetype.sol";
 import "agreements/ActiveAgreement.sol";
 
-contract DefaultActiveAgreement is ActiveAgreement, AbstractDataStorage, AbstractAddressScopes, DefaultEventEmitter {
+contract DefaultActiveAgreement is Versioned(1,0,0), ActiveAgreement, AbstractDelegateTarget, AbstractERC165, AbstractDataStorage, AbstractAddressScopes, DefaultEventEmitter {
 	
 	using ArrayUtilsAPI for address[];
 	using TypeUtilsAPI for bytes32;
@@ -29,13 +32,14 @@ contract DefaultActiveAgreement is ActiveAgreement, AbstractDataStorage, Abstrac
 	bool privateFlag;
 	uint32 maxNumberOfEvents;
 	address[] parties;
-	Agreements.LegalState legalState = Agreements.LegalState.FORMULATED; //TODO we currently don't support a negotiation phase in the AN, so the agreement's prose contract is already formulated when the agreement is created.
+	Agreements.LegalState legalState;
 	mapping(address => Agreements.Signature) signatures;
 	mapping(address => Agreements.Signature) cancellations;
 	address[] governingAgreements;
 
 	/**
-	 * @dev Constructor
+	 * @dev Initializes this ActiveAgreement with the provided parameters. This function replaces the
+	 * contract constructor, so it can be used as the delegate target for an ObjectProxy.
 	 * @param _archetype archetype address
 	 * @param _name name
 	 * @param _creator the account that created this agreement
@@ -44,14 +48,16 @@ contract DefaultActiveAgreement is ActiveAgreement, AbstractDataStorage, Abstrac
 	 * @param _parties the signing parties to the agreement
 	 * @param _governingAgreements array of agreement addresses which govern this agreement (optional)
 	 */
-	constructor(
+	function initialize(
 		address _archetype, 
 		string _name, 
 		address _creator, 
 		string _privateParametersFileReference, 
 		bool _isPrivate, 
 		address[] _parties, 
-		address[] _governingAgreements) public 
+		address[] _governingAgreements)
+		external
+		pre_post_initialize
 	{
 		archetype = _archetype;
 		name = _name;
@@ -60,6 +66,8 @@ contract DefaultActiveAgreement is ActiveAgreement, AbstractDataStorage, Abstrac
 		privateFlag = _isPrivate;
 		parties = _parties;
 		governingAgreements = _governingAgreements;
+		legalState = Agreements.LegalState.FORMULATED; //TODO we currently don't support a negotiation phase in the AN, so the agreement's prose contract is already formulated when the agreement is created.
+		// NOTE: some of the parameters for the event must be read from storage, otherwise "stack too deep" compilation errors occur
 		emit LogAgreementCreation(
 			EVENT_ID_AGREEMENTS,
 			address(this),
@@ -69,7 +77,7 @@ contract DefaultActiveAgreement is ActiveAgreement, AbstractDataStorage, Abstrac
 			_isPrivate,
 			uint8(legalState),
 			maxNumberOfEvents,
-			_privateParametersFileReference,
+			privateParametersFileReference,
 			eventLogFileReference
 		);
 		for (uint i = 0; i < _parties.length; i++) {

@@ -8,6 +8,8 @@ import "commons-events/AbstractEventListener.sol";
 import "commons-management/ArtifactsFinder.sol";
 import "commons-management/ArtifactsFinderEnabled.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
+import "commons-management/AbstractObjectFactory.sol";
+import "commons-management/ObjectProxy.sol";
 import "commons-auth/ParticipantsManager.sol";
 import "commons-utils/ArrayUtilsAPI.sol";
 import "bpm-runtime/BpmRuntime.sol";
@@ -26,7 +28,7 @@ import "agreements/ArchetypeRegistry.sol";
  * @title DefaultActiveAgreementRegistry Interface
  * @dev A contract interface to create and manage Active Agreements.
  */
-contract DefaultActiveAgreementRegistry is Versioned(1,0,0), ArtifactsFinderEnabled, AbstractEventListener, AbstractDbUpgradeable, ActiveAgreementRegistry {
+contract DefaultActiveAgreementRegistry is Versioned(1,0,0), AbstractObjectFactory, ArtifactsFinderEnabled, AbstractEventListener, AbstractDbUpgradeable, ActiveAgreementRegistry {
 
 	using ArrayUtilsAPI for address[];
 
@@ -50,7 +52,8 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), ArtifactsFinderEnab
 			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultActiveAgreementRegistry.constructor", "_serviceIdBpmService parameter must not be empty");
 		serviceIdArchetypeRegistry = _serviceIdArchetypeRegistry;
 		serviceIdBpmService = _serviceIdBpmService;
-		addInterfaceSupport(ERC165_ID_Versioned);
+        // support for Versioned needs to be added since Versioned does not come with ERC165 inheritance due to being in the lowest bundle commons-base
+        addInterfaceSupport(ERC165_ID_Versioned);
 	}
 
 	/**
@@ -90,7 +93,8 @@ contract DefaultActiveAgreementRegistry is Versioned(1,0,0), ArtifactsFinderEnab
 		external returns (address activeAgreement)
 	{
 		validateAgreementRequirements(_archetype, _name, _governingAgreements);
-		activeAgreement = new DefaultActiveAgreement(_archetype, _name, _creator, _privateParametersFileReference, _isPrivate, _parties, _governingAgreements);
+        activeAgreement = new ObjectProxy(artifactsFinder, OBJECT_CLASS_AGREEMENT);
+        DefaultActiveAgreement(address(activeAgreement)).initialize(_archetype, _name, _creator, _privateParametersFileReference, _isPrivate, _parties, _governingAgreements);
 		register(activeAgreement, _name);
 		if (_collectionId != "") {
 			addAgreementToCollection(_collectionId, activeAgreement);

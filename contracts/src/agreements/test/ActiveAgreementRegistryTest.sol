@@ -54,6 +54,7 @@ contract ActiveAgreementRegistryTest {
 	address[] governingAgreements;
 	address[] governingArchetypes;
 
+	DefaultActiveAgreement defaultAgreement = new DefaultActiveAgreement();
 	ArchetypeRegistry archetypeRegistry;
 	BpmService bpmService;
 	ArtifactsRegistry artifactsRegistry;
@@ -83,6 +84,7 @@ contract ActiveAgreementRegistryTest {
 		SystemOwned(registryDb).transferSystemOwnership(newRegistry);
 		AbstractDbUpgradeable(newRegistry).acceptDatabase(registryDb);
 		newRegistry.setArtifactsFinder(artifactsRegistry);
+        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_AGREEMENT(), defaultAgreement, defaultAgreement.getVersion(), true);
 		// check that dependencies are wired correctly
 		require (address(newRegistry.getArchetypeRegistry()) != address(0), "ArchetypeRegistry in new ActiveAgreementRegistry not found");
 		require (address(newRegistry.getArchetypeRegistry()) == address(archetypeRegistry), "ArchetypeRegistry in ActiveAgreementRegistry address mismatch");

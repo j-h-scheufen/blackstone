@@ -40,6 +40,8 @@ contract ActiveAgreementRegistry is ProcessStateChangeListener, Upgradeable {
 		address archetypeAddress
 	);
 
+    string public constant OBJECT_CLASS_AGREEMENT = "agreements.ActiveAgreement";
+
 	bytes32 public constant DATA_ID_AGREEMENT = "agreement";
 
 	bytes32 public constant EVENT_ID_AGREEMENT_COLLECTIONS = "AN://agreement-collections";

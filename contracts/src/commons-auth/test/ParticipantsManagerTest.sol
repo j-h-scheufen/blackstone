@@ -24,7 +24,7 @@ contract ParticipantsManagerTest {
     bytes32 id;
     
     ArtifactsRegistry artifacts = new DefaultArtifactsRegistry();
-    Organization defaultOrganization = new DefaultOrganization();
+    DefaultOrganization defaultOrganization = new DefaultOrganization();
     ParticipantsManager participantsManager;
     Ecosystem myEcosystem;
 
@@ -41,7 +41,7 @@ contract ParticipantsManagerTest {
     function createNewParticipantsManager() internal returns (ParticipantsManager manager) {
 		manager =  new DefaultParticipantsManager();
         ArtifactsFinderEnabled(manager).setArtifactsFinder(artifacts);
-        artifacts.registerArtifact(manager.OBJECT_CLASS_ORGANIZATION(), defaultOrganization, [1,0,0], true);
+        artifacts.registerArtifact(manager.OBJECT_CLASS_ORGANIZATION(), defaultOrganization, defaultOrganization.getVersion(), true);
 		ParticipantsManagerDb database = new ParticipantsManagerDb();
 		SystemOwned(database).transferSystemOwnership(manager);
 		AbstractDbUpgradeable(manager).acceptDatabase(database);

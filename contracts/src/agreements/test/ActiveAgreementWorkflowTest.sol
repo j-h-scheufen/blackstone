@@ -82,6 +82,7 @@ contract ActiveAgreementWorkflowTest {
 	ProcessModelRepository processModelRepository;
 	ApplicationRegistry applicationRegistry;
 
+	DefaultActiveAgreement defaultAgreement = new DefaultActiveAgreement();
 	ArtifactsRegistry artifactsRegistry;
 	string constant serviceIdBpmService = "agreements-network/services/BpmService";
 	string constant serviceIdArchetypeRegistry = "agreements-network/services/ArchetypeRegistry";
@@ -134,6 +135,7 @@ contract ActiveAgreementWorkflowTest {
 		SystemOwned(agreementRegistryDb).transferSystemOwnership(newRegistry);
 		AbstractDbUpgradeable(newRegistry).acceptDatabase(agreementRegistryDb);
 		ArtifactsFinderEnabled(newRegistry).setArtifactsFinder(artifactsRegistry);
+        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_AGREEMENT(), defaultAgreement, defaultAgreement.getVersion(), true);
 		// check that dependencies are wired correctly
 		require (address(newRegistry.getArchetypeRegistry()) != address(0), "ArchetypeRegistry in new ActiveAgreementRegistry not found");
 		require (address(newRegistry.getArchetypeRegistry()) == address(archetypeRegistry), "ArchetypeRegistry in ActiveAgreementRegistry address mismatch");
@@ -154,7 +156,8 @@ contract ActiveAgreementWorkflowTest {
 		agreementRegistry = createNewAgreementRegistry();
 
 		// make an agreement with fields of type address and add role qualifiers. Note: archetype is not used, so setting address to 'this'
-		ActiveAgreement agreement = new DefaultActiveAgreement(this, "RoleQualifierAgreement", this, "", false, parties, governingAgreements);
+		ActiveAgreement agreement = new DefaultActiveAgreement();
+		DefaultActiveAgreement(agreement).initialize(this, "RoleQualifierAgreement", this, "", false, parties, governingAgreements);
 		agreement.setDataValueAsBytes32("AgreementRoleField43", "SellerRole");
 		// Adding two scopes to the agreement:
 		// 1. Buyer context: a fixed scope for the msg.sender
