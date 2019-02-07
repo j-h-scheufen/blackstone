@@ -954,7 +954,7 @@ describe(':: External Users ::', () => {
 
   it('Should allow external user to register', async () => {
     // REGISTER USER
-    externalUser1.username = 'new_username';
+    externalUser1.username = `new_username_${rid(5, 'aA0')}`;
     externalUser1.password = 'externaluser';
     const registerResult = await api.registerUser({
       email: externalUser1.email,

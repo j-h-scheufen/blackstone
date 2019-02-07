@@ -123,7 +123,11 @@ describe('Registration/ Login', () => {
   })
 
   it('Login as a user to obtain token', async () => {
-    await api.activateUser(credentials);
+    try {
+      await api.activateUser(credentials);
+    } catch (err) {
+      throw err;
+    }
     let loginResult = await api.loginUser(credentials);
     expect(loginResult.token).to.exist;
     userData = loginResult.loggedInUser;

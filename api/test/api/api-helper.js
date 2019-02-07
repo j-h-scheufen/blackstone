@@ -11,6 +11,7 @@ module.exports = (server) => {
     activateUser: user => app_db_pool.connect()
       .then(async (client) => await client.query('UPDATE users SET activated = true WHERE username = $1', [user.username]))
       .catch((err) => {
+        log.error(`Failed to activate user ${JSON.stringify(user)}: ${err.stack}`);
         throw err;
       }),
     
