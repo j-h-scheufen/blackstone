@@ -58,7 +58,7 @@ services:
       API_DIRECTORY: /app/api
       NODE_ENV: dev
       HOARD_IP: hoard:53431
-      MONAX_ECOSYSTEM: MONAX_PLATFORM
+      IDENTITY_PROVIDER: MONAX_PLATFORM
       CONTRACTS_DEPLOYMENT_ADDRESS: F390C8CA854874472CAD38C0135F78097BCB632D
       CHAIN_URL_GRPC: chain:10997
       POSTGRES_DB_DATABASE: blackstone_development
@@ -68,6 +68,7 @@ services:
       POSTGRES_DB_PORT: 5432
       POSTGRES_DB_SCHEMA: blackstone_development
       POSTGRES_DB_SCHEMA_VENT: blackstone_development
+      HOARD_SALT: hoard-salt
     volumes:
     - .:/app
     ports:

@@ -1,5 +1,4 @@
 const Joi = require('joi');
-
 /*
 sample agreement:
 note- parameters are handled separately
@@ -9,10 +8,6 @@ note- parameters are handled separately
   creator: '36ADA22D3A4B841EFB73414CD97C35C0A660C1C2',
   isPrivate: '1',
   parties: ['36ADA22D3A4B841EFB73414CD97C35C0A660C1C2'],
-  hoardAddress: '',
-  hoardSecret: '',
-  eventLogHoardAddress: '',
-  eventLogHoardSecret: '',
   maxNumberOfEvents: 10,
   collectionId: 'D37EDB770A6BF4C18B3C8D37EDB770A617ED601882335549119BF4C18B3C8D37',
   governingAgreements: [
@@ -40,25 +35,10 @@ const agreementSchema = Joi.object().keys({
       .min(0)
       .max(1),
   ],
+  privateParametersFileReference: Joi.string(),
   maxNumberOfEvents: Joi.number()
     .min(0)
     .default(0),
-  hoardAddress: Joi.string()
-    .hex()
-    .allow('')
-    .default(''),
-  hoardSecret: Joi.string()
-    .hex()
-    .allow('')
-    .default(''),
-  eventLogHoardAddress: Joi.string()
-    .hex()
-    .allow('')
-    .default(''),
-  eventLogHoardSecret: Joi.string()
-    .hex()
-    .allow('')
-    .default(''),
   parties: Joi.array()
     .items(Joi.string().hex())
     .required(),

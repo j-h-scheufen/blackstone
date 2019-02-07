@@ -15,6 +15,7 @@ const createHoard = (req, res, next) => {
 
   const plaintextIn = {
     data: addMeta(meta, req.files[0].buffer),
+    salt: req.body.salt ? Buffer.from(req.body.salt) : Buffer.from(process.env.HOARD_SALT),
   };
 
   hoard
@@ -23,7 +24,6 @@ const createHoard = (req, res, next) => {
       const ref = Object.assign(_ref, {
         address: _ref.address.toString('hex'),
         secretKey: _ref.secretKey.toString('hex'),
-        salt: _ref.salt.toString('hex'),
       });
       res.status(200).json(ref);
       return next();
@@ -35,7 +35,7 @@ const getHoard = (req, res, next) => {
   const ref = {
     address: Buffer.from(req.query.address, 'hex'),
     secretKey: Buffer.from(req.query.secretKey, 'hex'),
-    salt: req.query.salt ? Buffer.from(req.query.salt) : Buffer.from(''),
+    salt: req.query.salt ? Buffer.from(req.query.salt) : Buffer.from(process.env.HOARD_SALT),
   };
 
   if (req.query.password != null) {
@@ -59,12 +59,12 @@ const getHoard = (req, res, next) => {
     .catch(err => next(boom.badImplementation(err)));
 };
 
-const getModelFromHoard = (address, secret) => new Promise(async (resolve, reject) => {
+const getModelFromHoard = ({ address, secretKey }) => new Promise(async (resolve, reject) => {
   try {
     const hoardRef = {
       address: Buffer.from(address, 'hex'),
-      secretKey: Buffer.from(secret, 'hex'),
-      salt: Buffer.from(''),
+      secretKey: Buffer.from(secretKey, 'hex'),
+      salt: Buffer.from(process.env.HOARD_SALT),
     };
     const data = await hoard.get(hoardRef);
     return resolve(data);

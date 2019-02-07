@@ -599,7 +599,7 @@ describe(':: External Users ::', () => {
     ],
     documents: [{
       name: 'doc1.md',
-      hoardAddress: '0x0',
+      address: '0x0',
       secretKey: '0x0',
     }],
     jurisdictions: [],
@@ -607,16 +607,11 @@ describe(':: External Users ::', () => {
     formationProcessDefinition: '',
     governingArchetypes: []
   }
-
   let agreement = {
     name: 'external users agreement',
     archetype: '',
     isPrivate: false,
     parameters: [],
-    hoardAddress: '',
-    hoardSecret: '',
-    eventLogHoardAddress: '',
-    eventLogHoardSecret: '',
     maxNumberOfEvents: 0,
     governingAgreements: []
   }
@@ -667,7 +662,7 @@ describe(':: External Users ::', () => {
     // CREATE ARCHETYPE
     setTimeout(async () => {
       try {
-        archetype.documents[0].hoardAddress = hoardRef.address;
+        archetype.documents[0].address = hoardRef.address;
         archetype.documents[0].secretKey = hoardRef.secretKey;
         Object.assign(archetype, await api.createArchetype(archetype, registeredUser.token));
         expect(String(archetype.address)).match(/[0-9A-Fa-f]{40}/).to.exist;
@@ -695,8 +690,6 @@ describe(':: External Users ::', () => {
         agreement.parameters.push({ name: 'External1Lowercase', type: 6, value: externalUser1.email.toLowerCase() });
         agreement.parameters.push({ name: 'RegisteredNormal', type: 6, value: registeredUser.address });
         agreement.parameters.push({ name: 'RegisteredByEmail', type: 6, value: registeredUser.email.toLowerCase() });
-        agreement.hoardAddress = hoardRef.address;
-        agreement.hoardSecret = hoardRef.secretKey;
         Object.assign(agreement, await api.createAgreement(agreement, registeredUser.token));
         expect(String(agreement.address)).match(/[0-9A-Fa-f]{40}/).to.exist;
         done();

@@ -192,8 +192,8 @@ const load = () => new Promise((resolve, reject) => {
 }).then(() => new Promise(async (resolve, reject) => {
   // Lastly, ensure Ecosystem setup
   // Resolve the Ecosystem address for this ContractsManager
-  if (global.__settings.monax.ecosystem) {
-    const ecosystemName = global.__settings.monax.ecosystem;
+  if (global.__settings.identity_provider) {
+    const ecosystemName = global.__settings.identity_provider;
     log.info(`Validating if Ecosystem ${ecosystemName} is in NameReg`);
     try {
       appManager.ecosystemAddress = await getFromNameRegistry(ecosystemName);
@@ -381,10 +381,10 @@ const addArchetypeParameters = (address, parameters) => new Promise((resolve, re
     });
 });
 
-const addArchetypeDocument = (address, name, hoardAddress, secretKey) => new Promise((resolve, reject) => {
+const addArchetypeDocument = (address, name, fileReference) => new Promise((resolve, reject) => {
   appManager
     .contracts['ArchetypeRegistry']
-    .factory.addDocument(address, name, hoardAddress, secretKey, (error, data) => {
+    .factory.addDocument(address, name, fileReference, (error, data) => {
       if (error || !data.raw) {
         return reject(boom.badImplementation(`Failed to add document to archetype at ${address}: ${error}`));
       }
@@ -396,10 +396,10 @@ const addArchetypeDocument = (address, name, hoardAddress, secretKey) => new Pro
     });
 });
 
-const addArchetypeDocuments = async (address, documents) => {
-  log.trace(`Adding archetype documents to archetype at ${address}: ${JSON.stringify(documents)}`);
-  const resolvedDocs = await Promise.all(documents.map(async (doc) => {
-    const result = await addArchetypeDocument(address, doc.name, doc.hoardAddress, doc.secretKey);
+const addArchetypeDocuments = async (archetypeAddress, documents) => {
+  log.trace(`Adding archetype documents to archetype at ${archetypeAddress}: ${JSON.stringify(documents)}`);
+  const resolvedDocs = await Promise.all(documents.map(async ({ name, address, secretKey }) => {
+    const result = await addArchetypeDocument(archetypeAddress, name, JSON.stringify({ address, secretKey }));
     return result;
   }));
   return resolvedDocs;
@@ -506,8 +506,7 @@ const createAgreement = agreement => new Promise((resolve, reject) => {
     archetype,
     name,
     creator,
-    hoardAddress,
-    hoardSecret,
+    privateParametersFileReference,
     parties,
     collectionId,
     governingAgreements,
@@ -516,7 +515,7 @@ const createAgreement = agreement => new Promise((resolve, reject) => {
   log.trace(`Creating agreement with following data: ${JSON.stringify(agreement)}`);
   appManager
     .contracts['ActiveAgreementRegistry']
-    .factory.createAgreement(archetype, name, creator, hoardAddress, hoardSecret, isPrivate,
+    .factory.createAgreement(archetype, name, creator, privateParametersFileReference, isPrivate,
       parties, collectionId, governingAgreements, (error, data) => {
         if (error || !data.raw) {
           return reject(boomify(error, `Failed to create agreement ${agreement.name} from archetype at ${agreement.archetype}`));
@@ -562,7 +561,7 @@ const updateAgreementEventLog = (agreementAddress, hoardRef) => new Promise((res
   log.trace(`Updating event log hoard reference for agreement at ${agreementAddress} with new hoard reference ${JSON.stringify(hoardRef)}`);
   appManager
     .contracts['ActiveAgreementRegistry']
-    .factory.setEventLogReference(agreementAddress, hoardRef.address, hoardRef.secretKey, (error) => {
+    .factory.setEventLogReference(agreementAddress, hoardRef, (error) => {
       if (error) {
         return reject(boom.badImplementation(`Failed to update event log for agreement at ${agreementAddress}: ${error}`));
       }
@@ -738,17 +737,16 @@ const removeDepartmentUser = (organizationAddress, depId, userAddress, actingUse
     })
     .catch(error => reject(boom.badImplementation(`Error forwarding removeDepartmentUser request via acting user ${actingUserAddress} to oganization ${organizationAddress}! Error: ${error}`)));
 });
-
-const createProcessModel = (modelId, modelName, modelVersion, author, isPrivate, hoardAddress, hoardSecret) => new Promise((resolve, reject) => {
+const createProcessModel = (modelId, modelName, modelVersion, author, isPrivate, modelFileReference) => new Promise((resolve, reject) => {
   log.trace(`Creating process model with following data: ${JSON.stringify({
-    modelId, modelName, modelVersion, author, isPrivate, hoardAddress, hoardSecret,
+    modelId, modelName, modelVersion, author, isPrivate, modelFileReference,
   })}`);
   const modelIdHex = global.stringToHex(modelId);
   const modelNameHex = global.stringToHex(modelName);
   appManager
     .contracts['ProcessModelRepository']
     .factory.createProcessModel(modelIdHex, modelNameHex, modelVersion, author,
-      isPrivate, hoardAddress, hoardSecret, (error, data) => {
+      isPrivate, modelFileReference, (error, data) => {
         if (error || !data.raw) {
           return reject(boom
             .badImplementation(`Failed to create process model ${modelName} with id ${modelId}: ${error}`));

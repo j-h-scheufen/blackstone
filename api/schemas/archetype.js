@@ -36,12 +36,12 @@ sample archetype:
   documents: [
     {
       name: 'pdf-test.pdf',
-      hoardAddress: 'ffb95e8c8d8346c9a63f83078f2a6577b5c3c50896e8b3e5aab4ee4ae3ea9880',
+      address: 'ffb95e8c8d8346c9a63f83078f2a6577b5c3c50896e8b3e5aab4ee4ae3ea9880',
       secretKey: '8265c79f5e52c59b141f2113e10c7c3b08278cebf8f958be69d882329bff31fc',
     },
     {
       name: 'test.md',
-      hoardAddress: '53920144769c88f6359a8f7e0eddae979a4363482fddbdc6f89ae4026a055de8',
+      address: '53920144769c88f6359a8f7e0eddae979a4363482fddbdc6f89ae4026a055de8',
       secretKey: '93b4101e36ddeb7989f38b9657104a76fc6af144912d376d294d40a4a50e0360',
     },
   ],
@@ -97,7 +97,7 @@ const archetypeSchema = Joi.object().keys({
   documents: Joi.array().items(
     Joi.object().keys({
       name: Joi.string(),
-      hoardAddress: Joi.string().hex(),
+      address: Joi.string().hex(),
       secretKey: Joi.string().hex(),
     }),
   ),

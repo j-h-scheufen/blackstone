@@ -129,7 +129,6 @@ describe('FORMATION - EXECUTION with 1 User Task each', () => {
     assignee: seller.id,
     multiInstance: false
   }
-
   let agreement = {
     name: 'user tasks agreement',
     archetype: '',
@@ -144,10 +143,6 @@ describe('FORMATION - EXECUTION with 1 User Task each', () => {
       value: ''
     }
     ],
-    hoardAddress: '',
-    hoardSecret: '',
-    eventLogHoardAddress: '',
-    eventLogHoardSecret: '',
     maxNumberOfEvents: 0
   }
 
@@ -246,10 +241,6 @@ describe('FORMATION - EXECUTION with 1 User Task each', () => {
       archetype: agreement.archetype,
       name: agreement.name,
       creator: agreement.creator,
-      hoardAddress: '',
-      hoardSecret: '',
-      eventLogHoardAddress: '',
-      eventLogHoardSecret: '',
       maxNumberOfEvents: 0,
       isPrivate: agreement.isPrivate,
       parties: [buyer.address],

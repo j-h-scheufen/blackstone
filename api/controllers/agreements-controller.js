@@ -41,33 +41,6 @@ const getArchetypes = asyncMiddleware(async (req, res) => {
   res.json(retData);
 });
 
-const getDocumentsFromHoard = (docMetadata, password) => {
-  // Don't just decrypt. Also fetch each one and resolve name. replace name in the colomn
-  if (docMetadata.length > 0) {
-    const promises = docMetadata.map((_doc) => {
-      const doc = Object.assign(_doc, {
-        secretKey: decrypt(Buffer.from(_doc.secretKey, 'hex'), password).toString('hex').toUpperCase(),
-      });
-      const ref = {
-        address: Buffer.from(doc.hoardAddress, 'hex'),
-        secretKey: Buffer.from(doc.secretKey, 'hex'),
-      };
-      return hoard.get(ref).then((_data) => {
-        const data = splitMeta(_data);
-        doc.name = data.meta.name;
-        return format('Document', doc);
-      });
-    });
-    return Promise.all(promises)
-      .then(documents => Promise.resolve(documents))
-      .catch((err) => {
-        log.error(`Failed to get documents: ${err}`);
-        return Promise.reject(boom.unauthorized('Archetype could not be unlocked'));
-      });
-  }
-  return [];
-};
-
 const getArchetype = asyncMiddleware(async (req, res) => {
   const password = req.query.password || null;
   let data;
@@ -107,7 +80,7 @@ const getArchetype = asyncMiddleware(async (req, res) => {
   }
   data.jurisdictions = await sqlCache.getArchetypeJurisdictions(req.params.address);
   const documentMetadata = await sqlCache.getArchetypeDocuments(req.params.address);
-  data.documents = await getDocumentsFromHoard(documentMetadata, password);
+  data.documents = documentMetadata.map(({ name, fileReference }) => ({ name, ...JSON.parse(fileReference) }));
   data.packages = await sqlCache.getPackagesOfArchetype(req.params.address);
   const governingArchetypes = await sqlCache.getGoverningArchetypes(req.params.address);
   data.governingArchetypes = governingArchetypes.map(arch => format('Archetype', arch));
@@ -155,7 +128,7 @@ const createArchetype = asyncMiddleware(async (req, res) => {
     type.documents.forEach((_obj) => {
       // Set document name to hoard address
       const obj = Object.assign({}, _obj);
-      obj.name = obj.hoardAddress;
+      obj.name = obj.name || obj.address;
       if (password != null) {
         obj.secretKey = encrypt(
           Buffer.from(obj.secretKey, 'hex'),
@@ -410,9 +383,6 @@ const createAgreement = asyncMiddleware(async (req, res) => {
   let parameters = req.body.parameters || [];
   parameters = await createOrFindAccountsWithEmails(parameters, 'type');
   const parties = req.body.parties || [];
-  const hoardRef = {};
-  hoardRef.address = req.body.eventLogHoardAddress || '';
-  hoardRef.secretKey = req.body.eventLogHoardSecret || '';
   parameters.forEach((param) => {
     if (parseInt(param.type, 10) === PARAM_TYPE.SIGNING_PARTY) parties.push(param.value);
   });
@@ -422,8 +392,7 @@ const createAgreement = asyncMiddleware(async (req, res) => {
     creator: req.user.address,
     isPrivate: req.body.isPrivate,
     parties,
-    hoardAddress: '',
-    hoardSecret: '',
+    privateParametersFileReference: JSON.stringify(''), // see TODO below- once we're saving private params to hoard, the returned ref should be passed here
     collectionId: req.body.collectionId,
     governingAgreements: req.body.governingAgreements || [],
   };
@@ -448,11 +417,8 @@ const createAgreement = asyncMiddleware(async (req, res) => {
   //     agreement.hoardAddress = ref.address;
   //     agreement.hoardSecret = ref.secretKey;
 
-  //     log.debug('Request to create new agreement: ' + agreement.name);
-
   const agreementAddress = await contracts.createAgreement(agreement);
   await contracts.setMaxNumberOfEvents(agreementAddress, parseInt(req.body.maxNumberOfEvents, 10));
-  await contracts.updateAgreementEventLog(agreementAddress, hoardRef);
   await setAgreementParameters(agreementAddress, req.body.archetype, parameters);
   await contracts.setAddressScopeForAgreementParameters(agreementAddress, parameters.filter(({ scope }) => scope));
   await contracts.setAddressScopeForAgreementParameters(agreementAddress, parameters
@@ -520,29 +486,27 @@ const getAgreements = asyncMiddleware(async (req, res) => {
 });
 
 const getAgreement = asyncMiddleware(async (req, res) => {
-  const retData = {};
   if (!req.params.address) throw boom.badRequest('Agreement address is required');
   const addr = req.params.address;
-  const data = (await sqlCache.getAgreementData(addr, req.user.address))[0];
+  let data = (await sqlCache.getAgreementData(addr, req.user.address))[0];
   if (!data) throw boom.notFound(`Agreement at ${addr} not found or user has insufficient privileges`);
   const parameters = await getAgreementParameters(addr, null);
   const parties = await sqlCache.getAgreementParties(addr);
-  Object.assign(retData, format('Agreement', data));
-  const password = req.query.password || null;
-  const documentMetadata = await sqlCache.getArchetypeDocuments(retData.archetype);
-  retData.documents = await getDocumentsFromHoard(documentMetadata, password);
-  retData.parameters = parameters.map(param => format('Parameter Value', param));
-  retData.parties = parties.map(party => format('Parameter Value', party));
-  retData.governingAgreements = await sqlCache.getGoverningAgreements(req.params.address);
-  delete retData.hoardAddress;
-  delete retData.hoardSecret;
-  return res.status(200).json(retData);
+  data = format('Agreement', data);
+  const documentMetadata = await sqlCache.getArchetypeDocuments(data.archetype);
+  data.documents = documentMetadata.map(({ name, fileReference }) => ({ name, ...JSON.parse(fileReference) }));
+  data.parameters = parameters.map(param => format('Parameter Value', param));
+  data.parties = parties.map(party => format('Parameter Value', party));
+  data.governingAgreements = await sqlCache.getGoverningAgreements(req.params.address);
+  return res.status(200).json(data);
 });
 
 const updateAgreementEventLog = asyncMiddleware(async ({ params: { address }, body: { eventName, content }, user }, res) => {
   if (!address) throw boom.badRequest('Agreement address is required');
   if (!eventName) throw boom.badRequest('eventName is required');
   const data = await sqlCache.getAgreementEventLogDetails(address);
+  // Parse file reference which is stored as a JSON string
+  data.eventLogFileReference = data.eventLogFileReference ? JSON.parse(data.eventLogFileReference) : null;
   const newEvent = {
     name: eventName,
     submitter: user.address,
@@ -550,12 +514,15 @@ const updateAgreementEventLog = asyncMiddleware(async ({ params: { address }, bo
     content: content || '',
   };
   let eventLog;
-  if (data.eventLogHoardAddress === '0000000000000000000000000000000000000000000000000000000000000000') {
+  if (!data.eventLogFileReference) {
+    // No reference stored- start new event log
     eventLog = { data: [] };
   } else {
+    // Get existing data with reference
     const hoardRef = {
-      address: Buffer.from(data.eventLogHoardAddress, 'hex'),
-      secretKey: Buffer.from(data.eventLogHoardSecret, 'hex'),
+      address: Buffer.from(data.eventLogFileReference.address, 'hex'),
+      secretKey: Buffer.from(data.eventLogFileReference.secretKey, 'hex'),
+      salt: Buffer.from(process.env.HOARD_SALT),
     };
     eventLog = await hoard.get(hoardRef);
     eventLog = splitMeta(eventLog);
@@ -563,16 +530,18 @@ const updateAgreementEventLog = asyncMiddleware(async ({ params: { address }, bo
   }
   if (eventLog.data.length < data.maxNumberOfEvents) {
     eventLog.data.push(newEvent);
+    // Store new data in hoard
     const plaintext = {
       data: addMeta({ agreement: address }, JSON.stringify(eventLog.data)),
+      salt: Buffer.from(process.env.HOARD_SALT),
     };
     let newHoardRef = await hoard.put(plaintext);
+    // Stringify hoard ref to store in contract
     newHoardRef = {
       address: newHoardRef.address.toString('hex'),
       secretKey: newHoardRef.secretKey.toString('hex'),
-      salt: newHoardRef.salt.toString('hex'),
     };
-    await contracts.updateAgreementEventLog(address, newHoardRef);
+    await contracts.updateAgreementEventLog(address, JSON.stringify(newHoardRef));
     return res.status(200).json(newHoardRef);
   }
   throw boom.badRequest(`Cannot log event. Max number of events (${data.maxNumberOfEvents}) has been reached.`);

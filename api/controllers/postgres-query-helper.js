@@ -211,8 +211,8 @@ const getArchetypeJurisdictions = (archetypeAddress) => {
 };
 
 const getArchetypeDocuments = (archetypeAddress) => {
-  const queryString = 'SELECT document_key AS name, encode(hoard_address::bytea, \'hex\') as "hoardAddress", ' +
-    'encode(secret_key:: bytea, \'hex\') as "secretKey" FROM archetype_documents WHERE archetype_address = $1';
+  const queryString = `SELECT document_key AS name, document_reference AS "fileReference"
+    FROM archetype_documents WHERE archetype_address = $1;`;
   return runChainDbQuery(queryString, [archetypeAddress])
     .catch((err) => { throw boom.badImplementation(`Failed to get documents for archetype: ${err}`); });
 };
@@ -282,11 +282,9 @@ const currentUserAgreements = userAccount => `(
       ap.party IN (SELECT ou.organization_address FROM organization_users ou WHERE ou.user_address = '${userAccount}')
     )
   ) `;
-
 const getAgreements = (queryParams, forCurrentUser, userAccount) => {
   const queryString = 'SELECT DISTINCT(a.agreement_address) as address, a.archetype_address as archetype, a.name, a.creator, ' +
-    'encode(a.hoard_address::bytea, \'hex\') as "hoardAddress", encode(a.hoard_secret::bytea, \'hex\') as "hoardSecret", ' +
-    'encode(a.event_log_hoard_address::bytea, \'hex\') as "eventLogHoardAddress", encode(a.event_log_hoard_secret::bytea, \'hex\') as "eventLogHoardSecret", ' +
+    'a.event_log_file_reference AS "eventLogFileReference", ' +
     'a.max_event_count::integer as "maxNumberOfEvents", a.is_private as "isPrivate", a.legal_state as "legalState", ' +
     'a.formation_process_instance as "formationProcessInstance", a.execution_process_instance as "executionProcessInstance", ' +
     '(SELECT count(ap.agreement_address) FROM agreement_to_party ap WHERE a.agreement_address = ap.agreement_address)::integer AS "numberOfParties" ' +
@@ -301,8 +299,7 @@ const getAgreements = (queryParams, forCurrentUser, userAccount) => {
 
 const getAgreementData = (agreementAddress, userAccount) => {
   const queryString = 'SELECT a.agreement_address as address, a.archetype_address as archetype, a.name, a.creator, ' +
-    'encode(a.hoard_address::bytea, \'hex\') as "hoardAddress", encode(a.hoard_secret::bytea, \'hex\') as "hoardSecret", ' +
-    'encode(a.event_log_hoard_address::bytea, \'hex\') as "eventLogHoardAddress", encode(a.event_log_hoard_secret::bytea, \'hex\') as "eventLogHoardSecret", ' +
+    'a.event_log_file_reference as "eventLogFileReference", ' +
     'a.max_event_count::integer as "maxNumberOfEvents", a.is_private as "isPrivate", a.legal_state as "legalState", ' +
     'a.formation_process_instance as "formationProcessInstance", a.execution_process_instance as "executionProcessInstance", ' +
     'UPPER(encode(ac.collection_id::bytea, \'hex\')) as "collectionId", arch.formation_process_definition as "formationProcessDefinition", arch.execution_process_definition as "executionProcessDefinition" ' +
@@ -348,7 +345,7 @@ const getGoverningAgreements = (agreementAddress) => {
 
 const getAgreementEventLogDetails = (agreementAddress) => {
   const queryString = 'SELECT ' +
-    'encode(a.event_log_hoard_address:: bytea, \'hex\') as "eventLogHoardAddress", encode(a.event_log_hoard_secret::bytea, \'hex\') as "eventLogHoardSecret", ' +
+    'a.event_log_file_reference as "eventLogFileReference", ' +
     'a.max_event_count::integer as "maxNumberOfEvents" FROM agreements a WHERE agreement_address = $1;';
   return runChainDbQuery(queryString, [agreementAddress])
     .then((data) => {
@@ -537,8 +534,7 @@ const getTasksByUserAddress = (userAddress) => {
 const getModels = (author) => {
   const queryString = 'SELECT model_address as "modelAddress", ' +
     'id, name, author, is_private as "isPrivate", active, ' +
-    'encode(diagram_address:: bytea, \'hex\') as "diagramAddress", ' +
-    'encode(diagram_secret::bytea, \'hex\') as "diagramSecret", ' +
+    'model_file_reference as "modelFileReference",' +
     'CAST(version_major AS INTEGER) AS "versionMajor", ' +
     'CAST(version_minor AS INTEGER) AS "versionMinor", ' +
     'CAST(version_patch AS INTEGER) AS "versionPatch" ' +
@@ -581,7 +577,7 @@ const getDataMappingsForActivity = (activityInstanceId, dataMappingId) => {
 };
 
 const getProcessDefinitions = (author, { interfaceId, processDefinitionId, modelId }) => {
-  const queryString = 'SELECT pd.id as "processDefinitionId", pd.process_definition_address AS address, pd.model_address as "modelAddress", pd.interface_id as "interfaceId", pm.id as "modelId", encode(pm.diagram_address::bytea, \'hex\') as "diagramAddress", encode(pm.diagram_secret::bytea, \'hex\') as "diagramSecret", pm.is_private as "isPrivate", pm.author ' +
+  const queryString = 'SELECT pd.id as "processDefinitionId", pd.process_definition_address AS address, pd.model_address as "modelAddress", pd.interface_id as "interfaceId", pm.id as "modelId", pm.model_file_reference as "modelFileReference", pm.is_private as "isPrivate", pm.author ' +
     'FROM process_definitions pd JOIN process_models pm ' +
     'ON pd.model_address = pm.model_address ' +
     'WHERE (pm.is_private = $1 OR pm.author = $2) ' +
@@ -594,7 +590,7 @@ const getProcessDefinitions = (author, { interfaceId, processDefinitionId, model
 };
 
 const getProcessDefinitionData = (address) => {
-  const queryString = 'SELECT pd.id as "processDefinitionId", pd.process_definition_address AS address, pd.model_address as "modelAddress", pd.interface_id as "interfaceId", encode(pm.diagram_address::bytea, \'hex\') as "diagramAddress", encode(pm.diagram_secret::bytea, \'hex\') as "diagramSecret", pm.is_private as "isPrivate", pm.author, pm.id as "modelId" ' +
+  const queryString = 'SELECT pd.id as "processDefinitionId", pd.process_definition_address AS address, pd.model_address as "modelAddress", pd.interface_id as "interfaceId", pm.model_file_reference as "modelFileReference", pm.is_private as "isPrivate", pm.author, pm.id as "modelId" ' +
     'FROM process_definitions pd JOIN process_models pm ' +
     'ON pd.model_address = pm.model_address WHERE pd.process_definition_address = $1;';
   return runChainDbQuery(queryString, [address])
@@ -602,7 +598,7 @@ const getProcessDefinitionData = (address) => {
 };
 
 const getProcessModelData = (address) => {
-  const queryString = 'SELECT model_address as "modelAddress", id, name, author, is_private as "isPrivate", active, encode(diagram_address::bytea, \'hex\') as "diagramAddress", encode(diagram_secret::bytea, \'hex\') as "diagramSecret", version_major as "versionMajor", version_minor as "versionMinor", version_patch as "versionPatch" FROM process_models pm ' +
+  const queryString = 'SELECT model_address as "modelAddress", id, name, author, is_private as "isPrivate", active, model_file_reference as "modelFileReference", version_major as "versionMajor", version_minor as "versionMinor", version_patch as "versionPatch" FROM process_models pm ' +
     'WHERE pm.model_address = $1;';
   return runChainDbQuery(queryString, [address])
     .catch((err) => { throw boom.badImplementation(`Failed to get process model: ${err}`); });

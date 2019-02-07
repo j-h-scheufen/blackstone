@@ -292,7 +292,7 @@ const getModelDiagram = asyncMiddleware(async (req, res) => {
     !profileData.find(({ organization }) => organization === model.author)) {
     throw boom.forbidden('You are not authorized to view this private model');
   }
-  const diagram = await getModelFromHoard(model.diagramAddress, model.diagramSecret);
+  const diagram = await getModelFromHoard(JSON.parse(model.modelFileReference));
   const data = splitMeta(diagram);
   if (req.headers.accept.includes('application/xml')) {
     res.attachment(data.meta.name);
@@ -317,13 +317,13 @@ const pushModelXmlToHoard = async (rawXml) => {
         mime: 'application/xml',
         name: 'bpmn_xml',
       }, rawXml),
+      salt: Buffer.from(process.env.HOARD_SALT),
     };
     hoardRef = await hoard.put(plaintext);
-    return {
+    return JSON.stringify({
       address: hoardRef.address.toString('hex'),
       secretKey: hoardRef.secretKey.toString('hex'),
-      salt: hoardRef.salt.toString('hex'),
-    };
+    });
   } catch (err) {
     throw boom.badImplementation(`Failed to upload data to hoard: ${err}`);
   }
@@ -511,7 +511,7 @@ const createModelFromBpmn = asyncMiddleware(async (req, res) => {
   model.author = req.user.address;
   response.model.id = model.id;
   const hoardRef = await pushModelXmlToHoard(rawXml);
-  response.model.address = await contracts.createProcessModel(model.id, model.name, model.version, model.author, model.private, hoardRef.address, hoardRef.secretKey);
+  response.model.address = await contracts.createProcessModel(model.id, model.name, model.version, model.author, model.private, hoardRef);
   response.model.dataStoreFields = await addDataDefinitionsToModel(response.model.address, model.dataStoreFields);
   response.processes = await addProcessesToModel(response.model.address, processes);
   response.processes = response.processes.map(_proc => Object.assign(_proc, { isPrivate: model.isPrivate, author: model.author }));

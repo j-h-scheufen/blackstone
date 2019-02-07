@@ -143,13 +143,10 @@ describe('CONTRACTS', () => {
     active: true,
     governingArchetypes: []
   }
-
   const agreement = {
     name: 'Agreement 1',
     isPrivate: false,
     values: [],
-    hoardAddress: 'hoardAddress',
-    hoardSecret: 'hoardSecret',
     governingAgreements: []
   }
 
@@ -164,7 +161,7 @@ describe('CONTRACTS', () => {
   }).timeout(10000)
 
   it('Should create a process model', async () => {
-    let res = await contracts.createProcessModel(model.id, model.name, model.version, arch.author, false, 'hoardAddress', 'hoardSecret')
+    let res = await contracts.createProcessModel(model.id, model.name, model.version, arch.author, false, JSON.stringify({ address: '', secretKey: '' }));
     res.should.match(/[0-9A-Fa-f]{40}/) // match for 20 byte hex
     pmAddress = res
   }).timeout(10000)

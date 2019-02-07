@@ -1,6 +1,7 @@
+identity_provider = "TEST_ECOSYSTEM" # for testing/demo only. This should be overwritten using the ENV var IDENTITY_PROVIDER
+
 [monax]
 DOUG = ""
-ecosystem = "TEST_ECOSYSTEM" # for testing/demo only. This should be overwritten using the ENV var MONAX_ECOSYSTEM
 hoard = "hoard:53431"
 analyticsID = "TEST"
 

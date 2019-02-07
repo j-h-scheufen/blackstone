@@ -334,8 +334,10 @@ module.exports = (app, customMiddleware) => {
       "address": "65BF0FB03BA5C140B1584A290B157F8907B8FEBE",
       "modelAddress": "6025AF7E4FBB2FCCCFBB855E68025CF20038E142",
       "interfaceId": "Agreement Execution",
-      "diagramAddress": "904cad90af9f665716b7f191969d877cf252dabae1e409f2adeac51da778c285",
-      "diagramSecret": "6828c97c05e8ad45fcdec60538944a88a0a5b419081383cf4993268381cfc4b8",
+      "modelFileReference": {
+        "address": "904cad90af9f665716b7f191969d877cf252dabae1e409f2adeac51da778c285",
+        "secretKey": "6828c97c05e8ad45fcdec60538944a88a0a5b419081383cf4993268381cfc4b8"
+      },
       "isPrivate": false,
       "author": "DAE988ADED111E6AE82DBFD9AE4FFFE97ADBC23D",
       "modelId": "INC_EXEC_2018",
@@ -362,8 +364,7 @@ module.exports = (app, customMiddleware) => {
    * @apiSuccess {String} address Address of the process definition
    * @apiSuccess {String} modelAddress Address of the model the process definition was created under
    * @apiSuccess {String} interfaceId 'Agreement Formation' or 'Agreement Execution'
-   * @apiSuccess {String} diagramAddress Hoard address for the xml file representing the process
-   * @apiSuccess {String} diagramSecret Hoard secret for the xml file representing the process
+   * @apiSuccess {Object} modelFileReference Hoard reference for the xml file representing the process
    * @apiSuccess {String} isPrivate Whether model is private
    * @apiSuccess {String} author Address of the model author
    * @apiSuccess {String} modelId Id of the process model
@@ -374,8 +375,10 @@ module.exports = (app, customMiddleware) => {
       "address": "65BF0FB03BA5C140B1584A290B157F8907B8FEBE",
       "modelAddress": "6025AF7E4FBB2FCCCFBB855E68025CF20038E142",
       "interfaceId": "Agreement Execution",
-      "diagramAddress": "904cad90af9f665716b7f191969d877cf252dabae1e409f2adeac51da778c285",
-      "diagramSecret": "6828c97c05e8ad45fcdec60538944a88a0a5b419081383cf4993268381cfc4b8",
+      "modelFileReference": {
+        "address": "904cad90af9f665716b7f191969d877cf252dabae1e409f2adeac51da778c285",
+        "secretKey": "6828c97c05e8ad45fcdec60538944a88a0a5b419081383cf4993268381cfc4b8"
+      },
       "isPrivate": false,
       "author": "DAE988ADED111E6AE82DBFD9AE4FFFE97ADBC23D",
       "modelId": "INC_EXEC_2018",
