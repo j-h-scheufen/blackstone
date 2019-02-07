@@ -76,7 +76,10 @@ contract DefaultProcessDefinition is AbstractVersionedArtifact(1,0,0), AbstractD
 	 * @param _id the ProcessDefinition ID
 	 * @param _model the address of a ProcessModel in which this ProcessDefinition is created
 	 */
-	function initialize(bytes32 _id, address _model) external {
+	function initialize(bytes32 _id, address _model)
+		external
+		pre_post_initialize
+	{
 		ErrorsLib.revertIf(_id == "",
 			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(),"ProcessDefinition.constructor","_id is NULL");
 		ErrorsLib.revertIf(_model == 0x0,

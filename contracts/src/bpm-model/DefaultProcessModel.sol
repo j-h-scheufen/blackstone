@@ -43,6 +43,7 @@ contract DefaultProcessModel is AbstractVersionedArtifact(1,0,0), AbstractDelega
 	 */
 	function initialize(bytes32 _id, string _name, uint8[3] _version, address _author, bool _isPrivate, string _modelFileReference)
 		external
+		pre_post_initialize
 	{
 		id = _id;
 		name = _name;

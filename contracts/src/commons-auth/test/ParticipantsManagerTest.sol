@@ -58,6 +58,7 @@ contract ParticipantsManagerTest {
         ExternalCaller ecosystemCaller = new ExternalCaller();
 
         myEcosystem = new DefaultEcosystem();
+        myEcosystem.initialize();
         myEcosystem.addExternalAddress(address(ecosystemCaller));
 
         TestUserAccount user1 = new TestUserAccount();

@@ -49,7 +49,10 @@ contract DefaultUserAccount is AbstractVersionedArtifact(1,0,0), AbstractDelegat
      * @param _owner public external address of individual owner (optional)
      * @param _ecosystem address of an ecosystem (optional)
      */
-    function initialize(address _owner, address _ecosystem) external {
+    function initialize(address _owner, address _ecosystem)
+        external
+        pre_post_initialize
+    {
         ErrorsLib.revertIf(_owner == address(0) && _ecosystem == address(0),
             ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultUserAccount.constructor", "One of owner or ecosystem must be provided");
         owner = _owner;
