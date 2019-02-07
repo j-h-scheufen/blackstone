@@ -829,14 +829,14 @@ const createProcessDefinition = (modelAddress, processDefnId) => new Promise((re
   const processDefnIdHex = global.stringToHex(processDefnId);
   appManager
     .contracts['ProcessModelRepository']
-    .factory.createProcessDefinition(processDefnIdHex, modelAddress, (error, data) => {
-    if (error || !data.raw) {
-      return reject(boom
-        .badImplementation(`Failed to create process definition ${processDefnId} in model at ${modelAddress}: ${error}`));
-    }
-    log.info(`Process definition ${processDefnId} in model at ${modelAddress} created at ${data.raw[0]}`);
-    return resolve(data.raw[0]);
-  });
+    .factory.createProcessDefinition(modelAddress, processDefnIdHex, (error, data) => {
+      if (error || !data.raw) {
+        return reject(boom
+          .badImplementation(`Failed to create process definition ${processDefnId} in model at ${modelAddress}: ${error}`));
+      }
+      log.info(`Process definition ${processDefnId} in model at ${modelAddress} created at ${data.raw[0]}`);
+      return resolve(data.raw[0]);
+    });
 });
 
 const addProcessInterfaceImplementation = (pmAddress, pdAddress, interfaceId) => new Promise((resolve, reject) => {
