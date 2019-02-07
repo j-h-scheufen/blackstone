@@ -827,20 +827,17 @@ const addParticipant = (pmAddress, participantId, accountAddress, dataPath, data
 });
 
 const createProcessDefinition = (modelAddress, processDefnId) => new Promise((resolve, reject) => {
-  const processModel = getContract(global.__abi, global.__monax_bundles.BPM_MODEL.contracts.PROCESS_MODEL, modelAddress);
   log.trace(`Creating process definition with Id ${processDefnId} for process model ${modelAddress}`);
   const processDefnIdHex = global.stringToHex(processDefnId);
-  processModel.createProcessDefinition(processDefnIdHex, (error, data) => {
+  appManager
+    .contracts['ProcessModelRepository']
+    .factory.createProcessDefinition(processDefnIdHex, modelAddress, (error, data) => {
     if (error || !data.raw) {
       return reject(boom
         .badImplementation(`Failed to create process definition ${processDefnId} in model at ${modelAddress}: ${error}`));
     }
-    if (parseInt(data.raw[0], 10) !== 1) {
-      return reject(boom
-        .badImplementation(`Error code creating process definition ${processDefnId} in model at ${modelAddress}: ${data.raw[0]}`));
-    }
-    log.info(`Process definition ${processDefnId} in model at ${modelAddress} created at ${data.raw[1]}`);
-    return resolve(data.raw[1]);
+    log.info(`Process definition ${processDefnId} in model at ${modelAddress} created at ${data.raw[0]}`);
+    return resolve(data.raw[0]);
   });
 });
 
