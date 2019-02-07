@@ -401,7 +401,7 @@ const getActivityInstances = ({ processAddress, agreementAddress }) => {
     'pm.id as "modelId",  ' +
     'pd.id as "processDefinitionId",  ' +
     'pd.process_definition_address as "processDefinitionAddress",  ' +
-    'pdat.address_value as "agreementAddress",  ' +
+    'ds.address_value as "agreementAddress",  ' +
     'agr.name as "agreementName",  ' +
     'ad.task_type as "taskType"  ' +
     'FROM activity_instances ai  ' +
@@ -409,11 +409,11 @@ const getActivityInstances = ({ processAddress, agreementAddress }) => {
     'JOIN activity_definitions ad ON ai.activity_id = ad.activity_id AND pi.process_definition_address = ad.process_definition_address ' +
     'JOIN process_definitions pd ON pd.process_definition_address = pi.process_definition_address ' +
     'JOIN process_models pm ON pm.model_address = pd.model_address ' +
-    'LEFT JOIN process_data pdat ON ai.process_instance_address = pdat.process_instance_address ' +
-    'LEFT JOIN agreements agr ON agr.agreement_address = pdat.address_value ' +
-    'WHERE pdat.data_id = \'agreement\'' + // Hard-coded dataId 'agreement' which all processes in the Agreements Network have
+    'LEFT JOIN data_storage ds ON ai.process_instance_address = ds.storage_address ' +
+    'LEFT JOIN agreements agr ON agr.agreement_address = ds.address_value ' +
+    'WHERE ds.data_id = \'agreement\'' + // Hard-coded dataId 'agreement' which all processes in the Agreements Network have
     `${(processAddress ? ` AND ai.process_instance_address = '${processAddress}'` : '')}` +
-    `${(agreementAddress ? ` AND pdat.address_value = '${agreementAddress}';` : ';')}`;
+    `${(agreementAddress ? ` AND ds.address_value = '${agreementAddress}';` : ';')}`;
   return runChainDbQuery(queryString)
     .catch((err) => { throw boom.badImplementation(`Failed to get activities: ${err}`); });
 };
@@ -421,18 +421,18 @@ const getActivityInstances = ({ processAddress, agreementAddress }) => {
 const getActivityInstanceData = (id, userAddress) => {
   const queryString = `SELECT ai.state, ai.process_instance_address as "processAddress", UPPER(encode(ai.activity_instance_id::bytea, 'hex')) as "activityInstanceId", ai.activity_id as "activityId", ai.created, ai.performer, ai.completed, ad.task_type as "taskType", ad.application as application,
       pd.model_address as "modelAddress", pm.id as "modelId", pd.id as "processDefinitionId", pd.process_definition_address as "processDefinitionAddress", app.web_form as "webForm", app.application_type as "applicationType",
-      pdat.address_value as "agreementAddress", pm.author as "modelAuthor", pm.is_private AS "isModelPrivate", agr.name as "agreementName", encode(scopes.fixed_scope, 'hex') AS scope, encode(o.organization_id::bytea, 'hex') as "organizationKey" 
+      ds.address_value as "agreementAddress", pm.author as "modelAuthor", pm.is_private AS "isModelPrivate", agr.name as "agreementName", encode(scopes.fixed_scope, 'hex') AS scope, encode(o.organization_id::bytea, 'hex') as "organizationKey" 
     FROM activity_instances ai
     JOIN process_instances pi ON ai.process_instance_address = pi.process_instance_address
     JOIN activity_definitions ad ON ai.activity_id = ad.activity_id AND pi.process_definition_address = ad.process_definition_address
     JOIN process_definitions pd ON pd.process_definition_address = pi.process_definition_address
     JOIN process_models pm ON pm.model_address = pd.model_address
-    LEFT JOIN process_data pdat ON ai.process_instance_address = pdat.process_instance_address
-    LEFT JOIN agreements agr ON agr.agreement_address = pdat.address_value
+    LEFT JOIN data_storage ds ON ai.process_instance_address = ds.storage_address
+    LEFT JOIN agreements agr ON agr.agreement_address = ds.address_value
     LEFT JOIN applications app ON app.application_id = ad.application
     LEFT JOIN organization_accounts o ON o.organization_address = ai.performer 
     LEFT JOIN process_instance_address_scopes scopes ON (
-      scopes.process_instance_address = pdat.process_instance_address 
+      scopes.process_instance_address = ds.storage_address 
       AND scopes.scope_address = ai.performer 
       AND scopes.scope_context = ai.activity_id
     )
@@ -460,7 +460,7 @@ const getActivityInstanceData = (id, userAddress) => {
         )
       )
     )
-    AND pdat.data_id = 'agreement'`; // Hard-coded dataId 'agreement' which all processes in the Agreements Network have
+    AND ds.data_id = 'agreement'`; // Hard-coded dataId 'agreement' which all processes in the Agreements Network have
   return runChainDbQuery(queryString, [`\\x${id}`, userAddress])
     .then((data) => {
       if (!data) throw boom.notFound(`Activity ${id} not found`);
@@ -487,17 +487,17 @@ const getTasksByUserAddress = (userAddress) => {
   // If we ever want to retrieve more process data (from other data objects in the process or flexibly retrieve data based on a future process configuration aka 'descriptors'), multiple queries will have to be used
   const queryString = `SELECT ai.state, ai.process_instance_address as "processAddress", UPPER(encode(ai.activity_instance_id::bytea, 'hex')) as "activityInstanceId", ai.activity_id as "activityId", ai.created, ai.performer, 
     pd.model_address as "modelAddress", pd.process_definition_address as "processDefinitionAddress", pd.id as "processDefinitionId", 
-    agr.name as "agreementName", pm.id as "modelId", pdat.address_value as "agreementAddress", encode(scopes.fixed_scope::bytea, 'hex') AS scope, encode(o.organization_id::bytea, 'hex') as "organizationKey"
+    agr.name as "agreementName", pm.id as "modelId", ds.address_value as "agreementAddress", encode(scopes.fixed_scope::bytea, 'hex') AS scope, encode(o.organization_id::bytea, 'hex') as "organizationKey"
     FROM activity_instances ai
     JOIN process_instances pi ON ai.process_instance_address = pi.process_instance_address
     JOIN activity_definitions ad ON ai.activity_id = ad.activity_id AND pi.process_definition_address = ad.process_definition_address
     JOIN process_definitions pd ON pd.process_definition_address = pi.process_definition_address
     JOIN process_models pm ON pm.model_address = pd.model_address
-    LEFT JOIN process_data pdat ON ai.process_instance_address = pdat.process_instance_address
-    LEFT JOIN agreements agr ON agr.agreement_address = pdat.address_value
+    LEFT JOIN data_storage ds ON ai.process_instance_address = ds.storage_address
+    LEFT JOIN agreements agr ON agr.agreement_address = ds.address_value
     LEFT JOIN organization_accounts o ON o.organization_address = ai.performer
     LEFT JOIN process_instance_address_scopes scopes ON (
-      scopes.process_instance_address = pdat.process_instance_address
+      scopes.process_instance_address = ds.storage_address
       AND scopes.scope_address = ai.performer 
       AND scopes.scope_context = ai.activity_id
     )
@@ -526,7 +526,7 @@ const getTasksByUserAddress = (userAddress) => {
         )
       )
     )
-    AND pdat.data_id = 'agreement';`; // Hard-coded dataId 'agreement' which all processes in the Agreements Network have
+    AND ds.data_id = 'agreement';`; // Hard-coded dataId 'agreement' which all processes in the Agreements Network have
   return runChainDbQuery(queryString, [userAddress])
     .catch((err) => { throw boom.badImplementation(`Failed to get tasks assigned to user: ${err}`); });
 };
@@ -566,7 +566,7 @@ const getDataMappingsForActivity = (activityInstanceId, dataMappingId) => {
   )
   LEFT JOIN process_instance_address_scopes scopes ON (
     ai.process_instance_address = scopes.process_instance_address AND 
-    ai.activity_id = scopes.key_context AND
+    ai.activity_id = scopes.scope_context AND
     pmd.data_id = COALESCE(NULLIF(scopes.data_storage_id, ''), 'PROCESS_INSTANCE') AND
     pmd.data_path = scopes.data_path
   )

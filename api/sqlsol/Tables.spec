@@ -951,7 +951,7 @@
     "Filter": "Log1Text = 'AN://organizations/users'",
     "DeleteFilter": "CRUD_ACTION = 'delete'",
     "Columns": {
-      "organizationaddress": {
+      "organizationAddress": {
         "name": "organization_address",
         "type": "address",
         "primary": true
