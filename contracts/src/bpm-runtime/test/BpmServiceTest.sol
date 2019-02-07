@@ -89,6 +89,7 @@ contract BpmServiceTest {
 	ArtifactsRegistry artifactsRegistry;
 	ProcessModel defaultProcessModelImpl = new DefaultProcessModel();
 	ProcessDefinition defaultProcessDefinitionImpl = new DefaultProcessDefinition();
+	ProcessInstance defaultProcessInstanceImpl = new DefaultProcessInstance();
 	string constant serviceIdModelRepository = "agreements-network/services/ProcessModelRepository";
 	string constant serviceIdApplicationRegistry = "agreements-network/services/ApplicationRegistry";
 
@@ -128,6 +129,7 @@ contract BpmServiceTest {
 		SystemOwned(serviceDb).transferSystemOwnership(service);
 		AbstractDbUpgradeable(service).acceptDatabase(serviceDb);
 		service.setArtifactsFinder(artifactsRegistry);
+        artifactsRegistry.registerArtifact(service.OBJECT_CLASS_PROCESS_INSTANCE(), address(defaultProcessInstanceImpl), defaultProcessInstanceImpl.getArtifactVersion(), true);
 		// check that dependencies are wired correctly
 		require (address(service.getApplicationRegistry()) != address(0), "ApplicationRegistry in new BpmService not found");
 		require (address(service.getProcessModelRepository()) != address(0), "ProcessModelRepository in new BpmService not found");
@@ -661,7 +663,8 @@ contract BpmServiceTest {
 		(success, bytes32Value) = pd.validate();
 		if (!success) return bytes32Value.toString();
 
-		ProcessInstance pi = new DefaultProcessInstance(pd, this, EMPTY);
+		ProcessInstance pi = new DefaultProcessInstance();
+		pi.initialize(pd, address(this), EMPTY);
 		graph.configure(pi);
 		if (graph.processInstance != address(pi)) return "ProcessGraph.configure() should have set the process instance on the graph";
 
@@ -894,7 +897,8 @@ contract BpmServiceTest {
 		TestBpmService service = createNewTestBpmService();
 
 		// Start first process instance with Payments Made uninitialized
-		ProcessInstance pi = new DefaultProcessInstance(pd, this, EMPTY);
+		ProcessInstance pi = new DefaultProcessInstance();
+		pi.initialize(pd, this, EMPTY);
 		graph.configure(pi);
 
 		// inspect the process graph
@@ -1020,7 +1024,8 @@ contract BpmServiceTest {
 		TestBpmService service = createNewTestBpmService();
 
 		// Start first process instance with Payments Made uninitialized
-		ProcessInstance pi = new DefaultProcessInstance(pd, this, EMPTY);
+		ProcessInstance pi = new DefaultProcessInstance();
+		pi.initialize(pd, this, EMPTY);
 
 		// produce a copy of the ProcessGraph for inspection
 		graph.configure(pi);
@@ -1066,7 +1071,8 @@ contract BpmServiceTest {
 
 
 		// SECOND RUN: Set conditions to make process go straight through and skip activities 2 + 3
-		pi = new DefaultProcessInstance(pd, this, EMPTY);
+		pi = new DefaultProcessInstance();
+		pi.initialize(pd, this, EMPTY);
 		pi.setDataValueAsAddress("agreement", dataStorage);
 		dataStorage.setDataValueAsUint("Year", uint(2000));
 		dataStorage.setDataValueAsString("Lastname", "Smith");
@@ -1232,7 +1238,8 @@ contract BpmServiceTest {
 		(success, bytes32Value) = pd.validate();
 		if (!success) return bytes32Value.toString();
 
-		TestProcessInstance pi = new TestProcessInstance(pd);
+		TestProcessInstance pi = new TestProcessInstance();
+		pi.initialize(pd, address(0), EMPTY);
 		pi.setDataValueAsAddress(dataStorageId, dataStorage); // supports indirect navigation to DataStorage via a field in the process instance
 		pi.setDataValueAsAddress(dataPathOnProcess, this); // supports direct lookup of address via a field in the process instance
 		pi.initRuntime();
@@ -1435,7 +1442,8 @@ contract BpmServiceTest {
 		if (error != BaseErrors.NO_ERROR()) return "Unexpected error during process start";
 		if (addr == 0x0) return "No error during process start, but PI address is empty!";
 		ProcessInstance pi1 = ProcessInstance(addr);
-		ProcessInstance pi2 = new DefaultProcessInstance(pd, 0x0, EMPTY);
+		ProcessInstance pi2 = new DefaultProcessInstance();
+		pi2.initialize(pd, 0x0, EMPTY);
 		service.startProcessInstance(pi2);
 
 		// verify DB state
@@ -1706,8 +1714,6 @@ contract TestData is AbstractDataStorage {}
 contract TestProcessInstance is DefaultProcessInstance {
 
 	bytes32 constant EMPTY = "";
-
-	constructor(ProcessDefinition _pd) DefaultProcessInstance(_pd, 0x0, EMPTY) public {}
 
 	function resolveParticipant(bytes32 _assignee) public view returns (address, bytes32) {
 		return BpmRuntimeLib.resolveParticipant(self.processDefinition.getModel(), DataStorage(this), _assignee);

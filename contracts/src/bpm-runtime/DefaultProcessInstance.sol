@@ -6,7 +6,8 @@ import "commons-base/Owned.sol";
 import "commons-collections/AbstractDataStorage.sol";
 import "commons-collections/AbstractAddressScopes.sol";
 import "bpm-model/ProcessDefinition.sol";
-
+import "commons-management/AbstractVersionedArtifact.sol";
+import "commons-management/AbstractDelegateTarget.sol";
 
 import "bpm-runtime/BpmRuntime.sol";
 import "bpm-runtime/BpmRuntimeLib.sol";
@@ -18,7 +19,7 @@ import "bpm-runtime/AbstractProcessStateChangeEmitter.sol";
  * @title DefaultProcessInstance
  * @dev Default implementation of the ProcessInstance interface
  */
-contract DefaultProcessInstance is ProcessInstance, AbstractDataStorage, AbstractAddressScopes, Owned, AbstractProcessStateChangeEmitter {
+contract DefaultProcessInstance is AbstractVersionedArtifact(1,0,0), AbstractDelegateTarget, AbstractDataStorage, AbstractAddressScopes, AbstractProcessStateChangeEmitter, Owned, ProcessInstance {
 
     using BpmRuntimeLib for BpmRuntime.ProcessGraph;
     using BpmRuntimeLib for BpmRuntime.ProcessInstance;
@@ -84,22 +85,25 @@ contract DefaultProcessInstance is ProcessInstance, AbstractDataStorage, Abstrac
     }
 
     /**
-     * @dev Creates a new ProcessInstance that follows the given ProcessDefinition.
-     * throws if the runtime instance could not be created, e.g. due to a non-valid ProcessDefinition.
+	 * @dev Initializes this DefaultProcessInstance with the provided parameters. This function replaces the
+	 * contract constructor, so it can be used as the delegate target for an ObjectProxy.
      * REVERTS if:
      * - the provided ProcessDefinition is NULL
-     * @param _processDefinition a ProcessDefinition
+     * @param _processDefinition the ProcessDefinition which this ProcessInstance should follow
      * @param _startedBy (optional) account which initiated the transaction that started the process. If empty, the msg.sender is registered as having started the process
      * @param _activityInstanceId the ID of a subprocess activity instance that initiated this ProcessInstance (optional)
      */
-    constructor(ProcessDefinition _processDefinition, address _startedBy, bytes32 _activityInstanceId) public {
-        ErrorsLib.revertIf(address(_processDefinition) == 0x0,
+    function initialize(address _processDefinition, address _startedBy, bytes32 _activityInstanceId)
+        external
+        pre_post_initialize
+    {
+        ErrorsLib.revertIf(_processDefinition == address(0),
             ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultProcessInstance.constructor", "ProcessDefinition is NULL");
         owner = msg.sender;
-        self.startedBy = (_startedBy == 0x0) ? msg.sender : _startedBy; //TODO should startedBy be filled when the process is actually started, i.e. switched to ACTIVE? Maybe if it's not filled, it'll get filled in initRuntime?
+        self.startedBy = (_startedBy == address(0)) ? msg.sender : _startedBy; //TODO should startedBy be filled when the process is actually started, i.e. switched to ACTIVE? Maybe if it's not filled, it'll get filled in initRuntime?
         self.subProcessActivityInstance = _activityInstanceId;
         self.addr = address(this);
-        self.processDefinition = _processDefinition;
+        self.processDefinition = ProcessDefinition(_processDefinition);
         self.state = BpmRuntime.ProcessInstanceState.CREATED;
         emit LogProcessInstanceCreation(
 			EVENT_ID_PROCESS_INSTANCES,

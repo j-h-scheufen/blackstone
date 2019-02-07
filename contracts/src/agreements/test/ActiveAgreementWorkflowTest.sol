@@ -88,6 +88,7 @@ contract ActiveAgreementWorkflowTest {
 	DefaultArchetype defaultArchetypeImpl = new DefaultArchetype();
 	ProcessModel defaultProcessModelImpl = new DefaultProcessModel();
 	ProcessDefinition defaultProcessDefinitionImpl = new DefaultProcessDefinition();
+	ProcessInstance defaultProcessInstanceImpl = new DefaultProcessInstance();
 	ArtifactsRegistry artifactsRegistry;
 	string constant serviceIdBpmService = "agreements-network/services/BpmService";
 	string constant serviceIdArchetypeRegistry = "agreements-network/services/ArchetypeRegistry";
@@ -130,6 +131,7 @@ contract ActiveAgreementWorkflowTest {
         artifactsRegistry.registerArtifact(archetypeRegistry.OBJECT_CLASS_ARCHETYPE(), address(defaultArchetypeImpl), defaultArchetypeImpl.getArtifactVersion(), true);
         artifactsRegistry.registerArtifact(processModelRepository.OBJECT_CLASS_PROCESS_MODEL(), address(defaultProcessModelImpl), defaultProcessModelImpl.getArtifactVersion(), true);
         artifactsRegistry.registerArtifact(processModelRepository.OBJECT_CLASS_PROCESS_DEFINITION(), address(defaultProcessDefinitionImpl), defaultProcessDefinitionImpl.getArtifactVersion(), true);
+        artifactsRegistry.registerArtifact(bpmService.OBJECT_CLASS_PROCESS_INSTANCE(), address(defaultProcessInstanceImpl), defaultProcessInstanceImpl.getArtifactVersion(), true);
 		ArtifactsFinderEnabled(processModelRepository).setArtifactsFinder(artifactsRegistry);
 		ArtifactsFinderEnabled(archetypeRegistry).setArtifactsFinder(artifactsRegistry);
 		ArtifactsFinderEnabled(bpmService).setArtifactsFinder(artifactsRegistry);
@@ -145,7 +147,7 @@ contract ActiveAgreementWorkflowTest {
 		SystemOwned(agreementRegistryDb).transferSystemOwnership(newRegistry);
 		AbstractDbUpgradeable(newRegistry).acceptDatabase(agreementRegistryDb);
 		ArtifactsFinderEnabled(newRegistry).setArtifactsFinder(artifactsRegistry);
-        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_AGREEMENT(), defaultAgreementImpl, defaultAgreementImpl.getArtifactVersion(), true);
+        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_AGREEMENT(), address(defaultAgreementImpl), defaultAgreementImpl.getArtifactVersion(), true);
 		// check that dependencies are wired correctly
 		require (address(newRegistry.getArchetypeRegistry()) != address(0), "ArchetypeRegistry in new ActiveAgreementRegistry not found");
 		require (address(newRegistry.getArchetypeRegistry()) == address(archetypeRegistry), "ArchetypeRegistry in ActiveAgreementRegistry address mismatch");
@@ -194,7 +196,8 @@ contract ActiveAgreementWorkflowTest {
 		if (!valid) return errorMsg.toString();
 
 		// create a PI with agreement
-		ProcessInstance pi = new DefaultProcessInstance(pd, this, EMPTY);
+		ProcessInstance pi = new DefaultProcessInstance();
+		pi.initialize(pd, this, EMPTY);
 		pi.setDataValueAsAddress(agreementRegistry.DATA_ID_AGREEMENT(), address(agreement));
 
 		// function under test

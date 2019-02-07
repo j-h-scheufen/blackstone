@@ -13,6 +13,8 @@ import "bpm-runtime/BpmServiceDb.sol";
  */
 contract BpmService is ObjectFactory, Upgradeable {
 
+    string public constant OBJECT_CLASS_PROCESS_INSTANCE = "bpm.runtime.ProcessInstance";
+
 	/**
 	 * @dev Gets the ProcessModelRepository address for this BpmService
 	 * @return the address of the repository

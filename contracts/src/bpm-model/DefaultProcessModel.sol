@@ -32,7 +32,7 @@ contract DefaultProcessModel is AbstractVersionedArtifact(1,0,0), AbstractDelega
 	bool privateFlag;
 
 	/**
-	 * @dev Initializes this DefaultOrganization with the provided parameters. This function replaces the
+	 * @dev Initializes this DefaultProcessModel with the provided parameters. This function replaces the
 	 * contract constructor, so it can be used as the delegate target for an ObjectProxy.
 	 * @param _id the model ID
 	 * @param _name the model name

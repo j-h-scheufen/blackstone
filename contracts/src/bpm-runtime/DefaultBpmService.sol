@@ -9,6 +9,7 @@ import "commons-collections/MappingsLib.sol";
 import "commons-management/AbstractObjectFactory.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
 import "commons-management/ArtifactsFinderEnabled.sol";
+import "commons-management/ObjectProxy.sol";
 import "bpm-model/ProcessModelRepository.sol";
 import "bpm-model/ProcessDefinition.sol";
 import "bpm-model/ProcessModel.sol";
@@ -117,7 +118,9 @@ contract DefaultBpmService is AbstractVersionedArtifact(1,0,0), AbstractObjectFa
     {
         ErrorsLib.revertIf(_processDefinition == 0x0,
             ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultBpmService.createDefaultProcessInstance", "ProcessDefinition is NULL");
-        processInstance = new DefaultProcessInstance(ProcessDefinition(_processDefinition), (_startedBy == 0x0) ? msg.sender : _startedBy, _activityInstanceId);
+        address piAddress = new ObjectProxy(artifactsFinder, OBJECT_CLASS_PROCESS_INSTANCE);
+        processInstance = ProcessInstance(piAddress);
+        processInstance.initialize(ProcessDefinition(_processDefinition), (_startedBy == 0x0) ? msg.sender : _startedBy, _activityInstanceId);
         processInstance.transferOwnership(msg.sender);
         ErrorsLib.revertIf(address(processInstance) == 0x0,
                 ErrorsLib.INVALID_STATE(), "DefaultBpmService.createDefaultProcessInstance", "Process Instance address empty");
