@@ -11,15 +11,6 @@ contract AbstractVersioned is Versioned {
     uint8[3] semanticVersion;
 
     /**
-     * @dev Constructor
-     */
-    constructor(uint8 _major, uint8 _minor, uint8 _patch) internal {
-        semanticVersion[0] = _major;
-        semanticVersion[1] = _minor;
-        semanticVersion[2] = _patch;
-    }
-
-    /**
      * @dev Compares this contract's version to the version of the contract at the specified address.
      *
      * @param _other the address to which this contract is compared

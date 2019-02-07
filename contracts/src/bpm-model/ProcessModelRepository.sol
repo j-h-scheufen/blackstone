@@ -18,6 +18,8 @@ contract ProcessModelRepository is ObjectFactory, Upgradeable {
 		bool active
 	);
 
+    string public constant OBJECT_CLASS_PROCESS_MODEL = "bpm.model.ProcessModel";
+
 	/**
 	 * @dev Factory function to instantiate a ProcessModel. The model is automatically added to this repository.
 	 * @param _id the model ID
@@ -28,13 +30,6 @@ contract ProcessModelRepository is ObjectFactory, Upgradeable {
 	 * @param _modelFileReference the reference to the external model file from which this ProcessModel originated
 	 */
 	function createProcessModel(bytes32 _id, string _name, uint8[3] _version, address _author, bool _isPrivate, string _modelFileReference) external returns (uint error, address modelAddress);
-
-	/**
-	 * @dev Adds the given ProcessModel to this repository.
-	 * @param _model the ProcessModel to add
-	 * @return an error indicating success or failure
-	 */
-	function addModel(ProcessModel _model) public returns (uint error);
 	
 	/**
 	 * @dev Activates the given ProcessModel and deactivates any previously activated model version of the same ID

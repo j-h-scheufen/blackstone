@@ -7,6 +7,7 @@ import "commons-collections/MappingsLib.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
 import "commons-management/AbstractObjectFactory.sol";
 import "commons-management/ArtifactsFinderEnabled.sol";
+import "commons-management/ObjectProxy.sol";
 
 import "bpm-model/ProcessModel.sol";
 import "bpm-model/BpmModel.sol";
@@ -38,25 +39,14 @@ contract DefaultProcessModelRepository is AbstractVersionedArtifact(1,0,0), Abst
 	 * @param _modelFileReference the reference to the external model file from which this ProcessModel originated
 	 */
 	function createProcessModel(bytes32 _id, string _name, uint8[3] _version, address _author, bool _isPrivate, string _modelFileReference) external returns (uint error, address modelAddress) {
-		ProcessModel pm = new DefaultProcessModel(_id, _name, _version, _author, _isPrivate, _modelFileReference);
-		error = addModel(pm);
-		if (error != BaseErrors.NO_ERROR()) //TODO this should revert the model creation if it could not be added
-			return (error, 0x0);
-		modelAddress = address(pm);
-	}
-
-	/**
-	 * @dev Adds the given ProcessModel to this repository.
-	 * @param _model the ProcessModel to add
-	 * @return BaseErrors.RESOURCE_ALREADY_EXISTS() if a model with the same ID and version already exists
-	 * @return BaseErrors.NO_ERROR() when added successfully
-	 */
-	function addModel(ProcessModel _model) public returns (uint error) {
-		error = ProcessModelRepositoryDb(database).addModel(_model.getId(), _model.getVersion(), _model);
-		if ( error != BaseErrors.NO_ERROR()) return;
+		modelAddress = new ObjectProxy(artifactsFinder, OBJECT_CLASS_PROCESS_MODEL);
+		ProcessModel(modelAddress).initialize(_id, _name, _version, _author, _isPrivate, _modelFileReference);
+		error = ProcessModelRepositoryDb(database).addModel(_id, _version, modelAddress);
+		ErrorsLib.revertIf(error != BaseErrors.NO_ERROR(),
+			ErrorsLib.INVALID_STATE(), "DefaultProcessModelRepository.createProcessModel", "Unable to add the new ProcessModel to the DB contract");
 		// if there is no active model for this ID namespace, yet, then this one becomes the active one by default
-		if (!ProcessModelRepositoryDb(database).modelIsActive(_model.getId())) {
-			ProcessModelRepositoryDb(database).registerActiveModel(_model.getId(), _model);
+		if (!ProcessModelRepositoryDb(database).modelIsActive(_id)) {
+			ProcessModelRepositoryDb(database).registerActiveModel(_id, modelAddress);
 		}
 	}
 

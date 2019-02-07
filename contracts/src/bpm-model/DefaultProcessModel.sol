@@ -31,7 +31,8 @@ contract DefaultProcessModel is AbstractVersionedArtifact(1,0,0), AbstractDelega
 	bool privateFlag;
 
 	/**
-	 * @dev Creates a new DefaultProcessModel with the given parameters
+	 * @dev Initializes this DefaultOrganization with the provided parameters. This function replaces the
+	 * contract constructor, so it can be used as the delegate target for an ObjectProxy.
 	 * @param _id the model ID
 	 * @param _name the model name
 	 * @param _version the model version
@@ -39,14 +40,15 @@ contract DefaultProcessModel is AbstractVersionedArtifact(1,0,0), AbstractDelega
 	 * @param _isPrivate indicates if model is visible only to creator
 	 * @param _modelFileReference the reference to the external model file from which this ProcessModel originated
 	 */
-	constructor(bytes32 _id, string _name, uint8[3] _version, address _author, bool _isPrivate, string _modelFileReference)
-		AbstractVersioned(_version[0], _version[1], _version[2])
-		AbstractNamedElement(_id, _name)
-		public
+	function initialize(bytes32 _id, string _name, uint8[3] _version, address _author, bool _isPrivate, string _modelFileReference)
+		external
 	{
+		id = _id;
+		name = _name;
+		semanticVersion = _version;
 		modelFileReference = _modelFileReference;
 		author = _author;
-		privateFlag = _isPrivate;
+		modelFileReference = _modelFileReference;
 		emit LogProcessModelCreation(
 			EVENT_ID_PROCESS_MODELS,
 			address(this),
@@ -64,20 +66,20 @@ contract DefaultProcessModel is AbstractVersionedArtifact(1,0,0), AbstractDelega
 	
 	/**
 	 * @dev Creates a new process definition with the given parameters in this ProcessModel
-	 * @param _id the process ID
+	 * @param _processDefinitionId the process definition ID
 	 * @return error - BaseErrors.RESOURCE_ALREADY_EXISTS(), if a process definition with the same ID already exists, BaseErrors.NO_ERROR() otherwise
 	 * @return newAddress - the address of the new ProcessDefinition when successful
 	 */
-	function createProcessDefinition(bytes32 _id) external returns (uint error, address newAddress) {
-		if (processDefinitions.exists(_id)) return (BaseErrors.RESOURCE_ALREADY_EXISTS(), 0x0);
-		newAddress = new DefaultProcessDefinition(_id, this);
-		error = processDefinitions.insert(_id, newAddress);
+	function createProcessDefinition(bytes32 _processDefinitionId) external returns (uint error, address newAddress) {
+		if (processDefinitions.exists(_processDefinitionId)) return (BaseErrors.RESOURCE_ALREADY_EXISTS(), 0x0);
+		newAddress = new DefaultProcessDefinition(_processDefinitionId, this);
+		error = processDefinitions.insert(_processDefinitionId, newAddress);
 		emit LogProcessDefinitionCreation(
 			EVENT_ID_PROCESS_DEFINITIONS,
 			newAddress,
-			_id,
+			_processDefinitionId,
 			bytes32(""),
-			ProcessModel(this).getId(),
+			id,
 			address(this)
 		);
 	}

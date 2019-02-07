@@ -8,7 +8,10 @@ import "commons-base/AbstractNamedElement.sol";
  */
 contract TestElement is AbstractNamedElement {
 	
-	constructor(bytes32 _id, string _name) AbstractNamedElement(_id, _name) public {}
+	constructor(bytes32 _id, string _name) public {
+		id = _id;
+		name = _name;
+	}
 }
 
 contract BaseTest {

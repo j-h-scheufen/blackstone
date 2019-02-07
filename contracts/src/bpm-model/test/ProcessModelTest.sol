@@ -24,7 +24,8 @@ contract ProcessModelTest {
 		uint error;
 		address newAddress;
 
-		ProcessModel pm = new DefaultProcessModel("testModel", "Test Model", [1,2,3], author, false, dummyModelFileReference);
+		ProcessModel pm = new DefaultProcessModel();
+		pm.initialize("testModel", "Test Model", [1,2,3], author, false, dummyModelFileReference);
 		if (pm.getId() != "testModel") return "ProcessModel ID not set correctly";
 		if (bytes(pm.getName()).length != bytes(modelName).length) return "ProcessModel Name not set correctly";
 		if (pm.getAuthor() != author) return "ProcessModel Author not set correctly";

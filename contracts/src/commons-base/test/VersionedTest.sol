@@ -39,7 +39,7 @@ contract VersionedTest {
 
 contract VersionedContract is AbstractVersioned {
 
-    constructor(uint8[3] _version) AbstractVersioned(_version[0], _version[1], _version[2]) public {
-
+    constructor(uint8[3] _version) public {
+        semanticVersion = _version;
     }
 }

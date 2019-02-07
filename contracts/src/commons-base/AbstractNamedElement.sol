@@ -10,17 +10,7 @@ contract AbstractNamedElement is NamedElement {
 	
 	bytes32 id;
 	string name;
-	
-	/**
-	 * @dev Creates a new AbstractNamedElement with the specified ID and name
-	 * @param _id the ID
-	 * @param _name the name 
-	 */
-	constructor(bytes32 _id, string _name) public {
-		id = _id;
-		name = _name;
-	}
-	
+		
 	/**
 	 * @dev Returns the ID of this contract.
 	 * @return the bytes32 ID

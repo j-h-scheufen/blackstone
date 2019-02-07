@@ -3,6 +3,8 @@ pragma solidity ^0.4.25;
 import "commons-base/BaseErrors.sol";
 import "commons-base/Owned.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
+import "commons-management/ArtifactsRegistry.sol";
+import "commons-management/DefaultArtifactsRegistry.sol";
 
 import "bpm-model/DefaultProcessModelRepository.sol";
 import "bpm-model/ProcessModelRepositoryDb.sol";
@@ -10,42 +12,42 @@ import "bpm-model/DefaultProcessModel.sol";
 
 contract ProcessModelRepositoryTest {
 	
-	ProcessModelRepositoryDb db = new ProcessModelRepositoryDb();
-	ProcessModelRepository repo = new DefaultProcessModelRepository();
-
 	address author = 0x9d7fDE63776AaB9E234d656E654ED9876574C54C;
 	uint error;
 	string dummyModelFileReference = "{json grant}";
-	
+
+    ArtifactsRegistry artifacts = new DefaultArtifactsRegistry();
+    DefaultProcessModel defaultProcessModelImpl = new DefaultProcessModel();
+
+    /**
+     * @dev Internal helper function to initiate a new ParticipantsManager with an empty database.
+     */
+    function createNewProcessModelRepository() internal returns (ProcessModelRepository repository) {
+		repository =  new DefaultProcessModelRepository();
+        ArtifactsFinderEnabled(repository).setArtifactsFinder(artifacts);
+        artifacts.registerArtifact(repository.OBJECT_CLASS_PROCESS_MODEL(), defaultProcessModelImpl, defaultProcessModelImpl.getArtifactVersion(), true);
+		ProcessModelRepositoryDb database = new ProcessModelRepositoryDb();
+		SystemOwned(database).transferSystemOwnership(repository);
+		AbstractDbUpgradeable(repository).acceptDatabase(database);
+	}
+
 	function testRepository() external returns (string) {
 
-		SystemOwned(db).transferSystemOwnership(repo);
-		AbstractDbUpgradeable(repo).acceptDatabase(db);
+		ProcessModelRepository repo = createNewProcessModelRepository();
 		
-		ProcessModel pm1 = new DefaultProcessModel("testModel", "Test Model", [1,0,0], author, false, dummyModelFileReference);
-		ProcessModel pm2 = new DefaultProcessModel("testModel", "Test Model", [2,0,0], author, false, dummyModelFileReference);
-		ProcessModel pm3 = new DefaultProcessModel("testModel", "Test Model", [3,0,0], author, false, dummyModelFileReference);
-		
-		error = repo.addModel(pm1);
-		if (error != BaseErrors.NO_ERROR()) return "Adding model 1 failed.";
-		
-		if (repo.getModel("testModel") != address(pm1)) return "Version 1.0.0 should be the active one.";
+		( ,address pm1) = repo.createProcessModel("testModel", "Test Model", [1,0,0], author, false, dummyModelFileReference);
+		( ,address pm2) = repo.createProcessModel("testModel", "Test Model", [2,0,0], author, false, dummyModelFileReference);
+		( ,address pm3) = repo.createProcessModel("testModel", "Test Model", [3,0,0], author, false, dummyModelFileReference);
+				
+		if (repo.getModel("testModel") != pm1) return "Version 1.0.0 should be the active one.";
 
-		error = repo.addModel(pm3);
-		if (error != BaseErrors.NO_ERROR()) return "Adding model 3 failed.";
-		
-		error = repo.addModel(pm2);
-		if (error != BaseErrors.NO_ERROR()) return "Adding model 2 failed.";
-
-		error = repo.activateModel(pm2);
+		error = repo.activateModel(ProcessModel(pm2));
 		if (error != BaseErrors.NO_ERROR()) return "Error activating model 2."; 
+		if (repo.getModel("testModel") != pm2) return "Version 2.0.0 should be the active one.";
 		
-		if (repo.getModel("testModel") != address(pm2)) return "Version 2.0.0 should be the active one.";
-		
-		error = repo.activateModel(pm3);
+		error = repo.activateModel(ProcessModel(pm3));
 		if (error != BaseErrors.NO_ERROR()) return "Error activating model 3."; 
-
-		if (repo.getModel("testModel") != address(pm3)) return "Version 3.0.0 should be the active one.";
+		if (repo.getModel("testModel") != pm3) return "Version 3.0.0 should be the active one.";
 				
 		return "success";
 	}

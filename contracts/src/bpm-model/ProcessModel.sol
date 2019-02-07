@@ -48,6 +48,18 @@ contract ProcessModel is VersionedArtifact, Versioned, NamedElement {
 	bytes32 public constant EVENT_ID_PROCESS_MODEL_DATA = "AN://process-model-data";
 
 	/**
+	 * @dev Initializes this DefaultOrganization with the provided parameters. This function replaces the
+	 * contract constructor, so it can be used as the delegate target for an ObjectProxy.
+	 * @param _id the model ID
+	 * @param _name the model name
+	 * @param _version the model version
+	 * @param _author the model author
+	 * @param _isPrivate indicates if model is visible only to creator
+	 * @param _modelFileReference the reference to the external model file from which this ProcessModel originated
+	 */
+	function initialize(bytes32 _id, string _name, uint8[3] _version, address _author, bool _isPrivate, string _modelFileReference) external;
+
+	/**
 	 * @dev Creates a new process definition with the given parameters in this ProcessModel
 	 * @param _id the process ID
 	 * @return an error code indicating success or failure
