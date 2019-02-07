@@ -15,56 +15,56 @@ jobs:
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [ErrorsLib]
 
 - name: TypeUtils
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [TypeUtils]
 
 - name: ArrayUtils
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [ArrayUtils]
 
 - name: MappingsLib
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [MappingsLib]
 
 - name: DataStorageUtils
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [DataStorageUtils]
 
 - name: ERC165Utils
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [ERC165Utils]
 
 - name: BpmRuntimeLib
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [BpmRuntimeLib]
 
 - name: AgreementsAPI
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [AgreementsAPI]
 
 #####
@@ -74,7 +74,7 @@ jobs:
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [BpmService]
 
 #####
@@ -121,8 +121,8 @@ jobs:
   call:
     destination: $DOUG
     bin: DOUG
-    function: deployContract
-    data: [ArchetypeRegistry, $ArchetypeRegistry]
+    function: deploy
+    data: ["AN://services/ArchetypeRegistry", $ArchetypeRegistry]
 
 - name: AssertArchetypeRegistry
   assert:
@@ -137,6 +137,7 @@ jobs:
   deploy:
     contract: agreements/DefaultActiveAgreementRegistry.sol
     libraries: ErrorsLib:$ErrorsLib, TypeUtilsAPI:$TypeUtils, ArrayUtilsAPI:$ArrayUtils, MappingsLib:$MappingsLib, BpmRuntimeLib:$BpmRuntimeLib, DataStorageUtils:$DataStorageUtils, ERC165Utils:$ERC165Utils, AgreementsAPI:$AgreementsAPI
+    data: ["AN://services/ArchetypeRegistry", "AN://services/BpmService"]
 
 - name: ActiveAgreementRegistryDb
   deploy:
@@ -174,8 +175,8 @@ jobs:
   call:
     destination: $DOUG
     bin: DOUG
-    function: deployContract
-    data: [ActiveAgreementRegistry, $ActiveAgreementRegistry]
+    function: deploy
+    data: ["AN://services/ActiveAgreementRegistry", $ActiveAgreementRegistry]
 
 - name: AssertActiveAgreementRegistry
   assert:
@@ -206,3 +207,43 @@ jobs:
     key: $getArchetypeRegistryFromAgreementRegistry
     relation: eq
     val: $ArchetypeRegistry
+
+#####
+# Register object classes
+#####
+
+- name: DefaultArchetypeImplementation
+  deploy:
+    contract: DefaultArchetype.bin
+    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib
+
+- name: ObjectClassArchetype
+  query-contract:
+    destination: $ArchetypeRegistry
+    bin: ArchetypeRegistry
+    function: OBJECT_CLASS_ARCHETYPE
+
+- name: RegisterArchetypeObjectClass
+  call:
+    destination: $DOUG
+    bin: DOUG
+    function: register
+    data: [$ObjectClassArchetype, $DefaultArchetypeImplementation]
+
+- name: DefaultActiveAgreementImplementation
+  deploy:
+    contract: DefaultActiveAgreement.bin
+    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib
+
+- name: ObjectClassActiveAgreement
+  query-contract:
+    destination: $ActiveAgreementsRegistry
+    bin: ActiveAgreementsRegistry
+    function: OBJECT_CLASS_AGREEMENT
+
+- name: RegisterActiveAgreementObjectClass
+  call:
+    destination: $DOUG
+    bin: DOUG
+    function: register
+    data: [$ObjectClassActiveAgreement, $DefaultActiveAgreementImplementation]

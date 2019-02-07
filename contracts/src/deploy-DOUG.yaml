@@ -55,6 +55,8 @@ jobs:
 #####
 # Main Contract (DOUG) + DougProxy
 #####
+
+# Implementation
 - name: DefaultArtifactsRegistry
   deploy:
     contract: DefaultArtifactsRegistry.bin
@@ -73,6 +75,7 @@ jobs:
     bin: DefaultArtifactsRegistry
     function: initialize
 
+# Implementation
 - name: DefaultDoug
   deploy:
     contract: DefaultDoug.bin
@@ -101,7 +104,7 @@ jobs:
 - name: SetArtifactsRegistryInDoug
   call:
     destination: $DOUG
-    bin: DOUG
+    bin: DefaultDoug
     function: setArtifactsRegistry
     data: [$ArtifactsRegistry]
 
@@ -129,61 +132,61 @@ jobs:
   call:
     destination: $DOUG
     bin: DefaultDoug
-    function: deploy
+    function: register
     data: [ErrorsLib, $ErrorsLib]
 
 - name: registerTypeUtilsLibrary
   call:
     destination: $DOUG
     bin: DefaultDoug
-    function: deploy
+    function: register
     data: [TypeUtils, $TypeUtilsImpl]
 
 - name: registerArrayUtilsLibrary
   call:
     destination: $DOUG
     bin: DefaultDoug
-    function: deploy
+    function: register
     data: [ArrayUtils, $ArrayUtilsImpl]
 
 - name: registerMappingsLibrary
   call:
     destination: $DOUG
     bin: DefaultDoug
-    function: deploy
+    function: register
     data: [MappingsLib, $MappingsLib]
 
 - name: registerDataStorageUtilsLibrary
   call:
     destination: $DOUG
     bin: DefaultDoug
-    function: deploy
+    function: register
     data: [DataStorageUtils, $DataStorageUtils]
 
 - name: registerERC165UtilsLibrary
   call:
     destination: $DOUG
     bin: DefaultDoug
-    function: deploy
+    function: register
     data: [ERC165Utils, $ERC165Utils]
 
 - name: registerBpmModelLibrary
   call:
     destination: $DOUG
     bin: DefaultDoug
-    function: deploy
+    function: register
     data: [BpmModelLib, $BpmModelLib]
 
 - name: registerBpmRuntimeLibrary
   call:
     destination: $DOUG
     bin: DefaultDoug
-    function: deploy
+    function: register
     data: [BpmRuntimeLib, $BpmRuntimeLib]
 
 - name: registerAgreementsApiLibrary
   call:
     destination: $DOUG
     bin: DefaultDoug
-    function: deploy
+    function: register
     data: [AgreementsAPI, $AgreementsAPI]

@@ -9,14 +9,14 @@ jobs:
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [ErrorsLib]
 
 - name: ArrayUtils
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [ArrayUtils]
 
 - name: IsoCountries

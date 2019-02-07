@@ -15,42 +15,42 @@ jobs:
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [ErrorsLib]
 
 - name: TypeUtils
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [TypeUtils]
 
 - name: ArrayUtils
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [ArrayUtils]
 
 - name: MappingsLib
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [MappingsLib]
 
 - name: BpmRuntimeLib
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [BpmRuntimeLib]
 
 - name: DataStorageUtils
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [DataStorageUtils]
 
 #####
@@ -63,7 +63,7 @@ jobs:
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [ApplicationRegistry]
 
 - name: AgreementSignatureCheck
@@ -84,41 +84,6 @@ jobs:
     bin: ApplicationRegistry
     function: addAccessPoint
     data: ["AgreementSignatureCheck", "agreement", 59, 0]
-
-- name: registerWebAppApprovalForm
-  call:
-    destination: $ApplicationRegistry
-    bin: ApplicationRegistry
-    function: addApplication
-    data: ["WebAppApprovalForm", 2, "0000000000000000000000000000000000000000", "", "TaskApprovalForm"]
-
-- name: addWebAppApprovalFormOutAccessPoint1
-  call:
-    destination: $ApplicationRegistry
-    bin: ApplicationRegistry
-    function: addAccessPoint
-    data: ["WebAppApprovalForm", "writeName", 2, 1]
-
-- name: addWebAppApprovalFormInAccessPoint1
-  call:
-    destination: $ApplicationRegistry
-    bin: ApplicationRegistry
-    function: addAccessPoint
-    data: ["WebAppApprovalForm", "readName", 2, 0]
-
-- name: addWebAppApprovalFormOutAccessPoint2
-  call:
-    destination: $ApplicationRegistry
-    bin: ApplicationRegistry
-    function: addAccessPoint
-    data: ["WebAppApprovalForm", "writeApproved", 1, 1]
-
-- name: addWebAppApprovalFormInAccessPoint2
-  call:
-    destination: $ApplicationRegistry
-    bin: ApplicationRegistry
-    function: addAccessPoint
-    data: ["WebAppApprovalForm", "readApproved", 1, 0]
 
 # TotalCounterCheck
 - name: TotalCounterCheck

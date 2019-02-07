@@ -13,6 +13,11 @@ contract AbstractDelegateTarget {
 	bool initialized;
 
 	/**
+	 * @dev Internal constructor to enforce abstract contract
+	 */
+	constructor() internal {}
+
+	/**
 	 * @dev Guards an initialization function by reverting if the contract has already been initialized and also
 	 * guaranteeing that the initialized flag is set to true at the end.
 	 */

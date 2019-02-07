@@ -1,19 +1,25 @@
 jobs:
-  - name: ArchetypeRegisterInterface
+  - name: ArchetypeRegister
     build:
       contract: agreements/ArchetypeRegistry.sol
   - name: Archetype
     build:
       contract: agreements/Archetype.sol
+  - name: DefaultArchetype
+    build:
+      contract: agreements/DefaultArchetype.sol
   - name: ArchetypeRegistry
     build:
       contract: agreements/DefaultArchetypeRegistry.sol
   - name: ArchetypeRegistryDb
     build:
       contract: agreements/ArchetypeRegistryDb.sol
-  - name: ActiveAgreementInterface
+  - name: ActiveAgreement
     build:
       contract: agreements/ActiveAgreement.sol
+  - name: DefaultActiveAgreement
+    build:
+      contract: agreements/DefaultActiveAgreement.sol
   - name: ActiveAgreementRegistryInterface
     build:
       contract: agreements/ActiveAgreementRegistry.sol

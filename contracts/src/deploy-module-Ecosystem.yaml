@@ -15,32 +15,32 @@ jobs:
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [ErrorsLib]
 
 - name: TypeUtils
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [TypeUtils]
 
 - name: ArrayUtils
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [ArrayUtils]
 
 - name: MappingsLib
   query-contract:
     destination: $DOUG
     bin: DOUG
-    function: lookupContract
+    function: lookup
     data: [MappingsLib]
 
 #####
-# Ecosystem
+# EcosystemRegistry
 #####
 - name: EcosystemRegistry
   deploy:
@@ -83,8 +83,8 @@ jobs:
   call:
     destination: $DOUG
     bin: DOUG
-    function: deployContract
-    data: [EcosystemRegistry, $EcosystemRegistry]
+    function: deploy
+    data: ["AN://services/EcosystemRegistry", $EcosystemRegistry]
 
 - name: AssertEcosystemRegistry
   assert:
@@ -136,8 +136,8 @@ jobs:
   call:
     destination: $DOUG
     bin: DOUG
-    function: deployContract
-    data: [ParticipantsManager, $ParticipantsManager]
+    function: deploy
+    data: ["AN://services/ParticipantsManager", $ParticipantsManager]
 
 - name: AssertParticipantsManager
   assert:
@@ -148,8 +148,6 @@ jobs:
 #####
 # Register object classes
 #####
-
-# TODO retrieve ArtifactsRegistry from DOUG
 
 - name: DefaultOrganizationImplementation
   deploy:
@@ -164,12 +162,43 @@ jobs:
 
 - name: RegisterOrganizationObjectClass
   call:
-    destination: $ArtifactsRegistry
-    bin: DefaultArtifactsRegistry
-    function: registerArtifact
-    data:
-        - $ObjectClassOrganization
-        - $DefaultOrganizationImplementation
-        - [1,0,0]
-        - "true"
+    destination: $DOUG
+    bin: DOUG
+    function: register
+    data: [$ObjectClassOrganization, $DefaultOrganizationImplementation]
 
+- name: DefaultUserAccountImplementation
+  deploy:
+    contract: DefaultUserAccount.bin
+    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib
+
+- name: ObjectClassUserAccount
+  query-contract:
+    destination: $ParticipantsManager
+    bin: ParticipantsManager
+    function: OBJECT_CLASS_USER_ACCOUNT
+
+- name: RegisterUserAccountObjectClass
+  call:
+    destination: $DOUG
+    bin: DOUG
+    function: register
+    data: [$ObjectClassUserAccount, $DefaultUserAccountImplementation]
+
+- name: DefaultEcosystemImplementation
+  deploy:
+    contract: DefaultEcosystem.bin
+    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib
+
+- name: ObjectClassEcosystem
+  query-contract:
+    destination: $EcosystemRegistry
+    bin: EcosystemRegistry
+    function: OBJECT_CLASS_ECOSYSTEM
+
+- name: RegisterEcosystemObjectClass
+  call:
+    destination: $DOUG
+    bin: DOUG
+    function: register
+    data: [$ObjectClassEcosystem, $DefaultEcosystemImplementation]

@@ -2,9 +2,15 @@ jobs:
   - name: ProcessModel
     build:
       contract: bpm-model/ProcessModel.sol
+  - name: DefaultProcessModel
+    build:
+      contract: bpm-model/DefaultProcessModel.sol
   - name: ProcessDefinition
     build:
       contract: bpm-model/ProcessDefinition.sol
+  - name: DefaultProcessDefinition
+    build:
+      contract: bpm-model/DefaultProcessDefinition.sol
   - name: ProcessModelRepository
     build:
       contract: bpm-model/ProcessModelRepository.sol
@@ -17,6 +23,9 @@ jobs:
   - name: ProcessInstance
     build:
       contract: bpm-runtime/ProcessInstance.sol
+  - name: DefaultProcessInstance
+    build:
+      contract: bpm-runtime/DefaultProcessInstance.sol
   - name: ApplicationRegistry
     build:
       contract: bpm-runtime/ApplicationRegistry.sol
