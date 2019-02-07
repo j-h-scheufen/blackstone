@@ -61,7 +61,7 @@ const logger = require(`${global.__common}/monax-logger`);
       if (log.isDebugEnabled()) {
         log.debug(`Loading contract ${name}`);
       }
-      self.doug.lookupContract(name, (err, data) => {
+      self.doug.lookup(name, (err, data) => {
         if (err) return reject(err);
         let retAddress = data.raw[0].valueOf();
         retAddress = (retAddress.slice(0, 2) === '0x') ? retAddress.slice(2) : retAddress;

@@ -75,7 +75,7 @@ jobs:
     destination: $DOUG
     bin: DOUG
     function: lookup
-    data: [BpmService]
+    data: ["BpmService"]
 
 #####
 # ArchetypeRegistry
@@ -122,7 +122,7 @@ jobs:
     destination: $DOUG
     bin: DOUG
     function: deploy
-    data: ["AN://services/ArchetypeRegistry", $ArchetypeRegistry]
+    data: ["ArchetypeRegistry", $ArchetypeRegistry]
 
 - name: AssertArchetypeRegistry
   assert:
@@ -137,7 +137,7 @@ jobs:
   deploy:
     contract: agreements/DefaultActiveAgreementRegistry.sol
     libraries: ErrorsLib:$ErrorsLib, TypeUtilsAPI:$TypeUtils, ArrayUtilsAPI:$ArrayUtils, MappingsLib:$MappingsLib, BpmRuntimeLib:$BpmRuntimeLib, DataStorageUtils:$DataStorageUtils, ERC165Utils:$ERC165Utils, AgreementsAPI:$AgreementsAPI
-    data: ["AN://services/ArchetypeRegistry", "AN://services/BpmService"]
+    data: ["ArchetypeRegistry", "BpmService"]
 
 - name: ActiveAgreementRegistryDb
   deploy:
@@ -176,7 +176,7 @@ jobs:
     destination: $DOUG
     bin: DOUG
     function: deploy
-    data: ["AN://services/ActiveAgreementRegistry", $ActiveAgreementRegistry]
+    data: ["ActiveAgreementRegistry", $ActiveAgreementRegistry]
 
 - name: AssertActiveAgreementRegistry
   assert:
@@ -215,7 +215,7 @@ jobs:
 - name: DefaultArchetypeImplementation
   deploy:
     contract: DefaultArchetype.bin
-    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib
+    libraries: ErrorsLib:$ErrorsLib, TypeUtilsAPI:$TypeUtils, ArrayUtilsAPI:$ArrayUtils, MappingsLib:$MappingsLib
 
 - name: ObjectClassArchetype
   query-contract:
@@ -233,12 +233,12 @@ jobs:
 - name: DefaultActiveAgreementImplementation
   deploy:
     contract: DefaultActiveAgreement.bin
-    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib
+    libraries: ErrorsLib:$ErrorsLib, TypeUtilsAPI:$TypeUtils, ArrayUtilsAPI:$ArrayUtils, MappingsLib:$MappingsLib, DataStorageUtils:$DataStorageUtils, AgreementsAPI:$AgreementsAPI
 
 - name: ObjectClassActiveAgreement
   query-contract:
-    destination: $ActiveAgreementsRegistry
-    bin: ActiveAgreementsRegistry
+    destination: $ActiveAgreementRegistry
+    bin: ActiveAgreementRegistry
     function: OBJECT_CLASS_AGREEMENT
 
 - name: RegisterActiveAgreementObjectClass
