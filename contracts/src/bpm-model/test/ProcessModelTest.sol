@@ -2,6 +2,8 @@ pragma solidity ^0.4.25;
 
 import "commons-base/BaseErrors.sol";
 import "commons-utils/DataTypes.sol";
+import "commons-management/ArtifactsRegistry.sol";
+import "commons-management/DefaultArtifactsRegistry.sol";
 
 import "bpm-model/DefaultProcessModel.sol";
 import "bpm-model/DefaultProcessDefinition.sol";
@@ -19,12 +21,17 @@ contract ProcessModelTest {
 
 	bytes32 EMPTY = "";
 
+	ProcessDefinition defaultProcessDefinitionImpl = new DefaultProcessDefinition();
+
 	function testProcessModel() external returns (string) {
 		
 		uint error;
 		address newAddress;
 
 		ProcessModel pm = new DefaultProcessModel();
+		ArtifactsRegistry artifactsRegistry = new DefaultArtifactsRegistry();
+		artifactsRegistry.registerArtifact(pm.OBJECT_CLASS_PROCESS_DEFINITION(), address(defaultProcessDefinitionImpl), defaultProcessDefinitionImpl.getArtifactVersion(), true);
+
 		pm.initialize("testModel", "Test Model", [1,2,3], author, false, dummyModelFileReference);
 		if (pm.getId() != "testModel") return "ProcessModel ID not set correctly";
 		if (bytes(pm.getName()).length != bytes(modelName).length) return "ProcessModel Name not set correctly";
@@ -48,8 +55,7 @@ contract ProcessModelTest {
 		if (key != keccak256(abi.encodePacked(bytes32("agreement"),bytes32("Hash")))) return "Hashed key for Hash data definition should match";
 		if (paramType != uint(DataTypes.ParameterType.BYTES32)) return "Parameter type for Hash data definition should be Bytes32";
 
-		(error, newAddress) = pm.createProcessDefinition("p1");
-		if (error != BaseErrors.NO_ERROR()) return "Unexpected error creating ProcessDefinition p1";
+		newAddress = pm.createProcessDefinition("p1", artifactsRegistry);
 		ProcessDefinition pd = ProcessDefinition(newAddress);
 		
 		if (pm.getProcessDefinition("p1") != address(pd)) return "Returned ProcessDefinition address does not match.";

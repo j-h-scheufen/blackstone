@@ -30,7 +30,15 @@ contract ProcessModelRepository is ObjectFactory, Upgradeable {
 	 * @param _modelFileReference the reference to the external model file from which this ProcessModel originated
 	 */
 	function createProcessModel(bytes32 _id, string _name, uint8[3] _version, address _author, bool _isPrivate, string _modelFileReference) external returns (uint error, address modelAddress);
-	
+
+	/**
+	 * @dev Creates a new process definition with the given parameters in the provided ProcessModel.
+	 * @param _processModelAddress the ProcessModel in which to create the ProcessDefinition
+	 * @param _processDefinitionId the process definition ID
+	 * @return newAddress - the address of the new ProcessDefinition when successful
+	 */
+	function createProcessDefinition(address _processModelAddress, bytes32 _processDefinitionId) external returns (address newAddress);
+
 	/**
 	 * @dev Activates the given ProcessModel and deactivates any previously activated model version of the same ID
 	 * @param _model the ProcessModel to activate

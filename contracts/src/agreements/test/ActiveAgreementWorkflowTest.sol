@@ -176,7 +176,7 @@ contract ActiveAgreementWorkflowTest {
 		pm.addParticipant(participantId1, 0x0, "Buyer", agreementRegistry.DATA_ID_AGREEMENT(), 0x0);
 		pm.addParticipant(participantId2, 0x0, "Seller", agreementRegistry.DATA_ID_AGREEMENT(), 0x0);
 		// make a ProcessDefinition with activities that use the participants
-		(error, addr) = pm.createProcessDefinition("RoleQualifierProcess");
+		(error, addr) = pm.createProcessDefinition("RoleQualifierProcess", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create process definition";
 		ProcessDefinition pd = ProcessDefinition(addr);
 		error = pd.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.USER, BpmModel.TaskBehavior.SENDRECEIVE, participantId1, false, EMPTY, EMPTY, EMPTY);
@@ -228,7 +228,7 @@ contract ActiveAgreementWorkflowTest {
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		pm = ProcessModel(addr);
 		// Formation Process
-		(error, addr) = pm.createProcessDefinition("FormationProcess");
+		(error, addr) = pm.createProcessDefinition("FormationProcess", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create FormationProcess definition";
 		formationPD = ProcessDefinition(addr);
 		error = formationPD.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.SEND, EMPTY, false, EMPTY, EMPTY, EMPTY);
@@ -236,7 +236,7 @@ contract ActiveAgreementWorkflowTest {
 		(success, errorMsg) = formationPD.validate();
 		if (!success) return errorMsg.toString();
 		// Execution Process
-		(error, addr) = pm.createProcessDefinition("ExecutionProcess");
+		(error, addr) = pm.createProcessDefinition("ExecutionProcess", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create ExecutionProcess definition";
 		executionPD = ProcessDefinition(addr);
 		error = executionPD.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.SEND, EMPTY, false, EMPTY, EMPTY, EMPTY);
@@ -342,7 +342,7 @@ contract ActiveAgreementWorkflowTest {
 		pm = ProcessModel(addr);
 		pm.addParticipant(participantId1, 0x0, DATA_FIELD_AGREEMENT_PARTIES, agreementRegistry.DATA_ID_AGREEMENT(), 0x0);
 		// Formation Process
-		(error, addr) = pm.createProcessDefinition("FormationProcess");
+		(error, addr) = pm.createProcessDefinition("FormationProcess", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create FormationProcess definition";
 		formationPD = ProcessDefinition(addr);
 		error = formationPD.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.USER, BpmModel.TaskBehavior.SENDRECEIVE, participantId1, true, appIdSignatureCheck, EMPTY, EMPTY);
@@ -351,7 +351,7 @@ contract ActiveAgreementWorkflowTest {
 		(success, errorMsg) = formationPD.validate();
 		if (!success) return errorMsg.toString();
 		// Execution Process
-		(error, addr) = pm.createProcessDefinition("ExecutionProcess");
+		(error, addr) = pm.createProcessDefinition("ExecutionProcess", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create ExecutionProcess definition";
 		executionPD = ProcessDefinition(addr);
 		error = executionPD.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.SEND, EMPTY, false, EMPTY, EMPTY, EMPTY);
@@ -479,7 +479,7 @@ contract ActiveAgreementWorkflowTest {
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		pm = ProcessModel(addr);
 		// Formation Process
-		(error, addr) = pm.createProcessDefinition("FormationProcess");
+		(error, addr) = pm.createProcessDefinition("FormationProcess", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create FormationProcess definition";
 		formationPD = ProcessDefinition(addr);
 		error = formationPD.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.RECEIVE, EMPTY, false, EMPTY, EMPTY, EMPTY);
@@ -487,7 +487,7 @@ contract ActiveAgreementWorkflowTest {
 		(valid, errorMsg) = formationPD.validate();
 		if (!valid) return errorMsg.toString();
 		// Execution Process
-		(error, addr) = pm.createProcessDefinition("ExecutionProcess");
+		(error, addr) = pm.createProcessDefinition("ExecutionProcess", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create ExecutionProcess definition";
 		executionPD = ProcessDefinition(addr);
 		error = executionPD.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.RECEIVE, EMPTY, false, EMPTY, EMPTY, EMPTY);

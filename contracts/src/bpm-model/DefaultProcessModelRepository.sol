@@ -51,6 +51,20 @@ contract DefaultProcessModelRepository is AbstractVersionedArtifact(1,0,0), Abst
 	}
 
 	/**
+	 * @dev Creates a new process definition with the given parameters in the provided ProcessModel.
+	 * @param _processModelAddress the ProcessModel in which to create the ProcessDefinition
+	 * @param _processDefinitionId the process definition ID
+	 * @return newAddress - the address of the new ProcessDefinition when successful
+	 */
+	function createProcessDefinition(address _processModelAddress, bytes32 _processDefinitionId) external returns (address newAddress) {
+		ErrorsLib.revertIf(_processModelAddress == address(0),
+			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultProcessModelRepository.createProcessDefinition", "The ProcessModel address must not be empty");
+		ErrorsLib.revertIf(_processDefinitionId == "",
+			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultProcessModelRepository.createProcessDefinition", "The process definition ID address must not be empty");
+		newAddress = ProcessModel(_processModelAddress).createProcessDefinition(_processDefinitionId, artifactsFinder);
+	}
+
+	/**
 	 * @dev Activates the given ProcessModel and deactivates any previously activated model version of the same ID
 	 * @param _model the ProcessModel to activate.
 	 * REVERTS if:

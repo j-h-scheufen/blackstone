@@ -45,16 +45,12 @@ contract ProcessDefinitionTest {
 
 		// re-usable test variables
 		uint error;
-		address newAddress;
 
 		ProcessModel pm = new DefaultProcessModel();
 		pm.initialize("testModel", "Test Model", [1,0,0], author, false, dummyModelFileReference);
-		(error, newAddress) = pm.createProcessDefinition("p1");
-		ProcessDefinition pd = ProcessDefinition(newAddress);
+		ProcessDefinition pd = new DefaultProcessDefinition();
+		pd.initialize("p1", address(pm));
 		
-		// setup
-		if (pm.getProcessDefinition("p1") != address(pd)) return "Returned ProcessDefinition address does not match.";
-
 		// test process interface handling
 		error = pd.addProcessInterfaceImplementation(pm, "AgreementFormation");
 		if (error != BaseErrors.RESOURCE_NOT_FOUND()) return "Expected error for adding non-existent process interface.";
@@ -185,14 +181,10 @@ contract ProcessDefinitionTest {
 	 */
 	function testTransitionConditionResolution() external returns (string) {
 
-		// re-usable variables for return values
-		uint error;
-		address addr;
-
 		ProcessModel pm = new DefaultProcessModel();
 		pm.initialize("conditionsModel", "Conditions Model", [1,0,0], author, false, dummyModelFileReference);
-		(error, addr) = pm.createProcessDefinition("p1");
-		ProcessDefinition pd = ProcessDefinition(addr);
+		ProcessDefinition pd = new DefaultProcessDefinition();
+		pd.initialize("p1", address(pm));
 
 		pd.createActivityDefinition(activity1Id, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.SEND, EMPTY, false, EMPTY, EMPTY, EMPTY);
 		pd.createActivityDefinition(activity2Id, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.SEND, EMPTY, false, EMPTY, EMPTY, EMPTY);

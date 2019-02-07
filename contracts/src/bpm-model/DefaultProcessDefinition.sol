@@ -5,6 +5,8 @@ import "commons-base/BaseErrors.sol";
 import "commons-base/Owned.sol";
 import "commons-utils/ArrayUtilsAPI.sol";
 import "commons-utils/TypeUtilsAPI.sol";
+import "commons-management/AbstractVersionedArtifact.sol";
+import "commons-management/AbstractDelegateTarget.sol";
 
 import "bpm-model/BpmModel.sol";
 import "bpm-model/BpmModelLib.sol";
@@ -15,7 +17,7 @@ import "bpm-model/ProcessModel.sol";
  * @title DefaultProcessDefinition
  * @dev Default implementation of the ProcessDefinition interface
  */
-contract DefaultProcessDefinition is ProcessDefinition, Owned {
+contract DefaultProcessDefinition is AbstractVersionedArtifact(1,0,0), AbstractDelegateTarget, Owned, ProcessDefinition {
 
 	using ArrayUtilsAPI for bytes32[];
 	using TypeUtilsAPI for bytes32;
@@ -67,17 +69,29 @@ contract DefaultProcessDefinition is ProcessDefinition, Owned {
 	}
 
 	/**
-	 * @dev Creates a new DefaultProcessDefinition with the specified ID, name, and belonging to the given model.
-	 * Throws if the _model is an empty address of if the ID is empty.
+	 * @dev Initializes this DefaultOrganization with the specified ID and belonging to the given model. This function replaces the
+	 * contract constructor, so it can be used as the delegate target for an ObjectProxy.
+	 * REVERTS if
+	 * - the _model is an empty address or if the ID is empty
+	 * @param _id the ProcessDefinition ID
+	 * @param _model the address of a ProcessModel in which this ProcessDefinition is created
 	 */
-	constructor(bytes32 _id, address _model) public {
-			ErrorsLib.revertIf(_id == "",
-				ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(),"ProcessDefinition.constructor","_id is NULL");
-			ErrorsLib.revertIf(_model == 0x0,
-				ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(),"ProcessDefinition.constructor","_model is NULL");
-			owner = msg.sender;
-			id = _id;
-			model = ProcessModel(_model);
+	function initialize(bytes32 _id, address _model) external {
+		ErrorsLib.revertIf(_id == "",
+			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(),"ProcessDefinition.constructor","_id is NULL");
+		ErrorsLib.revertIf(_model == 0x0,
+			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(),"ProcessDefinition.constructor","_model is NULL");
+		owner = msg.sender;
+		id = _id;
+		model = ProcessModel(_model);
+		emit LogProcessDefinitionCreation(
+			EVENT_ID_PROCESS_DEFINITIONS,
+			address(this),
+			_id,
+			bytes32(""),
+			model.getId(),
+			_model
+		);
 	}
 
 	/**

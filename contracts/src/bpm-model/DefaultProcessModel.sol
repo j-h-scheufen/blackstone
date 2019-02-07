@@ -6,6 +6,7 @@ import "commons-base/AbstractVersioned.sol";
 import "commons-base/AbstractNamedElement.sol";
 import "commons-collections/Mappings.sol";
 import "commons-collections/MappingsLib.sol";
+import "commons-management/ObjectProxy.sol";
 import "commons-management/AbstractVersionedArtifact.sol";
 import "commons-management/AbstractDelegateTarget.sol";
 
@@ -65,23 +66,21 @@ contract DefaultProcessModel is AbstractVersionedArtifact(1,0,0), AbstractDelega
 	}
 	
 	/**
-	 * @dev Creates a new process definition with the given parameters in this ProcessModel
+	 * @dev Creates a new process definition with the given parameters in this ProcessModel.
+	 * REVERTS if:
+	 * - a ProcessDefinition with the same ID already exists in the ProcessModel
+	 * - the new ProcessDefinition cannot be added to the #definitions mapping
 	 * @param _processDefinitionId the process definition ID
-	 * @return error - BaseErrors.RESOURCE_ALREADY_EXISTS(), if a process definition with the same ID already exists, BaseErrors.NO_ERROR() otherwise
-	 * @return newAddress - the address of the new ProcessDefinition when successful
+	 * @param _artifactsFinder an ArtifactFinder instance to create the ObjectProxy
+	 * @return newAddress - the address of the new ObjectProxy for the ProcessDefinition when successful
 	 */
-	function createProcessDefinition(bytes32 _processDefinitionId) external returns (uint error, address newAddress) {
-		if (processDefinitions.exists(_processDefinitionId)) return (BaseErrors.RESOURCE_ALREADY_EXISTS(), 0x0);
-		newAddress = new DefaultProcessDefinition(_processDefinitionId, this);
-		error = processDefinitions.insert(_processDefinitionId, newAddress);
-		emit LogProcessDefinitionCreation(
-			EVENT_ID_PROCESS_DEFINITIONS,
-			newAddress,
-			_processDefinitionId,
-			bytes32(""),
-			id,
-			address(this)
-		);
+	function createProcessDefinition(bytes32 _processDefinitionId, address _artifactsFinder) external returns (address newAddress) {
+		ErrorsLib.revertIf(processDefinitions.exists(_processDefinitionId),
+			ErrorsLib.RESOURCE_ALREADY_EXISTS(), "DefaultProcessModel.createProcessDefinition", "A ProcessDefinition with the same ID already exists in this ProcessModel");
+		newAddress = new ObjectProxy(_artifactsFinder, OBJECT_CLASS_PROCESS_DEFINITION);
+		ProcessDefinition(newAddress).initialize(_processDefinitionId, address(this));
+		ErrorsLib.revertIf(processDefinitions.insert(_processDefinitionId, newAddress) != BaseErrors.NO_ERROR(),
+			ErrorsLib.INVALID_STATE(), "DefaultProcessModel.createProcessDefinition", "Unable to add the new ProcessDefinition to the collection");
 	}
 	
 	/**

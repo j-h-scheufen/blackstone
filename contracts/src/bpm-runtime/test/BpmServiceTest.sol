@@ -629,7 +629,7 @@ contract BpmServiceTest {
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
-		(error, addr) = pm.createProcessDefinition("ProcessDefinition1");
+		(error, addr) = pm.createProcessDefinition("ProcessDefinition1", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create a ProcessDefinition";
 		ProcessDefinition pd = ProcessDefinition(addr);
 
@@ -711,7 +711,7 @@ contract BpmServiceTest {
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
-		(error, addr) = pm.createProcessDefinition("ProcessDefinitionSequence");
+		(error, addr) = pm.createProcessDefinition("ProcessDefinitionSequence", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create a ProcessDefinition";
 		ProcessDefinition pd = ProcessDefinition(addr);
 
@@ -777,7 +777,7 @@ contract BpmServiceTest {
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
-		(error, addr) = pm.createProcessDefinition("RoutingPD");
+		(error, addr) = pm.createProcessDefinition("RoutingPD", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create a ProcessDefinition";
 		ProcessDefinition pd = ProcessDefinition(addr);
 
@@ -866,7 +866,7 @@ contract BpmServiceTest {
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
-		(error, addr) = pm.createProcessDefinition("LoopingPD");
+		(error, addr) = pm.createProcessDefinition("LoopingPD", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create a ProcessDefinition";
 		ProcessDefinition pd = ProcessDefinition(addr);
 
@@ -986,7 +986,7 @@ contract BpmServiceTest {
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
 
-		(error, addr) = pm.createProcessDefinition("TwoGatewayPD");
+		(error, addr) = pm.createProcessDefinition("TwoGatewayPD", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create a ProcessDefinition";
 		ProcessDefinition pd = ProcessDefinition(addr);
 		
@@ -1114,7 +1114,7 @@ contract BpmServiceTest {
 		applicationRegistry.addApplication(serviceApp1Id, BpmModel.ApplicationType.EVENT, address(eventApp), bytes4(EMPTY), EMPTY);
 		applicationRegistry.addApplication(serviceApp2Id, BpmModel.ApplicationType.SERVICE, address(serviceApp), bytes4(EMPTY), EMPTY);
 
-		(error, addr) = pm.createProcessDefinition("ServiceApplicationProcess");
+		(error, addr) = pm.createProcessDefinition("ServiceApplicationProcess", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create a ProcessDefinition";
 		ProcessDefinition pd = ProcessDefinition(addr);
 
@@ -1223,7 +1223,7 @@ contract BpmServiceTest {
 		// conditional data path on process instance
 		pm.addParticipant(participantId4, 0x0, dataPathOnProcess, EMPTY, 0x0);
 
-		(error, addr) = pm.createProcessDefinition("SingleTaskProcess");
+		(error, addr) = pm.createProcessDefinition("SingleTaskProcess", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create a ProcessDefinition";
 		ProcessDefinition pd = ProcessDefinition(addr);
 
@@ -1288,7 +1288,7 @@ contract BpmServiceTest {
 		pm.addParticipant(participantId1, user1, EMPTY, EMPTY, 0x0); // user participant
 		pm.addParticipant(participantId2, org1, EMPTY, EMPTY, 0x0); // organization participant
 
-		(error, addr) = pm.createProcessDefinition("UserTaskProcess");
+		(error, addr) = pm.createProcessDefinition("UserTaskProcess", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create a ProcessDefinition";
 		ProcessDefinition pd = ProcessDefinition(addr);
 
@@ -1416,7 +1416,7 @@ contract BpmServiceTest {
 		// Register participants to be used for USER tasks
 		pm.addParticipant(participantId1, user1, EMPTY, EMPTY, 0x0); // user participant
 
-		(error, addr) = pm.createProcessDefinition("AbortProcess");
+		(error, addr) = pm.createProcessDefinition("AbortProcess", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create a ProcessDefinition";
 		ProcessDefinition pd = ProcessDefinition(addr);
 
@@ -1502,7 +1502,7 @@ contract BpmServiceTest {
 		// Register a participant to be used for USER tasks that replicates the AN behavior
 		pm.addParticipant(participantId1, 0x0, "SIGNATORIES", "agreement", 0x0);
 
-		(error, addr) = pm.createProcessDefinition("MultiInstanceUserTaskProcess");
+		(error, addr) = pm.createProcessDefinition("MultiInstanceUserTaskProcess", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create a ProcessDefinition";
 		ProcessDefinition pd = ProcessDefinition(addr);
 
@@ -1591,16 +1591,16 @@ contract BpmServiceTest {
 		ProcessModel pmB = ProcessModel(addr);
 
 		// One 'main' process and three sub-process definitions
-		(error, addr) = pmA.createProcessDefinition("MainProcess");
+		(error, addr) = pmA.createProcessDefinition("MainProcess", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create MainProcess ProcessDefinition";
 		ProcessDefinition pdMain = ProcessDefinition(addr);
-		(error, addr) = pmA.createProcessDefinition("SubProcessA");
+		(error, addr) = pmA.createProcessDefinition("SubProcessA", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create SubProcessA ProcessDefinition";
 		ProcessDefinition pdSubA = ProcessDefinition(addr);
-		(error, addr) = pmA.createProcessDefinition("SubProcessA2");
+		(error, addr) = pmA.createProcessDefinition("SubProcessA2", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create SubProcessA2 ProcessDefinition";
 		ProcessDefinition pdSubA2 = ProcessDefinition(addr);
-		(error, addr) = pmB.createProcessDefinition("SubProcessB");
+		(error, addr) = pmB.createProcessDefinition("SubProcessB", artifactsRegistry);
 		if (addr == 0x0) return "Unable to create SubProcessB ProcessDefinition";
 		ProcessDefinition pdSubB = ProcessDefinition(addr);
 
