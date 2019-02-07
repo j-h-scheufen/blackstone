@@ -19,10 +19,9 @@ contract VersionLinked is AbstractVersioned, Owned {
 	 * @dev Constructor - Sets the msg.sender as the owner.
 	 * @param _version the version of this VersionLinked contract
 	 */
-	constructor(uint8[3] _version)
-		AbstractVersioned(_version[0], _version[1], _version[2]) public
-	{
+	constructor(uint8[3] _version) public {
 		owner = msg.sender;
+		semanticVersion = _version;
 	}
 	
 	/**

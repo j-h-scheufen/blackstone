@@ -18,6 +18,8 @@ import "bpm-model/ProcessModelRepositoryDb.sol";
 import "bpm-model/DefaultProcessModelRepository.sol";
 import "bpm-model/ProcessModel.sol";
 import "bpm-model/ProcessDefinition.sol";
+import "bpm-model/ProcessDefinition.sol";
+import "bpm-model/DefaultProcessDefinition.sol";
 import "bpm-runtime/BpmRuntime.sol";
 import "bpm-runtime/BpmService.sol";
 import "bpm-runtime/BpmServiceDb.sol";
@@ -84,6 +86,8 @@ contract ActiveAgreementWorkflowTest {
 
 	DefaultActiveAgreement defaultAgreementImpl = new DefaultActiveAgreement();
 	DefaultArchetype defaultArchetypeImpl = new DefaultArchetype();
+	ProcessModel defaultProcessModelImpl = new DefaultProcessModel();
+	ProcessDefinition defaultProcessDefinitionImpl = new DefaultProcessDefinition();
 	ArtifactsRegistry artifactsRegistry;
 	string constant serviceIdBpmService = "agreements-network/services/BpmService";
 	string constant serviceIdArchetypeRegistry = "agreements-network/services/ArchetypeRegistry";
@@ -123,7 +127,10 @@ contract ActiveAgreementWorkflowTest {
 		artifactsRegistry.registerArtifact(serviceIdArchetypeRegistry, address(archetypeRegistry), archetypeRegistry.getArtifactVersion(), true);
 		artifactsRegistry.registerArtifact(serviceIdModelRepository, address(processModelRepository), processModelRepository.getArtifactVersion(), true);
 		artifactsRegistry.registerArtifact(serviceIdApplicationRegistry, address(applicationRegistry), applicationRegistry.getArtifactVersion(), true);
-        artifactsRegistry.registerArtifact(archetypeRegistry.OBJECT_CLASS_ARCHETYPE(), defaultArchetypeImpl, defaultArchetypeImpl.getArtifactVersion(), true);
+        artifactsRegistry.registerArtifact(archetypeRegistry.OBJECT_CLASS_ARCHETYPE(), address(defaultArchetypeImpl), defaultArchetypeImpl.getArtifactVersion(), true);
+        artifactsRegistry.registerArtifact(processModelRepository.OBJECT_CLASS_PROCESS_MODEL(), address(defaultProcessModelImpl), defaultProcessModelImpl.getArtifactVersion(), true);
+        artifactsRegistry.registerArtifact(processModelRepository.OBJECT_CLASS_PROCESS_DEFINITION(), address(defaultProcessDefinitionImpl), defaultProcessDefinitionImpl.getArtifactVersion(), true);
+		ArtifactsFinderEnabled(processModelRepository).setArtifactsFinder(artifactsRegistry);
 		ArtifactsFinderEnabled(archetypeRegistry).setArtifactsFinder(artifactsRegistry);
 		ArtifactsFinderEnabled(bpmService).setArtifactsFinder(artifactsRegistry);
 	}
@@ -176,8 +183,7 @@ contract ActiveAgreementWorkflowTest {
 		pm.addParticipant(participantId1, 0x0, "Buyer", agreementRegistry.DATA_ID_AGREEMENT(), 0x0);
 		pm.addParticipant(participantId2, 0x0, "Seller", agreementRegistry.DATA_ID_AGREEMENT(), 0x0);
 		// make a ProcessDefinition with activities that use the participants
-		(error, addr) = pm.createProcessDefinition("RoleQualifierProcess", artifactsRegistry);
-		if (addr == 0x0) return "Unable to create process definition";
+		addr = pm.createProcessDefinition("RoleQualifierProcess", artifactsRegistry);
 		ProcessDefinition pd = ProcessDefinition(addr);
 		error = pd.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.USER, BpmModel.TaskBehavior.SENDRECEIVE, participantId1, false, EMPTY, EMPTY, EMPTY);
 		error = pd.createActivityDefinition(activityId2, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.SEND, EMPTY, false, EMPTY, EMPTY, EMPTY);
@@ -228,16 +234,14 @@ contract ActiveAgreementWorkflowTest {
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		pm = ProcessModel(addr);
 		// Formation Process
-		(error, addr) = pm.createProcessDefinition("FormationProcess", artifactsRegistry);
-		if (addr == 0x0) return "Unable to create FormationProcess definition";
+		addr = pm.createProcessDefinition("FormationProcess", artifactsRegistry);
 		formationPD = ProcessDefinition(addr);
 		error = formationPD.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.SEND, EMPTY, false, EMPTY, EMPTY, EMPTY);
 		if (error != BaseErrors.NO_ERROR()) return "Error creating NONE task for formation process definition";
 		(success, errorMsg) = formationPD.validate();
 		if (!success) return errorMsg.toString();
 		// Execution Process
-		(error, addr) = pm.createProcessDefinition("ExecutionProcess", artifactsRegistry);
-		if (addr == 0x0) return "Unable to create ExecutionProcess definition";
+		addr = pm.createProcessDefinition("ExecutionProcess", artifactsRegistry);
 		executionPD = ProcessDefinition(addr);
 		error = executionPD.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.SEND, EMPTY, false, EMPTY, EMPTY, EMPTY);
 		if (error != BaseErrors.NO_ERROR()) return "Error creating NONE task for execution process definition";
@@ -342,8 +346,7 @@ contract ActiveAgreementWorkflowTest {
 		pm = ProcessModel(addr);
 		pm.addParticipant(participantId1, 0x0, DATA_FIELD_AGREEMENT_PARTIES, agreementRegistry.DATA_ID_AGREEMENT(), 0x0);
 		// Formation Process
-		(error, addr) = pm.createProcessDefinition("FormationProcess", artifactsRegistry);
-		if (addr == 0x0) return "Unable to create FormationProcess definition";
+		addr = pm.createProcessDefinition("FormationProcess", artifactsRegistry);
 		formationPD = ProcessDefinition(addr);
 		error = formationPD.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.USER, BpmModel.TaskBehavior.SENDRECEIVE, participantId1, true, appIdSignatureCheck, EMPTY, EMPTY);
 		if (error != BaseErrors.NO_ERROR()) return "Error creating USER task for formation process definition";
@@ -351,8 +354,7 @@ contract ActiveAgreementWorkflowTest {
 		(success, errorMsg) = formationPD.validate();
 		if (!success) return errorMsg.toString();
 		// Execution Process
-		(error, addr) = pm.createProcessDefinition("ExecutionProcess", artifactsRegistry);
-		if (addr == 0x0) return "Unable to create ExecutionProcess definition";
+		addr = pm.createProcessDefinition("ExecutionProcess", artifactsRegistry);
 		executionPD = ProcessDefinition(addr);
 		error = executionPD.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.SEND, EMPTY, false, EMPTY, EMPTY, EMPTY);
 		if (error != BaseErrors.NO_ERROR()) return "Error creating NONE task for execution process definition";
@@ -479,16 +481,14 @@ contract ActiveAgreementWorkflowTest {
 		if (addr == 0x0) return "Unable to create a ProcessModel";
 		pm = ProcessModel(addr);
 		// Formation Process
-		(error, addr) = pm.createProcessDefinition("FormationProcess", artifactsRegistry);
-		if (addr == 0x0) return "Unable to create FormationProcess definition";
+		addr = pm.createProcessDefinition("FormationProcess", artifactsRegistry);
 		formationPD = ProcessDefinition(addr);
 		error = formationPD.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.RECEIVE, EMPTY, false, EMPTY, EMPTY, EMPTY);
 		if (error != BaseErrors.NO_ERROR()) return "Error creating NONE task for formation process definition";
 		(valid, errorMsg) = formationPD.validate();
 		if (!valid) return errorMsg.toString();
 		// Execution Process
-		(error, addr) = pm.createProcessDefinition("ExecutionProcess", artifactsRegistry);
-		if (addr == 0x0) return "Unable to create ExecutionProcess definition";
+		addr = pm.createProcessDefinition("ExecutionProcess", artifactsRegistry);
 		executionPD = ProcessDefinition(addr);
 		error = executionPD.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.RECEIVE, EMPTY, false, EMPTY, EMPTY, EMPTY);
 		if (error != BaseErrors.NO_ERROR()) return "Error creating SERVICE task for execution process definition";

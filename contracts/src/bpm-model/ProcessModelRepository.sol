@@ -19,6 +19,7 @@ contract ProcessModelRepository is ObjectFactory, Upgradeable {
 	);
 
     string public constant OBJECT_CLASS_PROCESS_MODEL = "bpm.model.ProcessModel";
+    string public constant OBJECT_CLASS_PROCESS_DEFINITION = "bpm.model.ProcessDefinition";
 
 	/**
 	 * @dev Factory function to instantiate a ProcessModel. The model is automatically added to this repository.

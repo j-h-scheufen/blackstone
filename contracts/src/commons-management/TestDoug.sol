@@ -24,7 +24,7 @@ contract TestDoug is DOUG {
 		success = true;
 	}
 
-    function register(string _id, address _address) external returns (uint8[3] version) {
+    function register(string _id, address _address) external returns (uint8[3]) {
 		registry.registerArtifact(_id, _address, [0,0,0], true);
 	}
 

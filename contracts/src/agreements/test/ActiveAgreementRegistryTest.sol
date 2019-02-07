@@ -53,8 +53,8 @@ contract ActiveAgreementRegistryTest {
 	address[] governingAgreements;
 	address[] governingArchetypes;
 
-	DefaultActiveAgreement defaultAgreementImpl = new DefaultActiveAgreement();
-	DefaultArchetype defaultArchetypeImpl = new DefaultArchetype();
+	ActiveAgreement defaultAgreementImpl = new DefaultActiveAgreement();
+	Archetype defaultArchetypeImpl = new DefaultArchetype();
 	ArchetypeRegistry archetypeRegistry;
 	BpmService bpmService;
 	ArtifactsRegistry artifactsRegistry;
@@ -72,7 +72,7 @@ contract ActiveAgreementRegistryTest {
 		// ArtifactsRegistry
 		artifactsRegistry = new DefaultArtifactsRegistry();
 		artifactsRegistry.registerArtifact(serviceIdArchetypeRegistry, archetypeRegistry, archetypeRegistry.getArtifactVersion(), true);
-        artifactsRegistry.registerArtifact(archetypeRegistry.OBJECT_CLASS_ARCHETYPE(), defaultArchetypeImpl, defaultArchetypeImpl.getArtifactVersion(), true);
+        artifactsRegistry.registerArtifact(archetypeRegistry.OBJECT_CLASS_ARCHETYPE(), address(defaultArchetypeImpl), defaultArchetypeImpl.getArtifactVersion(), true);
 		ArtifactsFinderEnabled(archetypeRegistry).setArtifactsFinder(artifactsRegistry);
 	}
 
@@ -86,7 +86,7 @@ contract ActiveAgreementRegistryTest {
 		SystemOwned(registryDb).transferSystemOwnership(newRegistry);
 		AbstractDbUpgradeable(newRegistry).acceptDatabase(registryDb);
 		newRegistry.setArtifactsFinder(artifactsRegistry);
-        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_AGREEMENT(), defaultAgreementImpl, defaultAgreementImpl.getArtifactVersion(), true);
+        artifactsRegistry.registerArtifact(newRegistry.OBJECT_CLASS_AGREEMENT(), address(defaultAgreementImpl), defaultAgreementImpl.getArtifactVersion(), true);
 		// check that dependencies are wired correctly
 		require (address(newRegistry.getArchetypeRegistry()) != address(0), "ArchetypeRegistry in new ActiveAgreementRegistry not found");
 		require (address(newRegistry.getArchetypeRegistry()) == address(archetypeRegistry), "ArchetypeRegistry in ActiveAgreementRegistry address mismatch");

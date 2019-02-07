@@ -17,11 +17,10 @@ contract VersionLinkedAppendOnly is AbstractVersioned, Owned {
     _;
   }
 
-  constructor(uint8[3] _version)
-    AbstractVersioned(_version[0], _version[1], _version[2]) public
-  {
+  constructor(uint8[3] _version) public {
     owner = msg.sender;
     latest = this;
+    semanticVersion = _version;
   }
 
   /**
