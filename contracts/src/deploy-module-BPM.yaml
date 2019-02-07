@@ -104,8 +104,8 @@ jobs:
   call:
     destination: $DOUG
     bin: DOUG
-    function: deployContract
-    data: ["AN://services/ProcessModelRepository", $ProcessModelRepository]
+    function: deploy
+    data: ["ProcessModelRepository", $ProcessModelRepository]
 
 - name: AssertProcessModelRepository
   assert:
@@ -157,8 +157,8 @@ jobs:
   call:
     destination: $DOUG
     bin: DOUG
-    function: deployContract
-    data: ["AN://services/ApplicationRegistry", $ApplicationRegistry]
+    function: deploy
+    data: ["ApplicationRegistry", $ApplicationRegistry]
 
 - name: AssertApplicationRegistry
   assert:
@@ -173,7 +173,7 @@ jobs:
   deploy:
     contract: bpm-runtime/DefaultBpmService.sol
     libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtils, MappingsLib:$MappingsLib, BpmRuntimeLib:$BpmRuntimeLib, DataStorageUtils:$DataStorageUtils
-    data: ["AN://services/ProcessModelRepository", "AN://services/ApplicationRegistry"]
+    data: ["ProcessModelRepository", "ApplicationRegistry"]
 
 - name: BpmServiceDb
   deploy:
@@ -211,8 +211,8 @@ jobs:
   call:
     destination: $DOUG
     bin: DOUG
-    function: deployContract
-    data: ["AN://services/BpmService", $BpmService]
+    function: deploy
+    data: ["BpmService", $BpmService]
 
 - name: AssertBpmService
   assert:
@@ -251,7 +251,7 @@ jobs:
 - name: DefaultProcessModelImplementation
   deploy:
     contract: DefaultProcessModel.bin
-    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib
+    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtils, MappingsLib:$MappingsLib
 
 - name: ObjectClassProcessModel
   query-contract:
@@ -269,7 +269,7 @@ jobs:
 - name: DefaultProcessDefinitionImplementation
   deploy:
     contract: DefaultProcessDefinition.bin
-    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib
+    libraries: ErrorsLib:$ErrorsLib, TypeUtilsAPI:$TypeUtils, ArrayUtilsAPI:$ArrayUtils, MappingsLib:$MappingsLib, BpmModelLib:$BpmModelLib, DataStorageUtils:$DataStorageUtils
 
 - name: ObjectClassProcessDefinition
   query-contract:
@@ -287,7 +287,7 @@ jobs:
 - name: DefaultProcessInstanceImplementation
   deploy:
     contract: DefaultProcessInstance.bin
-    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtilsAPI, MappingsLib:$MappingsLib
+    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsAPI:$ArrayUtils, MappingsLib:$MappingsLib, BpmRuntimeLib:$BpmRuntimeLib, DataStorageUtils:$DataStorageUtils
 
 - name: ObjectClassProcessInstance
   query-contract:

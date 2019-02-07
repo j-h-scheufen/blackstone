@@ -84,7 +84,7 @@ jobs:
     destination: $DOUG
     bin: DOUG
     function: deploy
-    data: ["AN://services/EcosystemRegistry", $EcosystemRegistry]
+    data: ["EcosystemRegistry", $EcosystemRegistry]
 
 - name: AssertEcosystemRegistry
   assert:
@@ -137,7 +137,7 @@ jobs:
     destination: $DOUG
     bin: DOUG
     function: deploy
-    data: ["AN://services/ParticipantsManager", $ParticipantsManager]
+    data: ["ParticipantsManager", $ParticipantsManager]
 
 - name: AssertParticipantsManager
   assert:

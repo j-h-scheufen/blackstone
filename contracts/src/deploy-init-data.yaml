@@ -64,7 +64,7 @@ jobs:
     destination: $DOUG
     bin: DOUG
     function: lookup
-    data: [ApplicationRegistry]
+    data: ["ApplicationRegistry"]
 
 - name: AgreementSignatureCheck
   deploy:
