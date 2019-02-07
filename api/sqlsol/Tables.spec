@@ -29,6 +29,7 @@
         "name": "active_version",
         "type": "bool"
       }
+    }
   },
   {
     "TableName": "AGREEMENTS",
