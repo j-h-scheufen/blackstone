@@ -431,8 +431,8 @@ const getActivityInstanceData = (id, userAddress) => {
     LEFT JOIN agreements agr ON agr.agreement_address = ds.address_value
     LEFT JOIN applications app ON app.application_id = ad.application
     LEFT JOIN organization_accounts o ON o.organization_address = ai.performer 
-    LEFT JOIN process_instance_address_scopes scopes ON (
-      scopes.process_instance_address = ds.storage_address 
+    LEFT JOIN entities_address_scopes scopes ON (
+      scopes.entity_address = ds.storage_address 
       AND scopes.scope_address = ai.performer 
       AND scopes.scope_context = ai.activity_id
     )
@@ -496,8 +496,8 @@ const getTasksByUserAddress = (userAddress) => {
     LEFT JOIN data_storage ds ON ai.process_instance_address = ds.storage_address
     LEFT JOIN agreements agr ON agr.agreement_address = ds.address_value
     LEFT JOIN organization_accounts o ON o.organization_address = ai.performer
-    LEFT JOIN process_instance_address_scopes scopes ON (
-      scopes.process_instance_address = ds.storage_address
+    LEFT JOIN entities_address_scopes scopes ON (
+      scopes.entity_address = ds.storage_address
       AND scopes.scope_address = ai.performer 
       AND scopes.scope_context = ai.activity_id
     )
@@ -564,8 +564,8 @@ const getDataMappingsForActivity = (activityInstanceId, dataMappingId) => {
     pmd.data_id = COALESCE(NULLIF(dm.data_storage_id, ''), 'PROCESS_INSTANCE') AND
     pmd.data_path = dm.data_path
   )
-  LEFT JOIN process_instance_address_scopes scopes ON (
-    ai.process_instance_address = scopes.process_instance_address AND 
+  LEFT JOIN entities_address_scopes scopes ON (
+    ai.process_instance_address = scopes.entity_address AND 
     ai.activity_id = scopes.scope_context AND
     pmd.data_id = COALESCE(NULLIF(scopes.data_storage_id, ''), 'PROCESS_INSTANCE') AND
     pmd.data_path = scopes.data_path

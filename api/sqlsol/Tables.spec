@@ -178,22 +178,24 @@
     }
   },
   {
-    "TableName": "AGREEMENT_ADDRESS_SCOPES",
-    "Filter": "Log1Text = 'AN://agreements/scopes'",
+    "TableName": "ENTITIES_ADDRESS_SCOPES",
+    "Filter": "Log1Text = 'AN://entities/address-scopes'",
     "Columns": {
-      "agreementAddress": {
-        "name": "agreement_address",
+      "entityAddress": {
+        "name": "entity_address",
         "type": "address",
         "primary": true
       },
       "scopeAddress": {
         "name": "scope_address",
-        "type": "address"
+        "type": "address",
+        "primary": true
       },
       "scopeContext": {
         "name": "scope_context",
         "type": "bytes32",
-        "bytesToString": true
+        "bytesToString": true,
+        "primary": true
       },
       "fixedScope": {
         "name": "fixed_scope",
@@ -762,44 +764,6 @@
       "stringValue": {
         "name": "string_value",
         "type": "string"
-      }
-    }
-  },
-  {
-    "TableName": "PROCESS_INSTANCE_ADDRESS_SCOPES",
-    "Filter": "Log1Text = 'AN://process-instances/scopes'",
-    "Columns": {
-      "processInstanceAddress": {
-        "name": "process_instance_address",
-        "type": "address",
-        "primary": true
-      },
-      "scopeAddress": {
-        "name": "scope_address",
-        "type": "address"
-      },
-      "scopeContext": {
-        "name": "scope_context",
-        "type": "bytes32",
-        "bytesToString": true
-      },
-      "fixedScope": {
-        "name": "fixed_scope",
-        "type": "bytes32"
-      },
-      "dataPath": {
-        "name": "data_path",
-        "type": "bytes32",
-        "bytesToString": true
-      },
-      "dataStorageId": {
-        "name": "data_storage_id",
-        "type": "bytes32",
-        "bytesToString": true
-      },
-      "dataStorage": {
-        "name": "data_storage",
-        "type": "address"
       }
     }
   },
