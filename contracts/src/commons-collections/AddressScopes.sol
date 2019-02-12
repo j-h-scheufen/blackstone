@@ -9,6 +9,19 @@ import "commons-collections/DataStorage.sol";
  */
 contract AddressScopes {
 
+	event LogEntityAddressScopeUpdate(
+		bytes32 indexed eventId,
+		address entityAddress,
+		address scopeAddress,
+		bytes32 scopeContext,
+		bytes32 fixedScope,
+		bytes32 dataPath,
+		bytes32 dataStorageId,
+		address dataStorage
+	);
+
+	bytes32 public constant EVENT_ID_ENTITIES_ADDRESS_SCOPES = "AN://entities/address-scopes";
+
 	/**
 	 * @dev Associates the given address with a scope qualifier for a given context.
 	 * The context can be used to bind the same address to different scenarios and different scopes.

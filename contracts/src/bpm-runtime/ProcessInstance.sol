@@ -29,19 +29,7 @@ contract ProcessInstance is VersionedArtifact, DataStorage, AddressScopes, Owner
 		uint8 state
 	);
 
-	event LogProcessInstanceAddressScopesUpdate(
-		bytes32 indexed eventId,
-		address processInstanceAddress,
-		address scopeAddress,
-		bytes32 scopeContext,
-		bytes32 fixedScope,
-		bytes32 dataPath,
-		bytes32 dataStorageId,
-		address dataStorage
-	);
-
 	bytes32 public constant EVENT_ID_PROCESS_INSTANCES = "AN://process-instances";
-	bytes32 public constant EVENT_ID_PROCESS_INSTANCE_ADDRESS_SCOPES = "AN://process-instances/scopes";
 
     /**
 	 * @dev Initializes this ProcessInstance with the provided parameters. This function replaces the

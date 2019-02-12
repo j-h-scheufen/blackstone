@@ -612,23 +612,4 @@ contract DefaultProcessInstance is AbstractVersionedArtifact(1,0,0), AbstractDel
         }
     }
 
-    /**
-     * @dev Overwrites AbstractAddressScopes.setAddressScope() in order to emit an event in the context of this ActiveAgreement
-     */
-	function setAddressScope(address _address, bytes32 _context, bytes32 _fixedScope, bytes32 _dataPath, bytes32 _dataStorageId, address _dataStorage)
-		public
-	{
-        super.setAddressScope(_address, _context, _fixedScope, _dataPath, _dataStorageId, _dataStorage);
-        emit LogProcessInstanceAddressScopesUpdate(
-            EVENT_ID_PROCESS_INSTANCE_ADDRESS_SCOPES,
-            address(this),
-            _address,
-            _context,
-            _fixedScope,
-            _dataPath,
-            _dataStorageId,
-            _dataStorage
-        );        
-    }
-
 }

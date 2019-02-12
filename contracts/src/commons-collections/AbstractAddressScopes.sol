@@ -69,6 +69,17 @@ contract AbstractAddressScopes is AddressScopes {
             addressScopes[key].scope.conditionalScope = DataStorageUtils.ConditionalData({dataPath: _dataPath, dataStorageId: _dataStorageId, dataStorage: _dataStorage, exists: true});
         }
 		addressScopes[key].exists = true;
+        emit LogEntityAddressScopeUpdate(
+            EVENT_ID_ENTITIES_ADDRESS_SCOPES,
+            address(this),
+            _address,
+            _context,
+            _fixedScope,
+            _dataPath,
+            _dataStorageId,
+            _dataStorage
+        );        
+
 	}
 
 	/**
