@@ -17,6 +17,14 @@ jobs:
   - name: DefaultProcessModelRepository
     build:
       contract: bpm-model/DefaultProcessModelRepository.sol
+# For upgrade testing only
+  - name: NewProcessModelRepository
+    build:
+      contract: bpm-model/NewProcessModelRepository.sol
+  - name: NewProcessModel
+    build:
+      contract: bpm-model/NewProcessModel.sol
+
   - name: ProcessModelRepositoryDb
     build:
       contract: bpm-model/ProcessModelRepositoryDb.sol

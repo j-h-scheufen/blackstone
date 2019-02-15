@@ -1,0 +1,158 @@
+jobs:
+
+#####
+# Retrieve DOUG
+#####
+- name: DOUG
+  query-name:
+      name: DOUG
+      field: data
+
+#####
+# Retrieve Library Addresses
+#####
+- name: ErrorsLib
+  query-contract:
+    destination: $DOUG
+    bin: DOUG
+    function: lookup
+    data: [ErrorsLib]
+
+- name: TypeUtils
+  query-contract:
+    destination: $DOUG
+    bin: DOUG
+    function: lookup
+    data: [TypeUtils]
+
+- name: ArrayUtils
+  query-contract:
+    destination: $DOUG
+    bin: DOUG
+    function: lookup
+    data: [ArrayUtils]
+
+- name: MappingsLib
+  query-contract:
+    destination: $DOUG
+    bin: DOUG
+    function: lookup
+    data: [MappingsLib]
+
+- name: BpmModelLib
+  query-contract:
+    destination: $DOUG
+    bin: DOUG
+    function: lookup
+    data: [BpmModelLib]
+
+- name: BpmRuntimeLib
+  query-contract:
+    destination: $DOUG
+    bin: DOUG
+    function: lookup
+    data: [BpmRuntimeLib]
+
+- name: DataStorageUtils
+  query-contract:
+    destination: $DOUG
+    bin: DOUG
+    function: lookup
+    data: [DataStorageUtils]
+
+#####
+# ProcessModelRepository 1.1.0
+#####
+
+- name: OldProcessModelRepository
+  query-contract:
+    destination: $DOUG
+    bin: DOUG
+    function: lookup
+    data: [ProcessModelRepository]
+
+- name: NewProcessModelRepository
+  deploy:
+    contract: NewProcessModelRepository.bin
+    libraries: ErrorsLib:$ErrorsLib, TypeUtilsAPI:$TypeUtils, ArrayUtilsAPI:$ArrayUtils, MappingsLib:$MappingsLib, BpmModelLib:$BpmModelLib, DataStorageUtils:$DataStorageUtils
+
+- name: ChangeRepositoryUpgradeOwnership
+  call:
+    destination: $NewProcessModelRepository
+    bin: UpgradeOwned
+    function: transferUpgradeOwnership
+    data: [$DOUG]
+
+# At this point the old repository can still create models
+- name: VerifyOldProcessModelDisabledFalse
+  call:
+    destination: $NewProcessModelRepository
+    bin: NewProcessModelRepository
+    function: verifyOldRepositoryDisabled
+    data: [$OldProcessModelRepository]
+
+- name: AssertOldRepositoryDisabled
+  assert:
+    key: $VerifyOldProcessModelDisabledFalse
+    relation: eq
+    val: "false"
+
+- name: NumberOfModelsInOldRepository
+  query-contract:
+    destination: $OldProcessModelRepository
+    bin: ProcessModelRepository
+    function: getNumberOfModels
+
+- name: DeployProcessModelRepository
+  call:
+    destination: $DOUG
+    bin: DOUG
+    function: deploy
+    data: ["ProcessModelRepository", $NewProcessModelRepository]
+
+- name: AssertProcessModelRepository
+  assert:
+    key: $DeployProcessModelRepository
+    relation: eq
+    val: "true"
+
+# Retrieve the updated repository via DOUG
+- name: UpdatedProcessModelRepository
+  query-contract:
+    destination: $DOUG
+    bin: DOUG
+    function: lookup
+    data: [ProcessModelRepository]
+
+- name: AssertUpdatedProcessModelRepository
+  assert:
+    key: $UpdatedProcessModelRepository
+    relation: eq
+    val: $NewProcessModelRepository
+
+- name: NumberOfModelsInNewRepository
+  query-contract:
+    destination: $NewProcessModelRepository
+    bin: ProcessModelRepository
+    function: getNumberOfModels
+
+- name: AssertProcessModelsMigrated
+  assert:
+    key: $NumberOfModelsInNewRepository
+    relation: eq
+    val: $NumberOfModelsInOldRepository
+
+# After the upgrade it should not be possible to create process models
+# via the old repository since its DB contracts was migrated
+- name: VerifyOldProcessModelDisabledTrue
+  call:
+    destination: $NewProcessModelRepository
+    bin: NewProcessModelRepository
+    function: verifyOldRepositoryDisabled
+    data: [$OldProcessModelRepository]
+
+- name: AssertOldRepositoryDisabled
+  assert:
+    key: $VerifyOldProcessModelDisabledTrue
+    relation: eq
+    val: "true"

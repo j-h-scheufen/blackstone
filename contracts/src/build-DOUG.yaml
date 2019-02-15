@@ -38,3 +38,6 @@ jobs:
   - name: DOUG
     build:
       contract: commons-management/DOUG.sol
+  - name: ObjectProxy
+    build:
+      contract: commons-management/ObjectProxy.sol
