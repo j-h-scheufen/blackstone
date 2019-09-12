@@ -43,6 +43,7 @@ docker-compose.log
 docdev
 apidoc
 docs.agreements.network/
+docs/images/*class-diagram.svg
 
 # Build artifacts
 assembly
