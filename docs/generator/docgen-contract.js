@@ -27,6 +27,7 @@ function assembleDocs(dir) {
     }
     parsedBundles[bundle] = [];
   });
+  // console.log('PARSED CONTRACTS: '+JSON.stringify(parsedContracts));
   Object.keys(parsedContracts)
     .sort()
     .forEach((key) => {
@@ -39,9 +40,13 @@ function assembleDocs(dir) {
     });
   }
   for (const b in parsedBundles) {
-    contractDocs.push({ h2: b });
+    contractDocs.push({ h2: `Bundle: ${b}` });
+    contractDocs.push({ h4: `${b} Bundle UML Class Diagram` })
+    contractDocs.push({ img: [ { title: 'UML Class Diagram', source: `./images/${b}-class-diagram.svg` } ] });
     for (const c in parsedBundles[b]) {
       if (parsedBundles[b][c] != null) {
+        // console.log('PARSED BUNDLES basename: '+parsedBundles[b][c]['name']);
+        // console.log('PARSED BUNDLES filepath: '+parsedBundles[b][c]['path']);
         contractDocs.push(createMarkdown(b, parsedBundles[b][c]['name'], parsedBundles[b][c]['path']));
       }
     }
@@ -73,7 +78,6 @@ function createMarkdown(bundle, baseName, filePath) {
       contractName = (`${baseName} Interface`);
     }
     result.push({ h3: contractName });
-    result.push({ p: `The ${contractName} contract is found within the ${bundle} bundle.` });
     for (const key in devDoc.methods) {
       result.push(createDetailsPanel(key, devDoc.methods[key]));
       result.push({ p: '---' });
@@ -92,7 +96,6 @@ function createDetailsPanel(name, method) {
   const content = [];
   if (name) {
     content.push({ h4: name });
-    content.push({ p: `**${name}**` });
   }
   if (method.details) {
     content.push({ p: method.details });
