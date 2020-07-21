@@ -30,7 +30,8 @@ contract ActiveAgreement_v1_0_1 is VersionedArtifact, DataStorage, AddressScopes
 	event LogAgreementLegalStateUpdate(
 		bytes32 indexed eventId,
 		address agreementAddress,
-		uint8 legalState
+		uint8 legalState,
+    uint legalStateUpdateTimestamp
 	);
 
 	event LogAgreementMaxEventCountUpdate(

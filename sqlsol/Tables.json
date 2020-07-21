@@ -73,6 +73,11 @@
           "Type": "uint8"
         },
         {
+          "Field": "legalStateUpdateTimestamp",
+          "ColumnName": "legal_state_update_timestamp",
+          "Type": "uint8"
+        },
+        {
           "Field": "maxEventCount",
           "ColumnName": "max_event_count",
           "Type": "uint32"

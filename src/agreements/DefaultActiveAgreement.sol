@@ -149,7 +149,7 @@ contract DefaultActiveAgreement is AbstractVersionedArtifact(1,6,0), AbstractAct
 			if (AgreementsAPI.isFullyExecuted(address(this))) {
         if (permissions[ROLE_ID_LEGAL_STATE_CONTROLLER].holders.length == 0) {
           legalState = Agreements.LegalState.EXECUTED;
-          emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState));
+          emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState), block.timestamp);
         }
         if (this.getDataValueAsUint(DATA_FIELD_AGREEMENT_EFFECTIVE_DATE) == 0) {
           // Now that the agreement is executed, if there isn't already an effective date set, set to current time
@@ -173,7 +173,7 @@ contract DefaultActiveAgreement is AbstractVersionedArtifact(1,6,0), AbstractAct
 		external
 	{
 		legalState = _legalState;
-		emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState));
+		emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState), block.timestamp);
 	}
 
 	/**
@@ -221,7 +221,7 @@ contract DefaultActiveAgreement is AbstractVersionedArtifact(1,6,0), AbstractAct
 		}
 
         legalState = Agreements.LegalState.REDACTED;
-        emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState));
+        emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState), block.timestamp);
         emitEvent(EVENT_ID_STATE_CHANGED, address(this));
         // Signal deletion to external systems
         emit LogAgreementRedaction(EVENT_ID_AGREEMENTS, DELETION, address(this));
@@ -278,7 +278,7 @@ contract DefaultActiveAgreement is AbstractVersionedArtifact(1,6,0), AbstractAct
      */
     function setStateToCanceled() private {
         legalState = Agreements.LegalState.CANCELED;
-        emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState));
+        emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState), block.timestamp);
         emitEvent(EVENT_ID_STATE_CHANGED, address(this));
     }
 
