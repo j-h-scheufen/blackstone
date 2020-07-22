@@ -388,7 +388,7 @@ contract AbstractActiveAgreement_v1_0_1 is AbstractDelegateTarget, AbstractDataS
 	 */
 	function setFulfilled() external {
         legalState = Agreements.LegalState.FULFILLED;
-        emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState));
+        emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState), block.timestamp);
 	}
 
 	/**
@@ -414,7 +414,7 @@ contract AbstractActiveAgreement_v1_0_1 is AbstractDelegateTarget, AbstractDataS
 			// unilateral cancellation is allowed before execution phase
 			legalState = Agreements.LegalState.CANCELED;
 			emit LogActiveAgreementToPartyCancelationsUpdate(EVENT_ID_AGREEMENT_PARTY_MAP, address(this), party, actor, block.timestamp);
-			emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState));
+			emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState), block.timestamp);
 			emitEvent(EVENT_ID_STATE_CHANGED, address(this)); // for cancellations we need to inform the registry
 		}
 		else if (legalState == Agreements.LegalState.EXECUTED) {
@@ -429,7 +429,7 @@ contract AbstractActiveAgreement_v1_0_1 is AbstractDelegateTarget, AbstractDataS
 					}
 					if (i == parties.length-1) {
 						legalState = Agreements.LegalState.CANCELED;
-						emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState));
+						emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState), block.timestamp);
 						emitEvent(EVENT_ID_STATE_CHANGED, address(this)); // for cancellations we need to inform the registry
 					}
 				}
