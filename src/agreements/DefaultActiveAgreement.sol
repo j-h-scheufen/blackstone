@@ -151,9 +151,9 @@ contract DefaultActiveAgreement is AbstractVersionedArtifact(1,6,0), AbstractAct
           legalState = Agreements.LegalState.EXECUTED;
           emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState), block.timestamp);
         }
-        if (this.getDataValueAsUint(DATA_FIELD_AGREEMENT_EFFECTIVE_DATE) == 0) {
+        if (this.getDataValueAsInt(DATA_FIELD_AGREEMENT_EFFECTIVE_DATE) == 0) {
           // Now that the agreement is executed, if there isn't already an effective date set, set to current time
-          this.setDataValueAsUint(DATA_FIELD_AGREEMENT_EFFECTIVE_DATE, block.timestamp);
+          this.setDataValueAsInt(DATA_FIELD_AGREEMENT_EFFECTIVE_DATE, int(block.timestamp));
         }
 			}
 		}
