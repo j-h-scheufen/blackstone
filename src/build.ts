@@ -22,6 +22,7 @@ const contracts = [
   'agreements/RenewalWindowManager.sol',
   'agreements/RenewalInitializer.sol',
   'agreements/RenewalEvaluator.sol',
+  'agreements/Completables.sol',
 
   'bpm-model/ProcessModelRepositoryDb.sol',
   'bpm-model/DefaultProcessModelRepository.sol',
@@ -91,6 +92,7 @@ const contracts = [
   'commons-utils/DataTypesAccess.sol',
   'commons-utils/TypeUtilsLib.sol',
   'commons-utils/ArrayUtilsLib.sol',
+  'commons-utils/Strings.sol',
 ]
 
 const binPath = 'bin';
@@ -126,7 +128,7 @@ function main() {
     const target = filename.replace(/\.[^/.]+$/, '.abi.ts');
     const basename = path.basename(filename, '.sol');
     // Write the ABIs emitted for each file to the name of that file without extension. We flatten into a single
-    // directory because that's what burrow deploy has always done. 
+    // directory because that's what burrow deploy has always done.
     fs.writeFileSync(path.join(binPath, basename + '.bin'), JSON.stringify(solidity[basename]))
     fs.writeFileSync(target, solts.Print(...solts.NewFile(compiled)));
   }

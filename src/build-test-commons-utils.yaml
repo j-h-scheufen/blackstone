@@ -11,3 +11,6 @@ jobs:
   - name: ArrayUtilsLibTest
     build:
       contract: commons-utils/test/ArrayUtilsTest.sol
+  - name: StringsTest
+    build:
+      contract: commons-utils/Strings.sol

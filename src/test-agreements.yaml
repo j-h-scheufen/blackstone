@@ -13,6 +13,10 @@ jobs:
   deploy:
     contract: ArrayUtilsLib.bin
 
+- name: Strings
+  deploy:
+    contract: Strings.bin
+
 - name: MappingsLib
   deploy:
     contract: MappingsLib.bin
@@ -107,12 +111,22 @@ jobs:
     val: success
 
 
-# ActiveAgreementTest
 - name: ActiveAgreementTest
   deploy:
     contract: ActiveAgreementTest.bin
     instance: ActiveAgreementTest
     libraries: ErrorsLib:$ErrorsLib, ArrayUtilsLib:$ArrayUtilsLib, TypeUtilsLib:$TypeUtilsLib, MappingsLib:$MappingsLib, DataStorageUtils:$DataStorageUtils, ERC165Utils:$ERC165Utils, AgreementsAPI:$AgreementsAPI
+
+- name: ActiveAgreementTest
+  deploy:
+    contract: ActiveAgreementTest.bin
+    instance: ActiveAgreementTest
+    libraries: ErrorsLib:$ErrorsLib, ArrayUtilsLib:$ArrayUtilsLib, TypeUtilsLib:$TypeUtilsLib, MappingsLib:$MappingsLib, DataStorageUtils:$DataStorageUtils, ERC165Utils:$ERC165Utils, AgreementsAPI:$AgreementsAPI
+
+- name: CompletablesTest
+  deploy:
+    contract: CompletablesTest.bin
+    libraries: AgreementsAPI:$AgreementsAPI, Strings:$Strings, ErrorsLib:$ErrorsLib
 
 - name: testActiveAgreementSetup
   call:
@@ -159,6 +173,18 @@ jobs:
 - name: assertActiveAgreementRenewal
   assert:
     key: $testActiveAgreementRenewal
+    relation: eq
+    val: success
+
+- name: testCompletables
+  call:
+    destination: $CompletablesTest
+    bin: CompletablesTest
+    function: testCompletables
+
+- name: assertCompletables
+  assert:
+    key: $testCompletables
     relation: eq
     val: success
 

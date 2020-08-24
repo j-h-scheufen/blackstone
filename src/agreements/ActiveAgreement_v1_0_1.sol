@@ -31,7 +31,7 @@ contract ActiveAgreement_v1_0_1 is VersionedArtifact, DataStorage, AddressScopes
 		bytes32 indexed eventId,
 		address agreementAddress,
 		uint8 legalState,
-    uint legalStateUpdateTimestamp
+        uint legalStateUpdateTimestamp
 	);
 
 	event LogAgreementMaxEventCountUpdate(
@@ -100,11 +100,11 @@ contract ActiveAgreement_v1_0_1 is VersionedArtifact, DataStorage, AddressScopes
 	 * @param _governingAgreements array of agreement addresses which govern this agreement
 	 */
 	function initialize(
-		address _archetype, 
-		address _creator, 
-		string calldata _privateParametersFileReference, 
-		bool _isPrivate, 
-		address[] calldata _parties, 
+		address _archetype,
+		address _creator,
+		string calldata _privateParametersFileReference,
+		bool _isPrivate,
+		address[] calldata _parties,
 		address[] calldata _governingAgreements)
 		external;
 
@@ -189,13 +189,13 @@ contract ActiveAgreement_v1_0_1 is VersionedArtifact, DataStorage, AddressScopes
 
 	/**
 	 * @dev Returns the creator
-	 * @return the creator	 
+	 * @return the creator
 	 */
 	function getCreator() external view returns (address);
 
 	/**
 	 * @dev Returns the private state
-	 * @return the private flag 
+	 * @return the private flag
 	 */
 	function isPrivate() external view returns (bool);
 
@@ -257,7 +257,7 @@ contract ActiveAgreement_v1_0_1 is VersionedArtifact, DataStorage, AddressScopes
 	 * During formation (legal states DRAFT and FORMULATED), the agreement can cancelled unilaterally by one of the parties to the agreement.
 	 * During execution (legal state EXECUTED), the agreement can only be canceled if all parties agree to do so by invoking this function.
 	 * This function should REVERT if the cancel operation could not be carried out successfully.
-	 */ 
+	 */
 	function cancel() external;
 
 }
