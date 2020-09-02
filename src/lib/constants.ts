@@ -7,6 +7,7 @@ export enum Contracts {
   ProcessModelRepository = 'ProcessModelRepository',
   ApplicationRegistry = 'ApplicationRegistry',
   BpmService = 'BpmService',
+  Completables = 'Completables',
 }
 
 export enum Libraries {

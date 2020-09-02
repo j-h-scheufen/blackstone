@@ -11,6 +11,9 @@ jobs:
   - name: DataTypesAccess
     build:
       contract: commons-utils/DataTypesAccess.sol
+  - name: Strings
+    build:
+      contract: commons-utils/Strings.sol
   - name: MappingsLib
     build:
       contract: commons-collections/MappingsLib.sol

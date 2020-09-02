@@ -32,14 +32,22 @@ jobs:
   - name: ArchetypeRegistryTest
     build:
       contract: agreements/test/ArchetypeRegistryTest.sol
+
   - name: ActiveAgreementTest
     build:
       contract: agreements/test/ActiveAgreementTest.sol
       instance: ActiveAgreementTest
+
+  - name: CompletablesTest
+    build:
+      contract: agreements/test/CompletablesTest.sol
+      instance: CompletablesTest
+
   - name: ActiveAgreementRegistryTest
     build:
       contract: agreements/test/ActiveAgreementRegistryTest.sol
       instance: ActiveAgreementRegistryTest
+
   - name: DOUG
     build:
       contract: commons-management/TestDoug.sol
