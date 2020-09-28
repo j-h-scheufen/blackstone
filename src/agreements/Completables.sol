@@ -32,7 +32,7 @@ contract Completables is CompletableOptions {
     bytes32 constant EVENT_ID_AGREEMENT_COMPLETABLE = "AN://agreement-completable";
 
     event LogAgreementCompletableInit(
-        bytes32 indexed eventURN,
+        bytes32 indexed eventId,
         bytes32 indexed intervalId,
         address agreementAddress,
         address controller,
@@ -41,20 +41,20 @@ contract Completables is CompletableOptions {
     );
 
     event LogAgreementCompletableInitFranchisee(
-        bytes32 indexed eventURN,
+        bytes32 indexed eventId,
         bytes32 indexed intervalId,
         address franchisee
     );
 
     event LogAgreementCompletableBegin(
-        bytes32 indexed eventURN,
+        bytes32 indexed eventId,
         bytes32 indexed intervalId,
         address agreementAddress,
         int timestamp
     );
 
     event LogAgreementCompletableRatify(
-        bytes32 indexed eventURN,
+        bytes32 indexed eventId,
         bytes32 indexed intervalId,
         address agreementAddress,
         address franchisee,
@@ -63,7 +63,7 @@ contract Completables is CompletableOptions {
     );
 
     event LogAgreementCompletableComplete(
-        bytes32 indexed eventURN,
+        bytes32 indexed eventId,
         bytes32 indexed intervalId,
         address agreementAddress,
         bool ratified,
@@ -71,7 +71,7 @@ contract Completables is CompletableOptions {
     );
 
     event LogRelateIntervals(
-        bytes32 indexed eventURN,
+        bytes32 indexed eventId,
         bytes32 left,
         uint16 relation,
         bytes32 right
@@ -82,7 +82,7 @@ contract Completables is CompletableOptions {
     //   deletion logic to support deleting multiple rows probably through some opt-in flag
     //   see: https://github.com/hyperledger/burrow/issues/1403
     event LogDeleteInterval(
-        bytes32 indexed eventURN,
+        bytes32 indexed eventId,
         bytes32 indexed intervalId,
         int __DELETE__
     );
