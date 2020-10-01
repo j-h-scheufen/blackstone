@@ -203,8 +203,8 @@ export module ActiveAgreement {
                 return Decode(this.client, exec).createPermission();
             });
         }
-        defineRenewalTerms(_franchisees: string[], _threshold: number, _expirationDate: number, _opensAtOffset: string, _closesAtOffset: string, _extensionOffset: string) {
-            const data = Encode(this.client).defineRenewalTerms(_franchisees, _threshold, _expirationDate, _opensAtOffset, _closesAtOffset, _extensionOffset);
+        defineRenewalTerms(_franchisees: string[], _threshold: number, _opensAtOffset: string, _closesAtOffset: string, _extensionOffset: string) {
+            const data = Encode(this.client).defineRenewalTerms(_franchisees, _threshold, _opensAtOffset, _closesAtOffset, _extensionOffset);
             return Call<Tx, void>(this.client, this.address, data, false, (exec: Uint8Array) => {
                 return Decode(this.client, exec).defineRenewalTerms();
             });
@@ -610,12 +610,6 @@ export module ActiveAgreement {
                 return Decode(this.client, exec).setAddressScope();
             });
         }
-        setCurrentExpirationDate(_expirationDate: number) {
-            const data = Encode(this.client).setCurrentExpirationDate(_expirationDate);
-            return Call<Tx, void>(this.client, this.address, data, false, (exec: Uint8Array) => {
-                return Decode(this.client, exec).setCurrentExpirationDate();
-            });
-        }
         setDataValueAsAddress(_id: Buffer, _value: string) {
             const data = Encode(this.client).setDataValueAsAddress(_id, _value);
             return Call<Tx, void>(this.client, this.address, data, false, (exec: Uint8Array) => {
@@ -771,7 +765,7 @@ export module ActiveAgreement {
                 return client.encode("78BC0B0D", ["uint8[3]"], _version);
         },
         createPermission: (_permission: Buffer, _multiHolder: boolean, _revocable: boolean, _transferable: boolean) => { return client.encode("94FEB152", ["bytes32", "bool", "bool", "bool"], _permission, _multiHolder, _revocable, _transferable); },
-        defineRenewalTerms: (_franchisees: string[], _threshold: number, _expirationDate: number, _opensAtOffset: string, _closesAtOffset: string, _extensionOffset: string) => { return client.encode("0130B3E0", ["address[]", "uint256", "int256", "string", "string", "string"], _franchisees, _threshold, _expirationDate, _opensAtOffset, _closesAtOffset, _extensionOffset); },
+        defineRenewalTerms: (_franchisees: string[], _threshold: number, _opensAtOffset: string, _closesAtOffset: string, _extensionOffset: string) => { return client.encode("B00B6428", ["address[]", "uint256", "string", "string", "string"], _franchisees, _threshold, _opensAtOffset, _closesAtOffset, _extensionOffset); },
         getAddressScopeDetails: (_address: string, _context: Buffer) => { return client.encode("9561AA32", ["address", "bytes32"], _address, _context); },
         getAddressScopeDetailsForKey: (_key: Buffer) => { return client.encode("FE3C84B2", ["bytes32"], _key); },
         getAddressScopeKeys: () => { return client.encode("70A9C997", []); },
@@ -841,7 +835,6 @@ export module ActiveAgreement {
         resolveAddressScope: (_address: string, _context: Buffer, _dataStorage: string) => { return client.encode("3C0E5245", ["address", "bytes32", "address"], _address, _context, _dataStorage); },
         revokePermission: (_permission: Buffer, _holder: string) => { return client.encode("A6A8F17B", ["bytes32", "address"], _permission, _holder); },
         setAddressScope: (_address: string, _context: Buffer, _fixedScope: Buffer, _dataPath: Buffer, _dataStorageId: Buffer, _dataStorage: string) => { return client.encode("6D73C8BC", ["address", "bytes32", "bytes32", "bytes32", "bytes32", "address"], _address, _context, _fixedScope, _dataPath, _dataStorageId, _dataStorage); },
-        setCurrentExpirationDate: (_expirationDate: number) => { return client.encode("CFDC4942", ["int256"], _expirationDate); },
         setDataValueAsAddress: (_id: Buffer, _value: string) => { return client.encode("68E78011", ["bytes32", "address"], _id, _value); },
         setDataValueAsAddressArray: (_id: Buffer, _value: string[]) => { return client.encode("641375AD", ["bytes32", "address[]"], _id, _value); },
         setDataValueAsBool: (_id: Buffer, _value: boolean) => { return client.encode("1CB35540", ["bytes32", "bool"], _id, _value); },
@@ -1041,7 +1034,6 @@ export module ActiveAgreement {
         resolveAddressScope: (): [Buffer] => { return client.decode(data, ["bytes32"]); },
         revokePermission: (): void => { return; },
         setAddressScope: (): void => { return; },
-        setCurrentExpirationDate: (): void => { return; },
         setDataValueAsAddress: (): void => { return; },
         setDataValueAsAddressArray: (): void => { return; },
         setDataValueAsBool: (): void => { return; },

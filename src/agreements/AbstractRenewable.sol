@@ -66,24 +66,18 @@ contract AbstractRenewable is Renewable {
         string memory renewalExtensionOffset
     ) {
         renewalThreshold = threshold;
-        agreementExpirationDate = currentExpirationDate;
+        agreementExpirationDate = getCurrentExpirationDate();
         renewalOpensAtOffset = opensAtOffset;
         renewalClosesAtOffset = closesAtOffset;
         renewalExtensionOffset = extensionOffset;
     }
 
     /**
-     * @dev Sets the expiration date
-     * @param _expirationDate int expiration date timestamp
+     * @dev Gets the expiration date
+     * @return the expiration date timestamp
      */
-    function setCurrentExpirationDate(int _expirationDate) external {
-        currentExpirationDate = _expirationDate;
-        DataStorage(address(this)).setDataValueAsInt(DATA_ID_AGREEMENT_EXPIRATION_DATE, _expirationDate);
-        emit LogAgreementRenewalExpirationDateUpdate(
-            EVENT_ID_AGREEMENT_RENEWALS,
-            address(this),
-            currentExpirationDate
-        );
+    function getCurrentExpirationDate() internal view returns (int) {
+        return DataStorage(address(this)).getDataValueAsInt(DATA_ID_AGREEMENT_EXPIRATION_DATE);
     }
 
     /**
@@ -138,13 +132,12 @@ contract AbstractRenewable is Renewable {
                 ErrorsLib.revertIf(nextExpirationDate == 0,
                     ErrorsLib.INVALID_STATE(), "AbstractRenewable.closeRenewalWindow",
                     "Agreement is set to renew, but no updated expiration date set");
-                currentExpirationDate = nextExpirationDate;
+                DataStorage(address(this)).setDataValueAsInt(DATA_ID_AGREEMENT_EXPIRATION_DATE, nextExpirationDate);
                 nextExpirationDate = 0;
-                DataStorage(address(this)).setDataValueAsInt(DATA_ID_AGREEMENT_EXPIRATION_DATE, currentExpirationDate);
                 emit LogAgreementRenewalExpirationDateUpdate(
                     EVENT_ID_AGREEMENT_RENEWALS,
                     address(this),
-                    currentExpirationDate
+                    getCurrentExpirationDate()
                 );
             }
         }
@@ -170,7 +163,6 @@ contract AbstractRenewable is Renewable {
      * slate clean for current iteration of voting
      * @param _franchisees an array of addresses representing the franchisees who have privilege to renew
      * @param _threshold the number of votes needed to to renew
-     * @param _expirationDate expiration date of agreement
      * @param _opensAtOffset ISO 8601 offset from the expiration date when the renewal window opens
      * @param _closesAtOffset ISO 8601 offset from the expiration date when the renewal window closes
      * @param _extensionOffset ISO 8601 offset defining the duration of extention of the expiration date
@@ -178,7 +170,6 @@ contract AbstractRenewable is Renewable {
     function defineRenewalTerms(
         address[] calldata _franchisees,
         uint _threshold,
-        int _expirationDate,
         string calldata _opensAtOffset,
         string calldata _closesAtOffset,
         string calldata _extensionOffset
@@ -189,7 +180,6 @@ contract AbstractRenewable is Renewable {
         ErrorsLib.revertIf(_threshold > _franchisees.length,
             ErrorsLib.INVALID_INPUT(), "AbstractRenewable.defineTerms",
             "Threshold may not be greater than total number of franchisees able to renew");
-        currentExpirationDate = _expirationDate;
         franchisees = _franchisees;
         threshold = _threshold;
         opensAtOffset = _opensAtOffset;
@@ -198,7 +188,6 @@ contract AbstractRenewable is Renewable {
 
         resetRenewalVotes();
 
-        DataStorage(address(this)).setDataValueAsInt(DATA_ID_AGREEMENT_EXPIRATION_DATE, currentExpirationDate);
         DataStorage(address(this)).setDataValueAsString(DATA_ID_AGREEMENT_RENEWAL_OPENS_AT, opensAtOffset);
         DataStorage(address(this)).setDataValueAsString(DATA_ID_AGREEMENT_RENEWAL_CLOSES_AT, closesAtOffset);
         DataStorage(address(this)).setDataValueAsString(DATA_ID_AGREEMENT_EXTEND_EXPIRATION_BY, extensionOffset);
@@ -206,7 +195,7 @@ contract AbstractRenewable is Renewable {
         emit LogAgreementRenewalTermsDefined(
             EVENT_ID_AGREEMENT_RENEWALS,
             address(this),
-            currentExpirationDate,
+            getCurrentExpirationDate(),
             threshold,
             opensAtOffset,
             closesAtOffset,

@@ -88,10 +88,10 @@ contract Renewable {
     );
 
     /**
-       * @dev Sets the expiration date
-       * @param _expirationDate int expiration date timestamp
-       */
-    function setCurrentExpirationDate(int _expirationDate) external;
+     * @dev Gets the current expiration date
+     * @return the expiration date timestamp
+     */
+    function getCurrentExpirationDate() internal view returns (int);
 
     /**
      * @dev Sets the next expiration date if a renewal occurs
@@ -134,7 +134,6 @@ contract Renewable {
        * slate clean for current iteration of voting
        * @param _franchisees an array of addresses representing the franchisees who have privilege to renew
        * @param _threshold the number of votes needed to to renew
-       * @param _expirationDate expiration date of agreement
        * @param _opensAtOffset ISO 8601 offset from the expiration date when the renewal window opens
        * @param _closesAtOffset ISO 8601 offset from the expiration date when the renewal window closes
        * @param _extensionOffset ISO 8601 offset defining the duration of extention of the expiration date
@@ -142,7 +141,6 @@ contract Renewable {
     function defineRenewalTerms(
         address[] calldata _franchisees,
         uint _threshold,
-        int _expirationDate,
         string calldata _opensAtOffset,
         string calldata _closesAtOffset,
         string calldata _extensionOffset
