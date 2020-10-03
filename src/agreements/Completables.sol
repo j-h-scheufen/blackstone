@@ -1,8 +1,8 @@
+pragma solidity ^0.5;
+
 import "agreements/AgreementsAPI.sol";
 import "commons-base/ErrorsLib.sol";
 import "commons-utils/Strings.sol";
-
-pragma solidity ^0.5;
 
 contract CompletableOptions {
     // Completable options
@@ -12,11 +12,6 @@ contract CompletableOptions {
     * Not set: Wait for Complete to be called externally
     */
     uint public constant COMPLETE_ON_RATIFICATION = 1;
-    /**
-    * Set: persist the Completable as forever completed preserving relations involving it and reserving its intervalId in perpetuity
-    * Not set: delete the Completable on completion releasing its intervalId for reuse and remove relations in which the Completable is involved
-    */
-    uint public constant PERSIST_ON_COMPLETION = 1 << 1;
 
     function enabled(uint options, uint option) public pure returns (bool) {
         return options & option > 0;
@@ -26,23 +21,23 @@ contract CompletableOptions {
 contract Completables is CompletableOptions {
     using Strings for *;
 
-    // This is a placeholder value for the marker field - it could be anything
-    int constant DELETION = 0;
-
     bytes32 constant EVENT_ID_AGREEMENT_COMPLETABLE = "AN://agreement-completable";
 
     event LogAgreementCompletableInit(
         bytes32 indexed eventId,
         bytes32 indexed intervalId,
         address agreementAddress,
+        string namespace,
+        string name,
         address controller,
         uint threshold,
-        string payload
+        string metadata
     );
 
     event LogAgreementCompletableInitFranchisee(
         bytes32 indexed eventId,
         bytes32 indexed intervalId,
+        address agreementAddress,
         address franchisee
     );
 
@@ -53,11 +48,12 @@ contract Completables is CompletableOptions {
         int timestamp
     );
 
-    event LogAgreementCompletableRatify(
+    event LogAgreementCompletableAttest(
         bytes32 indexed eventId,
         bytes32 indexed intervalId,
         address agreementAddress,
         address franchisee,
+        // Is the completable ratified after this attestation?
         bool ratified,
         int timestamp
     );
@@ -68,23 +64,6 @@ contract Completables is CompletableOptions {
         address agreementAddress,
         bool ratified,
         int timestamp
-    );
-
-    event LogRelateIntervals(
-        bytes32 indexed eventId,
-        bytes32 left,
-        uint16 relation,
-        bytes32 right
-    );
-
-    // TODO: with some Vent changes we should be able to delete clean up all relations over intervals that neither exist
-    //   would need two deletion projections: one with intervalId => left, one with intervalId => right and change the
-    //   deletion logic to support deleting multiple rows probably through some opt-in flag
-    //   see: https://github.com/hyperledger/burrow/issues/1403
-    event LogDeleteInterval(
-        bytes32 indexed eventId,
-        bytes32 indexed intervalId,
-        int __DELETE__
     );
 
     struct Franchisee {
@@ -117,7 +96,7 @@ contract Completables is CompletableOptions {
     mapping(bytes32 => Completable) completables;
     bytes32[] intervals;
 
-    modifier intervalExists(bytes32 intervalId) {
+    modifier completableExists(bytes32 intervalId) {
         if (!completables[intervalId].exists) {
             revert("Completable ".concat(intervalId.quote(), " does not exist"));
         }
@@ -129,24 +108,27 @@ contract Completables is CompletableOptions {
         if (msg.sender != address(this) && completables[intervalId].controller != msg.sender) {
             revert(Strings.concat("caller is not Completable controller: ", msg.sender.toHex(),
                 " (msg.sender) != ", completables[intervalId].controller.toHex(), " (controller) ",
-                " for Completable ", intervalId.quote()));
+                " for Completable ", intervalId.toHex()));
         }
         _;
     }
 
     modifier intervalOpen(bytes32 intervalId, int instant) {
+        if (!completables[intervalId].exists) {
+            revert("Completable ".concat(intervalId.toHex(), " is undefined"));
+        }
         if (instant == 0) {
             instant = int(block.timestamp);
         }
         if (completables[intervalId].begun == 0) {
-            revert("Completable ".concat(intervalId.quote(), " is has not yet begun"));
+            revert("Completable ".concat(intervalId.toHex(), " has not yet begun"));
         }
         if (instant < completables[intervalId].begun) {
-            revert("Completable ".concat(intervalId.quote(), " begins later (at ",
+            revert("Completable ".concat(intervalId.toHex(), " begins later (at ",
                 completables[intervalId].begun.toString(), ") than instant ", instant.toString()));
         }
         if (completables[intervalId].completed != 0 && completables[intervalId].completed < instant) {
-            revert("Completable ".concat(intervalId.quote(), " is completed (as ",
+            revert("Completable ".concat(intervalId.toHex(), " is completed (as ",
                 completables[intervalId].completed.toString(), " before instant ", instant.toString()));
         }
         _;
@@ -156,28 +138,35 @@ contract Completables is CompletableOptions {
     * @notice Configures and registers a new Completable. This reserves the `intervalId` and allows it to participate
     *         in relations. The caller (msg.sender) of init becomes the 'controller' of this Completable and is
     *         the only identity permitted to call `begin`, `complete`, and `relate`
+    * @param namespace is a categorical identifier for this Completable for the purpose of querying and separating names
+    * @param name is a human-readable name for the completable
     * @param franchisees contains the addresses of all agreement parties that are able to ratify ('vote on') this
     *        Completable. If a franchisee appears multiple times then their vote counts that many times (contributes
     *        that many times to the threshold).
     * @param threshold sets the number of ratifications (votes from franchisees counted as above) required for the
              Completable to be 'ratified'. The alternative is that the Completable 'defaults'
     * @param options sets various options for how Completables operate, see constants above
-    * @param payload is an opaque datum that is meaningful to the Completable controller
+    * @param metadata an opaque datum that is meaningful to the Completable controller
     */
     function init(bytes32 intervalId,
+        string calldata namespace,
+        string calldata name,
         address agreementAddress,
         address[] calldata franchisees,
         uint threshold,
         uint options,
-        string calldata payload)
+        string calldata metadata)
     external
     {
         if (completables[intervalId].exists) {
-            revert(Strings.concat("Completable ", intervalId.quote(), " already exists"));
+            revert(Strings.concat("Completable ", intervalId.toHex(), " already exists"));
         }
         if (threshold > franchisees.length) {
             revert(Strings.concat("Cannot create a completable with ratification threshold (", threshold.toString(),
                 ") greater than number of franchisees (", franchisees.length.toString(), ")"));
+        }
+        if (intervalId[0] == 0) {
+            revert("Completable intervalId must be non-empty");
         }
         completables[intervalId].intervalId = intervalId;
         completables[intervalId].agreementAddress = agreementAddress;
@@ -189,36 +178,30 @@ contract Completables is CompletableOptions {
         emit LogAgreementCompletableInit(EVENT_ID_AGREEMENT_COMPLETABLE,
             intervalId,
             agreementAddress,
+            namespace,
+            name,
             msg.sender,
             threshold,
-            payload);
+            metadata);
 
         for (uint i = 0; i < franchisees.length; i++) {
             completables[intervalId].franchisees.push(Franchisee(franchisees[i], false));
 
             emit LogAgreementCompletableInitFranchisee(EVENT_ID_AGREEMENT_COMPLETABLE,
                 intervalId,
+                agreementAddress,
                 franchisees[i]);
         }
     }
 
-    function relate(bytes32 left, uint16 relation, bytes32 right)
-    external
-    intervalExists(left)
-    onlyController(left)
-    intervalExists(right)
-    onlyController(right)
-    {
-        emit LogRelateIntervals(EVENT_ID_AGREEMENT_COMPLETABLE, left, relation, right);
-    }
-
     function begin(bytes32 intervalId, int timestamp)
     external
-    intervalExists(intervalId)
+    completableExists(intervalId)
     onlyController(intervalId)
     {
         if (completables[intervalId].completed != 0) {
-            revert("begin(): cannot begin completable that has already completed");
+            // This allows us to institute a 'whichever comes first' race and not worry about late reports
+            return;
         }
         if (completables[intervalId].begun != 0) {
             // We could revert here but it's nicer if we can provide idempotence - TODO: review WRT lair
@@ -235,36 +218,36 @@ contract Completables is CompletableOptions {
     }
 
     /**
-     * @notice ratify this completable, deriving the franchisee from the caller via the agreement associated with the completable
+     * @notice attest to this this completable, deriving the franchisee from the caller via the agreement associated with the completable
      * @return whether the Completable is ratified after this invocation
      */
-    function ratify(bytes32 intervalId, int timestamp)
+    function attest(bytes32 intervalId, int timestamp)
     external
-    intervalExists(intervalId)
+    completableExists(intervalId)
     intervalOpen(intervalId, timestamp)
     returns (bool)
     {
         address actor;
-        address franchisee;
-        (actor, franchisee) = AgreementsAPI.authorizePartyActor(completables[intervalId].agreementAddress);
+        address party;
+        (actor, party) = AgreementsAPI.authorizePartyActor(completables[intervalId].agreementAddress);
         ErrorsLib.revertIf(actor == address(0),
             ErrorsLib.UNAUTHORIZED(), "Completables.ratify()",
-            Strings.concat("The caller is not authorized to ratify ", intervalId.quote()));
+            Strings.concat("The caller is not authorized to ratify ", intervalId.toHex()));
 
         if (timestamp == 0) {
             timestamp = int(block.timestamp);
         }
-        if (ratifyAndCount(intervalId, franchisee) >= completables[intervalId].threshold) {
+        if (ratifyAndCount(intervalId, actor, party) >= completables[intervalId].threshold) {
             completables[intervalId].ratified = timestamp;
         }
         // Avoid stack too deep issues with local variables
         Completable memory completable = completables[intervalId];
 
         bool isRatified = completable.ratified != 0;
-        emit LogAgreementCompletableRatify(EVENT_ID_AGREEMENT_COMPLETABLE,
+        emit LogAgreementCompletableAttest(EVENT_ID_AGREEMENT_COMPLETABLE,
             intervalId,
             completable.agreementAddress,
-            franchisee,
+            party,
             isRatified,
             timestamp);
 
@@ -275,17 +258,16 @@ contract Completables is CompletableOptions {
         return isRatified;
     }
 
-    function ratify(bytes32 intervalId) external returns (bool){
-        return this.ratify(intervalId, 0);
-    }
-
     function complete(bytes32 intervalId, int timestamp)
     external
-    intervalExists(intervalId)
+    completableExists(intervalId)
     onlyController(intervalId)
     returns (bool isRatified) {
+        if (!completables[intervalId].exists) {
+            revert(Strings.concat("complete(): ", intervalId.toHex(), " is not defined"));
+        }
         if (completables[intervalId].begun == 0) {
-            revert("complete(): cannot complete completable that has not begun");
+            revert(Strings.concat("complete(): ", intervalId.toHex(), " has not begun"));
         }
         isRatified = completables[intervalId].ratified != 0;
         if (completables[intervalId].completed != 0) {
@@ -301,14 +283,6 @@ contract Completables is CompletableOptions {
             isRatified,
             timestamp
         );
-
-        if (!enabled(completables[intervalId].options, PERSIST_ON_COMPLETION)) {
-            // TODO: Vent needs https://github.com/hyperledger/burrow/issues/1403 so this can clean up unused relations
-            emit LogDeleteInterval(EVENT_ID_AGREEMENT_COMPLETABLE,
-                intervalId,
-                DELETION);
-            delete completables[intervalId];
-        }
     }
 
     /**
@@ -317,7 +291,7 @@ contract Completables is CompletableOptions {
     */
     function ratifiedAt(bytes32 intervalId)
     external
-    intervalExists(intervalId)
+    completableExists(intervalId)
     view
     returns (int ratified){
         ratified = completables[intervalId].ratified;
@@ -327,11 +301,11 @@ contract Completables is CompletableOptions {
         }
     }
 
-    function ratifyAndCount(bytes32 intervalId, address franchisee) internal returns (uint ratifications) {
+    function ratifyAndCount(bytes32 intervalId, address actor, address party) internal returns (uint ratifications) {
         bool found;
         for (uint256 i; i < completables[intervalId].franchisees.length; i++) {
             // Note the same franchisee may appear multiple times, we could normalise this into a single franchisee but we don't
-            if (completables[intervalId].franchisees[i].franchiseeAddress == franchisee) {
+            if (completables[intervalId].franchisees[i].franchiseeAddress == actor || completables[intervalId].franchisees[i].franchiseeAddress == party) {
                 completables[intervalId].franchisees[i].ratified = true;
                 found = true;
             }
@@ -340,7 +314,7 @@ contract Completables is CompletableOptions {
             }
         }
         if (!found) {
-            revert(franchisee.toHex().concat(" is not a franchisee of interval ", intervalId.quote()));
+            revert(Strings.concat("Neither actor ", actor.toHex(), " or party ", party.toHex(), "is not a franchisee of interval ", intervalId.toHex()));
         }
         return ratifications;
     }

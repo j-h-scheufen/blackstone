@@ -32,4 +32,3 @@ jobs:
   - name: Completables
     build:
       contract: agreements/Completables.sol
-      libraries: AgreementsAPI:$AgreementsAPI, Strings:$Strings, ErrorsLib:$ErrorsLib
