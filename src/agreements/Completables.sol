@@ -137,7 +137,7 @@ contract Completables is CompletableOptions {
     /**
     * @notice Configures and registers a new Completable. This reserves the `intervalId` and allows it to participate
     *         in relations. The caller (msg.sender) of init becomes the 'controller' of this Completable and is
-    *         the only identity permitted to call `begin`, `complete`, and `relate`
+    *         the only identity permitted to call `begin` and `complete`
     * @param namespace is a categorical identifier for this Completable for the purpose of querying and separating names
     * @param name is a human-readable name for the completable
     * @param franchisees contains the addresses of all agreement parties that are able to ratify ('vote on') this
