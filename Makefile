@@ -37,7 +37,6 @@ docker_run_chain:
 .PHONY: docker_test_chain
 docker_test_chain: docker_run_chain
 	rm -rf src/bin
-	docker-compose logs -f chain &
 	docker-compose run contracts
 
 # API image for CI use outside of compose

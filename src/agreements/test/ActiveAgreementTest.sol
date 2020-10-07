@@ -325,12 +325,12 @@ contract ActiveAgreementTest {
         archetype.initialize(10, false, true, falseAddress, falseAddress, falseAddress, falseAddress, emptyAddressArray);
         agreement = new DefaultActiveAgreement();
         agreement.initialize(address(archetype), address(this), address(this), dummyPrivateParametersFileRef, false, parties, emptyAddressArray);
+        agreement.setDataValueAsInt(DATA_ID_AGREEMENT_EXPIRATION_DATE, expirationDate);
 
         // test renewal setup
-        agreement.defineRenewalTerms(franchisees, threshold, expirationDate, opensAtOffset, closesAtOffset, extensionOffset);
+        agreement.defineRenewalTerms(franchisees, threshold, opensAtOffset, closesAtOffset, extensionOffset);
 
         // renewal terms should be set on the agreement data storage
-        if (agreement.getDataValueAsInt(DATA_ID_AGREEMENT_EXPIRATION_DATE) != expirationDate) return "Expiration date should be set on the agreement";
         if (bytes(agreement.getDataValueAsString(DATA_ID_AGREEMENT_RENEWAL_OPENS_AT)).length == 0) return "Renewal Opens At Offset should be set on the agreement";
         if (bytes(agreement.getDataValueAsString(DATA_ID_AGREEMENT_RENEWAL_CLOSES_AT)).length == 0) return "Renewal Opens At Offset should be set on the agreement";
         if (bytes(agreement.getDataValueAsString(DATA_ID_AGREEMENT_EXTEND_EXPIRATION_BY)).length == 0) return "Renewal Opens At Offset should be set on the agreement";
