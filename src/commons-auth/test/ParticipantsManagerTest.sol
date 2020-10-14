@@ -345,8 +345,9 @@ contract ParticipantsManagerTest {
           return "Should REVERT if non-approver attempting to add another approver";
         payload = abi.encodeWithSignature(functionSigAddApprover, address(user2));
         (success, ) = address(user1).call(abi.encodeWithSignature(functionSigUserAccountForwardCall, address(org), payload));
-        if (success)
-          return "Should REVERT if adding same approver more than once";
+        if (!success)
+          return "Should allow adding same approver more than once";
+        if (org.getNumberOfApprovers() != 2) return "Adding same approver should not result in duplicate";
         payload = abi.encodeWithSignature(functionSigAddApprover, address(0));
         (success, ) = address(user1).call(abi.encodeWithSignature(functionSigUserAccountForwardCall, address(org), payload));
         if (success)
@@ -369,8 +370,9 @@ contract ParticipantsManagerTest {
           return "Should REVERT if non-approver attempting to remove another approver";
         payload = abi.encodeWithSignature(functionSigRemoveApprover, address(user3));
         (success, ) = address(user2).call(abi.encodeWithSignature(functionSigUserAccountForwardCall, address(org), payload));
-        if (success)
-          return "Should REVERT if user to remove is not an approver";
+        if (!success)
+          return "Should allow removing a user that is not an approver";
+        if (org.getNumberOfApprovers() != 2) return "Removing non-approver user should not affect approvers";
         payload = abi.encodeWithSignature(functionSigRemoveApprover, address(user2));
         user1.forwardCall(address(org), payload);
         payload = abi.encodeWithSignature(functionSigRemoveApprover, address(user1));
