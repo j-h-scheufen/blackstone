@@ -56,7 +56,6 @@ export class Contracts {
     this.manager = manager;
     this.ecosystem = ecosystem;
     this.log = getLogger("contracts");
-    this.log.level = "debug";
   }
 
   async getFromNameRegistry(name: string) {
