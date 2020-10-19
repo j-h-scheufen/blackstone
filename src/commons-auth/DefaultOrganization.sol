@@ -193,10 +193,8 @@ contract DefaultOrganization is AbstractVersionedArtifact(1,1,0), AbstractDelega
         ErrorsLib.INVALID_INPUT(), "DefaultOrganization.addApprover", "Cannot add empty address to approvers"
       );
 		for (uint i = 0; i < approvers.length; i++) {
-      ErrorsLib.revertIf(
-        approvers[i] == _userAccount,
-        ErrorsLib.RESOURCE_ALREADY_EXISTS(), "DefaultOrganization.addApprover", "Address already exists in approvers"
-      );
+      // User is already approver
+      if (approvers[i] == _userAccount) return;
     }
     approvers.push(_userAccount);
     emit LogOrganizationApproverUpdate(
@@ -223,10 +221,8 @@ contract DefaultOrganization is AbstractVersionedArtifact(1,1,0), AbstractDelega
         break;
       }
     }
-    ErrorsLib.revertIf(
-      remove_idx == 0 && approvers[remove_idx] != _userAccount,
-      ErrorsLib.RESOURCE_NOT_FOUND(), "DefaultOrganization.removeApprover", "Address not found in organization approvers"
-    );
+    // User not in approvers
+    if (remove_idx == 0 && approvers[remove_idx] != _userAccount) return;
     for (idx = remove_idx; idx < approvers.length - 1; idx++) {
         approvers[idx] = approvers[idx + 1];
     }
