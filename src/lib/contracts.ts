@@ -26,7 +26,8 @@ import {
 } from "./types";
 import { getLogger, Logger } from "log4js";
 import { VentListener, BurrowWatcher } from "./vent";
-import {Completables} from "../agreements/Completables.abi";
+import { Completables } from "../agreements/Completables.abi";
+import { DateRelations } from "../agreements/DateRelations.abi";
 
 export async function RegisterEcosystem(
   client: Client,
@@ -306,11 +307,26 @@ export class Contracts {
    * @param intervalId the identity of the completable in the space of intervals
    * @param timestamp the timestamp at which to record/schedule the attestation
    */
-  async attestCompletable(actingUserAddress: string, intervalId: Buffer, timestamp: number): Promise<boolean> {
-    this.log.debug('REQUEST: Attest to completable %s by user %s', intervalId.toString('hex'), actingUserAddress);
-    const payload = Completables.Encode(this.client).attest(intervalId, timestamp);
-    const output = await this.callOnBehalfOf(actingUserAddress, this.manager.Completables.address, payload);
-    return Completables.Decode(this.client, DecodeHex(output)).attest()[0]
+  async attestCompletable(
+    actingUserAddress: string,
+    intervalId: Buffer,
+    timestamp: number
+  ): Promise<boolean> {
+    this.log.debug(
+      "REQUEST: Attest to completable %s by user %s",
+      intervalId.toString("hex"),
+      actingUserAddress
+    );
+    const payload = Completables.Encode(this.client).attest(
+      intervalId,
+      timestamp
+    );
+    const output = await this.callOnBehalfOf(
+      actingUserAddress,
+      this.manager.Completables.address,
+      payload
+    );
+    return Completables.Decode(this.client, DecodeHex(output)).attest()[0];
   }
 
   async castRenewalVote(
@@ -392,12 +408,47 @@ export class Contracts {
     return this.manager.ActiveAgreementRegistry.startProcessLifecycle(
       agreementAddress
     ).then(async (data) => {
-      if (data.error !== 1) throw new Error(ErrorCode.RUNTIME_ERROR);
+      if (data.error && data.error !== 1)
+        throw new Error(ErrorCode.RUNTIME_ERROR);
       this.log.info(
         `SUCCESS: Formation process for agreement at ${agreementAddress} created and started at address: ${data.processInstance}`
       );
       return data.processInstance;
     });
+  }
+
+  /**
+   * @param actingUserAddress user who is a franchisee or belongs to a franchisee party
+   * @param intervalId the identity of the completable in the space of intervals
+   * @param timestamp the timestamp at which to record/schedule the ratification
+   */
+  async relateDates(
+    actingUserAddress: string,
+    agreementAdress: string,
+    derivedDate: string,
+    baseDate: string,
+    offset: string
+  ): Promise<void> {
+    this.log.debug(
+      "REQUEST: Set date %s to %s from date %s on agreement %s by user %s",
+      derivedDate,
+      offset,
+      baseDate,
+      agreementAdress,
+      actingUserAddress
+    );
+    const payload = DateRelations.Encode(this.client).relate(
+      agreementAdress,
+      BytesFromString(derivedDate),
+      BytesFromString(baseDate),
+      offset
+    );
+    const output = await this.callOnBehalfOf(
+      actingUserAddress,
+      this.manager.DateRelations.address,
+      payload
+    );
+    return DateRelations.Decode(this.client, DecodeHex(output)).relate();
   }
 
   async createArchetype(archetype: archetype) {

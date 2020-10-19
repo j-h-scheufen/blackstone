@@ -43,6 +43,11 @@ jobs:
       contract: agreements/test/CompletablesTest.sol
       instance: CompletablesTest
 
+  - name: DateRelationsTest
+    build:
+      contract: agreements/test/DateRelationsTest.sol
+      instance: DateRelationsTest
+
   - name: ActiveAgreementRegistryTest
     build:
       contract: agreements/test/ActiveAgreementRegistryTest.sol

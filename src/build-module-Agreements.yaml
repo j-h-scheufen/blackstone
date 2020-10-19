@@ -32,3 +32,6 @@ jobs:
   - name: Completables
     build:
       contract: agreements/Completables.sol
+  - name: DateRelations
+    build:
+      contract: agreements/DateRelations.sol
