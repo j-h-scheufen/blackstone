@@ -93,6 +93,8 @@ const contracts = [
   "commons-utils/TypeUtilsLib.sol",
   "commons-utils/ArrayUtilsLib.sol",
   "commons-utils/Strings.sol",
+
+  "migrations/Migrations.sol",
 ];
 
 const binPath = "bin";
