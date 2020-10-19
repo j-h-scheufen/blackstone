@@ -26,6 +26,7 @@ import {
 } from "./types";
 import { getLogger, Logger } from "log4js";
 import { VentListener, BurrowWatcher } from "./vent";
+import {Completables} from "../agreements/Completables.abi";
 
 export async function RegisterEcosystem(
   client: Client,
@@ -296,6 +297,20 @@ export class Contracts {
     );
     const payload = ActiveAgreement.Encode(this.client).sign();
     await this.callOnBehalfOf(actingUserAddress, agreementAddress, payload);
+  }
+
+  /**
+   * Attest to a completable
+   *
+   * @param actingUserAddress user who is a franchisee or belongs to a franchisee party
+   * @param intervalId the identity of the completable in the space of intervals
+   * @param timestamp the timestamp at which to record/schedule the attestation
+   */
+  async attestCompletable(actingUserAddress: string, intervalId: Buffer, timestamp: number): Promise<boolean> {
+    this.log.debug('REQUEST: Attest to completable %s by user %s', intervalId.toString('hex'), actingUserAddress);
+    const payload = Completables.Encode(this.client).attest(intervalId, timestamp);
+    const output = await this.callOnBehalfOf(actingUserAddress, this.manager.Completables.address, payload);
+    return Completables.Decode(this.client, DecodeHex(output)).attest()[0]
   }
 
   async castRenewalVote(

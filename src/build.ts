@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as os from "os";
 import * as path from 'path';
 import * as solc from 'solc';
 import * as solts from 'solts'
@@ -107,11 +106,13 @@ const binPath = 'bin';
  */
 function main() {
   fs.mkdirSync(binPath, {recursive: true})
-  const input = solts.EncodeInput(solts.InputDescriptionFromFiles(...contracts));
+  let inputDescription = solts.InputDescriptionFromFiles(...contracts);
+  const input = solts.EncodeInput(inputDescription);
   const solcOutput = solc.compile(input, {import: solts.ImportLocal});
   const output = solts.DecodeOutput(solcOutput);
-  if (output.errors && output.errors.length > 0)
+  if (output.errors && output.errors.length > 0){
     throw new Error(output.errors.map(err => err.formattedMessage).join('\n'));
+  }
 
   for (const filename of Object.keys(output.contracts)) {
     const compiled: solts.Compiled[] = [];

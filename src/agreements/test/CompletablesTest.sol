@@ -6,8 +6,8 @@ import "../Completables.sol";
 contract CompletablesTest is CompletableOptions {
     string constant SUCCESS = "success";
 
-    string constant initSignature = "init(bytes32,address,address[],uint256,bool,string)";
-    string constant ratifySignature = "ratify(bytes32,int256)";
+    string constant initSignature = "init(bytes32,string,string,address,address[],uint256,bool,string)";
+    string constant attestSignature = "attest(bytes32,int256)";
 
     function testCompletables() external returns (string memory) {
         address us = address(this);
@@ -25,9 +25,9 @@ contract CompletablesTest is CompletableOptions {
         bytes32 intervalId = "foo";
         uint options = COMPLETE_ON_RATIFICATION;
 
-        comp.init(intervalId, address(agreement), franchisees, threshold, options, "nada");
+        comp.init(intervalId, "crochet", "quaver", address(agreement), franchisees, threshold, options, "nada");
         comp.begin(intervalId, 0);
-        comp.ratify(intervalId, 0);
+        comp.attest(intervalId, 0);
 
         bool success;
         // Duplicate completable not allowed
@@ -38,18 +38,20 @@ contract CompletablesTest is CompletableOptions {
             threshold,
             options,
             "nada"));
-        if (success) return "Should revert when trying to init a Completable with same intervalId as existing open interval";
 
-        // Let's ratify
-        them.forwardCall(address(comp), abi.encodeWithSignature(ratifySignature, intervalId, 0));
+        if (success) {
+            return "Should revert when trying to init a Completable with same intervalId as existing open interval";
+        }
+
+        // Let's attest
+        them.forwardCall(address(comp), abi.encodeWithSignature(attestSignature, intervalId, 0));
+
+        int ratificationTimestamp = comp.ratifiedAt(intervalId);
+        if (ratificationTimestamp != int(block.timestamp)) {
+            return "Ratification timestamp should equal block timestamp";
+        }
 
         // Now the Completable has closed and been deleted so we should be able to re-init with the same intervalId
-        comp.init(intervalId, address(agreement), franchisees, threshold, options & PERSIST_ON_COMPLETION, "nada");
-
-        comp.begin(intervalId, 0);
-
-        comp.ratify(intervalId, 0);
-        them.forwardCall(address(comp), abi.encodeWithSignature(ratifySignature, intervalId, 0));
 
         return SUCCESS;
     }
