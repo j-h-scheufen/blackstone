@@ -60,7 +60,7 @@ function assert(left: string, right: string) {
   if (left != right) throw new Error(`Expected to match: ${left} != ${right}`);
 }
 
-async function DeployDOUG(
+export async function DeployDOUG(
   client: Client,
   errorsLib: Promise<string>,
   eRC165Utils: Promise<string>
@@ -106,7 +106,7 @@ async function DeployDOUG(
   return new DOUG.Contract(client, dougProxyAddress);
 }
 
-async function DeployEcosystemRegistry(
+export async function DeployEcosystemRegistry(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   errorsLib: Promise<string>,
@@ -144,7 +144,7 @@ async function DeployEcosystemRegistry(
   return ecosystemRegistry;
 }
 
-async function DeployParticipantsManager(
+export async function DeployParticipantsManager(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   errorsLib: Promise<string>,
@@ -184,7 +184,7 @@ async function DeployParticipantsManager(
   return participantsManager;
 }
 
-async function RegisterEcosystemAndParticipantClasses(
+export async function RegisterEcosystemAndParticipantClasses(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   participantsManager: Promise<DefaultParticipantsManager.Contract<CallTx>>,
@@ -230,7 +230,7 @@ async function RegisterEcosystemAndParticipantClasses(
   await doug.register(objectClassEcosystem, defaultEcosystemAddress);
 }
 
-async function DeployProcessModelRepository(
+export async function DeployProcessModelRepository(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   errorsLib: Promise<string>,
@@ -276,7 +276,7 @@ async function DeployProcessModelRepository(
   return processModelRepository;
 }
 
-async function DeployApplicationRegistry(
+export async function DeployApplicationRegistry(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   errorsLib: Promise<string>
@@ -315,7 +315,7 @@ async function DeployApplicationRegistry(
   return applicationRegistry;
 }
 
-async function DeployBpmService(
+export async function DeployBpmService(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   errorsLib: Promise<string>,
@@ -349,7 +349,7 @@ async function DeployBpmService(
   return bpmService;
 }
 
-async function RegisterProcessModelRepositoryClasses(
+export async function RegisterProcessModelRepositoryClasses(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   contract: Promise<DefaultProcessModelRepository.Contract<CallTx>>,
@@ -403,7 +403,7 @@ async function RegisterProcessModelRepositoryClasses(
   );
 }
 
-async function RegisterApplicationRepositoryClasses(
+export async function RegisterApplicationRepositoryClasses(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   contract: Promise<DefaultApplicationRegistry.Contract<CallTx>>,
@@ -439,7 +439,7 @@ async function RegisterApplicationRepositoryClasses(
   );
 }
 
-async function DeployArchetypeRegistry(
+export async function DeployArchetypeRegistry(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   errorsLib: Promise<string>,
@@ -482,7 +482,7 @@ async function DeployArchetypeRegistry(
   return archetypeRegistry;
 }
 
-async function DeployActiveAgreementRegistry(
+export async function DeployActiveAgreementRegistry(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   errorsLib: Promise<string>,
@@ -537,7 +537,7 @@ async function DeployActiveAgreementRegistry(
   return activeAgreementRegistry;
 }
 
-async function RegisterAgreementClasses(
+export async function RegisterAgreementClasses(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   agreement: Promise<DefaultActiveAgreementRegistry.Contract<CallTx>>,
@@ -602,7 +602,7 @@ async function RegisterAgreementClasses(
   );
 }
 
-async function DeployLib(
+export async function DeployLib(
   cli: Client,
   call: (client: Client, ...arg1: string[]) => Promise<string>,
   ...addr: Promise<string>[]
@@ -611,7 +611,7 @@ async function DeployLib(
   return call(cli, ...addresses);
 }
 
-async function RegisterLib(
+export async function RegisterLib(
   doug: DOUG.Contract<CallTx>,
   id: string,
   lib: Promise<string>
@@ -620,7 +620,7 @@ async function RegisterLib(
   await doug.register(id, address);
 }
 
-async function DeployRenewalWindowManager(
+export async function DeployRenewalWindowManager(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   service: Promise<DefaultBpmService.Contract<CallTx>>,
@@ -647,7 +647,7 @@ async function DeployRenewalWindowManager(
   ]);
 }
 
-async function DeployCompletables(
+export async function DeployCompletables(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   agreementsApi: Promise<string>,
@@ -664,7 +664,7 @@ async function DeployCompletables(
   await doug.deploy(Contracts.Completables, completables);
 }
 
-async function DeployDateRelations(
+export async function DeployDateRelations(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   agreementsApi: Promise<string>,
@@ -681,7 +681,7 @@ async function DeployDateRelations(
   await doug.deploy(Contracts.DateRelations, dateRelations);
 }
 
-async function DeployRenewalInitializer(
+export async function DeployRenewalInitializer(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   registry: Promise<DefaultApplicationRegistry.Contract<CallTx>>,
@@ -705,7 +705,7 @@ async function DeployRenewalInitializer(
   ]);
 }
 
-async function DeployRenewalEvaluator(
+export async function DeployRenewalEvaluator(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   registry: Promise<DefaultApplicationRegistry.Contract<CallTx>>
