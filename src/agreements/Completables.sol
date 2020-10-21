@@ -3,6 +3,9 @@ pragma solidity ^0.5;
 import "agreements/AgreementsAPI.sol";
 import "commons-base/ErrorsLib.sol";
 import "commons-utils/Strings.sol";
+import "commons-management/AbstractUpgradeable.sol";
+import "commons-management/AbstractVersionedArtifact.sol";
+
 
 contract CompletableOptions {
     // Completable options
@@ -18,7 +21,12 @@ contract CompletableOptions {
     }
 }
 
-contract Completables is CompletableOptions {
+// Notes on upgrading/design of this contract: we need to play back the events emitted by this contract in order to
+// do a full upgrade in the future since we do not store complete state int the completables mapping - we just store enough to do
+// book keeping (e.g. metadata). This is by design (the idea was 'events are primary state'/don't store history twice -
+// sorry if that was a bad decision) and assumes that we can provide a mechanism (via Burrow or Vent DB)
+// to play back the events to a migration contract
+contract Completables is CompletableOptions, AbstractVersionedArtifact(1,0,0), AbstractUpgradeable {
     using Strings for *;
 
     bytes32 constant EVENT_ID_AGREEMENT_COMPLETABLE = "AN://agreement-completable";
@@ -94,7 +102,6 @@ contract Completables is CompletableOptions {
 
     // intervalId => franchisees
     mapping(bytes32 => Completable) completables;
-    bytes32[] intervals;
 
     modifier completableExists(bytes32 intervalId) {
         if (!completables[intervalId].exists) {
@@ -128,8 +135,8 @@ contract Completables is CompletableOptions {
                 completables[intervalId].begun.toString(), ") than instant ", instant.toString()));
         }
         if (completables[intervalId].completed != 0 && completables[intervalId].completed < instant) {
-            revert("Completable ".concat(intervalId.toHex(), " is completed (as ",
-                completables[intervalId].completed.toString(), " before instant ", instant.toString()));
+            revert("Completable ".concat(intervalId.toHex(), " is not open: it completed at ",
+                completables[intervalId].completed.toString(), " before the instant ", instant.toString()));
         }
         _;
     }
@@ -317,5 +324,15 @@ contract Completables is CompletableOptions {
             revert(Strings.concat("Neither actor ", actor.toHex(), " or party ", party.toHex(), "is not a franchisee of interval ", intervalId.toHex()));
         }
         return ratifications;
+    }
+
+    // Migrations - we need to implement these functions if DOUG is to attempt to upgrade this way at any time in the future
+    function migrateFrom(address) public returns (bool success) {
+        success = true;
+    }
+
+    function migrateTo(address) public returns (bool success) {
+        // Who knows?
+        success = true;
     }
 }

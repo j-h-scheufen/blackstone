@@ -1,10 +1,12 @@
 import "agreements/AgreementsAPI.sol";
 import "commons-base/ErrorsLib.sol";
 import "commons-utils/Strings.sol";
+import "commons-management/AbstractUpgradeable.sol";
+import "commons-management/AbstractVersionedArtifact.sol";
 
 pragma solidity ^0.5;
 
-contract DateRelations {
+contract DateRelations is AbstractVersionedArtifact(1, 0, 0), AbstractUpgradeable {
   using Strings for *;
 
   // This is a placeholder value for the marker field - it could be anything
@@ -143,5 +145,15 @@ contract DateRelations {
       return true;
     }
     return false;
+  }
+
+  // Migrations - we need to implement these functions if DOUG is to attempt to upgrade this way at any time in the future
+  function migrateFrom(address) public returns (bool success) {
+    success = true;
+  }
+
+  function migrateTo(address) public returns (bool success) {
+    // Who knows?
+    success = true;
   }
 }
