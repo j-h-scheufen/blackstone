@@ -4,6 +4,7 @@ import {resolve} from "path";
 import {Client} from "..";
 import {Strings} from "../commons-utils/Strings.abi";
 import {CallTx} from "@hyperledger/burrow/proto/payload_pb";
+import { expect } from "chai";
 
 describe('Migrations', () => {
   let migrations: Migrations.Contract<CallTx>;
@@ -21,6 +22,17 @@ describe('Migrations', () => {
     const [index] = await migrations.head();
     await migrations.migrate("bar", index+1)
     await assertRejects(() => migrations.migrate("frogs", 999), 'should be at index 3')
+  })
+
+  it('gets migration', async () => {
+    const [head] = await migrations.head();
+    await assertRejects(() => migrations.migrationAt(head+1), 'cannot return migration at index 3')
+    await migrations.migrationAt(head)
+    const name = 'flob'
+    await migrations.migrate(name, head+1)
+    const [index, nameOut] = await migrations.migrationByName(name)
+    expect(index).to.equal(head+1)
+    expect(nameOut).to.equal(name)
   })
 })
 
