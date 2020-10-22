@@ -661,6 +661,7 @@ export async function DeployCompletables(
     errorsLib,
     stringsLib
   );
+  await new UpgradeOwned.Contract(client, completables).transferUpgradeOwnership(doug.address)
   await doug.deploy(Contracts.Completables, completables);
 }
 
@@ -678,6 +679,7 @@ export async function DeployDateRelations(
     errorsLib,
     stringsLib
   );
+  await new UpgradeOwned.Contract(client, dateRelations).transferUpgradeOwnership(doug.address)
   await doug.deploy(Contracts.DateRelations, dateRelations);
 }
 
@@ -915,13 +917,13 @@ export async function Deploy(client: Client) {
       applicationRegistry,
       errorsLib
     ),
-    DeployCompletables(client, doug, agreementsAPI, errorsLib, stringsLib),
-    DeployDateRelations(client, doug, agreementsAPI, errorsLib, stringsLib),
     DeployRenewalInitializer(client, doug, applicationRegistry, errorsLib),
     DeployRenewalEvaluator(client, doug, applicationRegistry),
     DeployDeadline(client, doug, bpmService, applicationRegistry, errorsLib),
     DeployWait(client, doug, bpmService, applicationRegistry, errorsLib),
     DeployNumbers(client, applicationRegistry),
+    DeployCompletables(client, doug, agreementsAPI, errorsLib, stringsLib),
+    DeployDateRelations(client, doug, agreementsAPI, errorsLib, stringsLib),
   ]);
 
   await Promise.all([
@@ -934,5 +936,6 @@ export async function Deploy(client: Client) {
     RegisterLib(doug, Libraries.BpmModelLib, bpmModelLib),
     RegisterLib(doug, Libraries.BpmRuntimeLib, bpmRuntimeLib),
     RegisterLib(doug, Libraries.AgreementsAPI, agreementsAPI),
+    RegisterLib(doug, Libraries.Strings, stringsLib),
   ]);
 }

@@ -21,6 +21,7 @@ export enum Libraries {
   BpmModelLib = "BpmModelLib",
   BpmRuntimeLib = "BpmRuntimeLib",
   AgreementsAPI = "AgreementsAPI",
+  Strings = "Strings",
 }
 
 export enum Direction {
