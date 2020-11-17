@@ -2,6 +2,7 @@
 
 ## Release History
 
+- Version [4.0.0](#v4.0.0)
 - Version [3.0.0](#v3.0.0)
 - Version [2.2.0](#v2.2.0)
 - Version [2.1.0](#v2.1.0)
@@ -19,6 +20,12 @@
 - Version [0.6.0](#v0.6.0)
 - Version [0.5.2](#v0.5.2)
 - Version [0.5.1](#v0.5.1)
+
+## <a name="v4.0.0">Release 4.0.0 - pending</a>
+
+### Fixed
+
+- Remove empty-string check on intervalID since intervalID is currently UUID bytes not string bytes.
 
 ## <a name="v3.0.0">Release 3.0.0</a>
 

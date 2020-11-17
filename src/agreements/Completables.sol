@@ -26,7 +26,7 @@ contract CompletableOptions {
 // book keeping (e.g. metadata). This is by design (the idea was 'events are primary state'/don't store history twice -
 // sorry if that was a bad decision) and assumes that we can provide a mechanism (via Burrow or Vent DB)
 // to play back the events to a migration contract
-contract Completables is CompletableOptions, AbstractVersionedArtifact(1,0,0), AbstractUpgradeable {
+contract Completables is CompletableOptions, AbstractVersionedArtifact(1,1,0), AbstractUpgradeable {
     using Strings for *;
 
     bytes32 constant EVENT_ID_AGREEMENT_COMPLETABLE = "AN://agreement-completable";
@@ -171,9 +171,6 @@ contract Completables is CompletableOptions, AbstractVersionedArtifact(1,0,0), A
         if (threshold > franchisees.length) {
             revert(Strings.concat("Cannot create a completable with ratification threshold (", threshold.toString(),
                 ") greater than number of franchisees (", franchisees.length.toString(), ")"));
-        }
-        if (intervalId[0] == 0) {
-            revert("Completable intervalId must be non-empty");
         }
         completables[intervalId].intervalId = intervalId;
         completables[intervalId].agreementAddress = agreementAddress;
