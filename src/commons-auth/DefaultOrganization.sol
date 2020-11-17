@@ -13,8 +13,8 @@ import "commons-auth/UserAccount.sol";
  * @title DefaultOrganization
  * @dev the default implementation of the Organization interface.
  */
-contract DefaultOrganization is AbstractVersionedArtifact(1,1,0), AbstractDelegateTarget, Organization {
-	
+contract DefaultOrganization is AbstractVersionedArtifact(1,2,0), AbstractDelegateTarget, Organization {
+
 	using MappingsLib for Mappings.AddressBoolMap;
 	using ArrayUtilsLib for address[];
 
@@ -137,7 +137,7 @@ contract DefaultOrganization is AbstractVersionedArtifact(1,1,0), AbstractDelega
 	function getNumberOfApprovers() external view returns (uint) {
 		return approvers.length;
 	}
-	
+
 	/**
 	 * @dev Returns the approver's address at the given index position.
 	 * @param _pos the index position

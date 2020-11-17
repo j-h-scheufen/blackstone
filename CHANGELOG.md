@@ -2,6 +2,7 @@
 
 ## Release History
 
+- Version [3.0.0](#v3.0.0)
 - Version [2.2.0](#v2.2.0)
 - Version [2.1.0](#v2.1.0)
 - Version [2.0.1](#v2.0.1)
@@ -18,6 +19,18 @@
 - Version [0.6.0](#v0.6.0)
 - Version [0.5.2](#v0.5.2)
 - Version [0.5.1](#v0.5.1)
+
+## <a name="v3.0.0">Release 3.0.0</a>
+
+From now on we will push a major version bump for every upgrade of the contracts we do
+
+### Added
+- Completables contract for tracking completable activities over time windows
+- DateRelations for relative and computed date handling
+
+### Fixed
+- Expiry date issues
+- Workaround for empty byte32 return values
 
 ## <a name="v2.2.0">Release 2.2.0</a>
 

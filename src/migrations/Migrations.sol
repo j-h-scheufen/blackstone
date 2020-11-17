@@ -58,10 +58,10 @@ contract Migrations {
   }
 
   function migrationAt(uint index) external view returns (uint, string memory) {
-    if (index >= migrations.length) {
+    if (index > migrations.length) {
       revert(Strings.concat("There are only ", migrations.length.toString(), " migrations so cannot return migration at index ", index.toString()));
     }
-    Migration memory migration = migrations[index];
+    Migration memory migration = migrations[index - 1];
     return (migration.index, migration.name);
   }
 
