@@ -21,7 +21,7 @@
 - Version [0.5.2](#v0.5.2)
 - Version [0.5.1](#v0.5.1)
 
-## <a name="v4.0.0">Release 4.0.0 - pending</a>
+## <a name="v4.0.0">Release 4.0.0</a>
 
 ### Fixed
 

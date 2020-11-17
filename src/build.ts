@@ -70,6 +70,7 @@ const contracts = [
   "commons-management/OwnedDelegateUnstructuredProxy.sol",
   "commons-management/DefaultDoug.sol",
   "commons-management/DOUG.sol",
+  "commons-management/VersionedArtifact.sol",
 
   "commons-math/Addition.sol",
   "commons-math/Decrement.sol",
