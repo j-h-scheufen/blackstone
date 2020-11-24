@@ -63,6 +63,18 @@ export module ActiveAgreement {
         LogDataStorageUpdateUintArray(callback: (err: Error, event: any) => void): Readable { return this.client.listen("LogDataStorageUpdateUintArray", this.address, callback); }
         LogEntityAddressScopeUpdate(callback: (err: Error, event: any) => void): Readable { return this.client.listen("LogEntityAddressScopeUpdate", this.address, callback); }
         LogGoverningAgreementUpdate(callback: (err: Error, event: any) => void): Readable { return this.client.listen("LogGoverningAgreementUpdate", this.address, callback); }
+        DATA_FIELD_AGREEMENT_CANCELATION_DATE() {
+            const data = Encode(this.client).DATA_FIELD_AGREEMENT_CANCELATION_DATE();
+            return Call<Tx, [Buffer]>(this.client, this.address, data, true, (exec: Uint8Array) => {
+                return Decode(this.client, exec).DATA_FIELD_AGREEMENT_CANCELATION_DATE();
+            });
+        }
+        DATA_FIELD_AGREEMENT_CREATION_DATE() {
+            const data = Encode(this.client).DATA_FIELD_AGREEMENT_CREATION_DATE();
+            return Call<Tx, [Buffer]>(this.client, this.address, data, true, (exec: Uint8Array) => {
+                return Decode(this.client, exec).DATA_FIELD_AGREEMENT_CREATION_DATE();
+            });
+        }
         DATA_FIELD_AGREEMENT_EFFECTIVE_DATE() {
             const data = Encode(this.client).DATA_FIELD_AGREEMENT_EFFECTIVE_DATE();
             return Call<Tx, [Buffer]>(this.client, this.address, data, true, (exec: Uint8Array) => {
@@ -732,6 +744,8 @@ export module ActiveAgreement {
         }
     }
     export const Encode = <Tx>(client: Provider<Tx>) => { return {
+        DATA_FIELD_AGREEMENT_CANCELATION_DATE: () => { return client.encode("CB1DC8CB", []); },
+        DATA_FIELD_AGREEMENT_CREATION_DATE: () => { return client.encode("CA66F015", []); },
         DATA_FIELD_AGREEMENT_EFFECTIVE_DATE: () => { return client.encode("1314CF66", []); },
         DATA_FIELD_AGREEMENT_PARTIES: () => { return client.encode("80C86BA7", []); },
         EMPTY_SCOPE: () => { return client.encode("F6EC229E", []); },
@@ -857,6 +871,8 @@ export module ActiveAgreement {
         transferPermission: (_permission: Buffer, _newHolder: string) => { return client.encode("EC9CB2CE", ["bytes32", "address"], _permission, _newHolder); }
     }; };
     export const Decode = <Tx>(client: Provider<Tx>, data: Uint8Array) => { return {
+        DATA_FIELD_AGREEMENT_CANCELATION_DATE: (): [Buffer] => { return client.decode(data, ["bytes32"]); },
+        DATA_FIELD_AGREEMENT_CREATION_DATE: (): [Buffer] => { return client.decode(data, ["bytes32"]); },
         DATA_FIELD_AGREEMENT_EFFECTIVE_DATE: (): [Buffer] => { return client.decode(data, ["bytes32"]); },
         DATA_FIELD_AGREEMENT_PARTIES: (): [Buffer] => { return client.decode(data, ["bytes32"]); },
         EMPTY_SCOPE: (): [Buffer] => { return client.decode(data, ["bytes32"]); },

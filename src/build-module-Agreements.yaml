@@ -35,3 +35,6 @@ jobs:
   - name: DateRelations
     build:
       contract: agreements/DateRelations.sol
+  - name: AgreementDates
+    build:
+      contract: agreements/AgreementDates.sol

@@ -45,6 +45,8 @@ contract ActiveAgreement is ActiveAgreement_v1_0_1, Permissioned {
  	bytes32 public constant ROLE_ID_LEGAL_STATE_CONTROLLER = keccak256(abi.encodePacked("agreement.legalStateController"));
 
   bytes32 public constant DATA_FIELD_AGREEMENT_EFFECTIVE_DATE = "Agreement Effective Date";
+  bytes32 public constant DATA_FIELD_AGREEMENT_CREATION_DATE = "Agreement Creation Date";
+  bytes32 public constant DATA_FIELD_AGREEMENT_CANCELATION_DATE = "Agreement Cancelation Date";
 
     // This is a placeholder value for the marker field - it could be anything
     int constant DELETION = 0;

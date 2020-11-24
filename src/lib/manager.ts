@@ -11,7 +11,7 @@ import { BpmService } from "../bpm-runtime/BpmService.abi";
 import { GetFromNameRegistry } from "./utils";
 import { Contracts } from "./constants";
 import { Completables } from "../agreements/Completables.abi";
-import { DateRelations } from "../agreements/DateRelations.abi";
+import { AgreementDates } from "../agreements/AgreementDates.abi";
 
 async function lookup(doug: DOUG.Contract<CallTx>, contract: string) {
   const result = await doug.lookup(contract);
@@ -27,7 +27,7 @@ export type Manager = {
   ApplicationRegistry: ApplicationRegistry.Contract<CallTx>;
   BpmService: BpmService.Contract<CallTx>;
   Completables: Completables.Contract<CallTx>;
-  DateRelations: DateRelations.Contract<CallTx>;
+  AgreementDates: AgreementDates.Contract<CallTx>;
 };
 
 export async function NewManager(client: Client): Promise<Manager> {
@@ -45,7 +45,7 @@ export async function NewManager(client: Client): Promise<Manager> {
   const applicationRegistry = lookup(doug, Contracts.ApplicationRegistry);
   const bpmService = lookup(doug, Contracts.BpmService);
   const completables = lookup(doug, Contracts.Completables);
-  const dateRelations = lookup(doug, Contracts.DateRelations);
+  const agreementDates = lookup(doug, Contracts.AgreementDates);
 
   return {
     EcosystemRegistry: new EcosystemRegistry.Contract(
@@ -74,6 +74,6 @@ export async function NewManager(client: Client): Promise<Manager> {
     ),
     BpmService: new BpmService.Contract(client, await bpmService),
     Completables: new Completables.Contract(client, await completables),
-    DateRelations: new DateRelations.Contract(client, await dateRelations),
+    AgreementDates: new AgreementDates.Contract(client, await agreementDates),
   };
 }

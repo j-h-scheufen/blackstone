@@ -37,6 +37,10 @@ library Strings {
         return string(abi.encodePacked(a, b, c, d, e, f, g, h));
     }
 
+    function concat(string memory a, string memory b, string memory c, string memory d, string memory e, string memory f, string memory g, string memory h, string memory i) internal pure returns (string memory) {
+        return string(abi.encodePacked(a, b, c, d, e, f, g, h, i));
+    }
+
     function quote(address value) public pure returns (string memory) {
         return quote(toHex(value));
     }
