@@ -14,7 +14,7 @@ import "agreements/AbstractActiveAgreement_v1_0_1.sol";
  * @dev Default implementation of the ActiveAgreement interface. This contract represents the latest "version" of the artifact by inheriting from past versions to guarantee the order
  * of storage variable declarations. It also inherits and instantiates AbstractVersionedArtifact.
  */
-contract DefaultActiveAgreement is AbstractVersionedArtifact(1,7,0), AbstractActiveAgreement_v1_0_1, AbstractPermissioned, ActiveAgreement {
+contract DefaultActiveAgreement is AbstractVersionedArtifact(1,8,0), AbstractActiveAgreement_v1_0_1, AbstractPermissioned, ActiveAgreement {
 
 	/**
 	 * @dev Legacy initialize function that is not supported anymore in this version of DefaultArchetype and will always revert.
@@ -118,6 +118,8 @@ contract DefaultActiveAgreement is AbstractVersionedArtifact(1,7,0), AbstractAct
 		for (i = 0; i < _governingAgreements.length; i++) {
 			emit LogGoverningAgreementUpdate(EVENT_ID_GOVERNING_AGREEMENT, address(this), _governingAgreements[i]);
 		}
+
+    this.setDataValueAsInt(DATA_FIELD_AGREEMENT_CREATION_DATE, int(block.timestamp));
 	}
 
 	/**
@@ -277,6 +279,7 @@ contract DefaultActiveAgreement is AbstractVersionedArtifact(1,7,0), AbstractAct
         legalState = Agreements.LegalState.CANCELED;
         emit LogAgreementLegalStateUpdate(EVENT_ID_AGREEMENTS, address(this), uint8(legalState), block.timestamp);
         emitEvent(EVENT_ID_STATE_CHANGED, address(this));
+        this.setDataValueAsInt(DATA_FIELD_AGREEMENT_CANCELATION_DATE, int(block.timestamp));
     }
 
 	function setPrivateParametersReference(string calldata _privateParametersFileReference) external {

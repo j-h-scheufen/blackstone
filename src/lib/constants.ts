@@ -9,6 +9,7 @@ export enum Contracts {
   BpmService = "BpmService",
   Completables = "Completables",
   DateRelations = "DateRelations",
+  AgreementDates = "AgreementDates",
 }
 
 export enum Libraries {

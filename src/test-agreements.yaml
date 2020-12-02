@@ -128,9 +128,9 @@ jobs:
     contract: CompletablesTest.bin
     libraries: AgreementsAPI:$AgreementsAPI, Strings:$Strings, ErrorsLib:$ErrorsLib
 
-- name: DateRelationsTest
+- name: AgreementDatesTest
   deploy:
-    contract: DateRelationsTest.bin
+    contract: AgreementDatesTest.bin
     libraries: AgreementsAPI:$AgreementsAPI, Strings:$Strings, ErrorsLib:$ErrorsLib
 
 - name: testActiveAgreementSetup
@@ -195,13 +195,25 @@ jobs:
 
 - name: testDateRelations
   call:
-    destination: $DateRelationsTest
-    bin: DateRelationsTest
+    destination: $AgreementDatesTest
+    bin: AgreementDatesTest
     function: testDateRelations
 
 - name: assertDateRelations
   assert:
     key: $testDateRelations
+    relation: eq
+    val: success
+
+- name: testDateCycles
+  call:
+    destination: $AgreementDatesTest
+    bin: AgreementDatesTest
+    function: testDateCycles
+
+- name: assertDateCycles
+  assert:
+    key: $testDateCycles
     relation: eq
     val: success
 

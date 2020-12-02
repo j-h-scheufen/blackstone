@@ -1,7 +1,7 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as solc from 'solc';
-import * as solts from 'solts'
+import * as fs from "fs";
+import * as path from "path";
+import * as solc from "solc";
+import * as solts from "solts";
 
 const contracts = [
   "active-agreements/TotalCounterCheck.sol",
@@ -23,6 +23,7 @@ const contracts = [
   "agreements/RenewalEvaluator.sol",
   "agreements/Completables.sol",
   "agreements/DateRelations.sol",
+  "agreements/AgreementDates.sol",
 
   "bpm-model/ProcessModelRepositoryDb.sol",
   "bpm-model/DefaultProcessModelRepository.sol",
@@ -108,13 +109,15 @@ const binPath = "bin";
  *  - Outputs the ABI files into bin to be later included in the distribution (for Vent and other ABI-consuming services)
  */
 function main() {
-  fs.mkdirSync(binPath, {recursive: true})
+  fs.mkdirSync(binPath, { recursive: true });
   let inputDescription = solts.InputDescriptionFromFiles(...contracts);
   const input = solts.EncodeInput(inputDescription);
-  const solcOutput = solc.compile(input, {import: solts.ImportLocal});
+  const solcOutput = solc.compile(input, { import: solts.ImportLocal });
   const output = solts.DecodeOutput(solcOutput);
-  if (output.errors && output.errors.length > 0){
-    throw new Error(output.errors.map(err => err.formattedMessage).join('\n'));
+  if (output.errors && output.errors.length > 0) {
+    throw new Error(
+      output.errors.map((err) => err.formattedMessage).join("\n")
+    );
   }
 
   for (const filename of Object.keys(output.contracts)) {

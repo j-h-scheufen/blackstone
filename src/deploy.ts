@@ -54,7 +54,7 @@ import { CallTx } from "@hyperledger/burrow/proto/payload_pb";
 import { DeployDeadline, DeployWait } from "./bpm-oracles/deploy";
 import { DeployNumbers } from "./commons-math/deploy";
 import { Completables } from "./agreements/Completables.abi";
-import { DateRelations } from "./agreements/DateRelations.abi";
+import { AgreementDates } from "./agreements/AgreementDates.abi";
 
 function assert(left: string, right: string) {
   if (left != right) throw new Error(`Expected to match: ${left} != ${right}`);
@@ -661,26 +661,32 @@ export async function DeployCompletables(
     errorsLib,
     stringsLib
   );
-  await new UpgradeOwned.Contract(client, completables).transferUpgradeOwnership(doug.address)
+  await new UpgradeOwned.Contract(
+    client,
+    completables
+  ).transferUpgradeOwnership(doug.address);
   await doug.deploy(Contracts.Completables, completables);
 }
 
-export async function DeployDateRelations(
+export async function DeployAgreementDates(
   client: Client,
   doug: DOUG.Contract<CallTx>,
   agreementsApi: Promise<string>,
   errorsLib: Promise<string>,
   stringsLib: Promise<string>
 ) {
-  const dateRelations = await DeployLib(
+  const agreementDates = await DeployLib(
     client,
-    DateRelations.Deploy,
+    AgreementDates.Deploy,
     agreementsApi,
     errorsLib,
     stringsLib
   );
-  await new UpgradeOwned.Contract(client, dateRelations).transferUpgradeOwnership(doug.address)
-  await doug.deploy(Contracts.DateRelations, dateRelations);
+  await new UpgradeOwned.Contract(
+    client,
+    agreementDates
+  ).transferUpgradeOwnership(doug.address);
+  await doug.deploy(Contracts.AgreementDates, agreementDates);
 }
 
 export async function DeployRenewalInitializer(
@@ -923,7 +929,7 @@ export async function Deploy(client: Client) {
     DeployWait(client, doug, bpmService, applicationRegistry, errorsLib),
     DeployNumbers(client, applicationRegistry),
     DeployCompletables(client, doug, agreementsAPI, errorsLib, stringsLib),
-    DeployDateRelations(client, doug, agreementsAPI, errorsLib, stringsLib),
+    DeployAgreementDates(client, doug, agreementsAPI, errorsLib, stringsLib),
   ]);
 
   await Promise.all([

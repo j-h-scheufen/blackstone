@@ -27,7 +27,7 @@ import {
 import { getLogger, Logger } from "log4js";
 import { VentListener, BurrowWatcher } from "./vent";
 import { Completables } from "../agreements/Completables.abi";
-import { DateRelations } from "../agreements/DateRelations.abi";
+import { AgreementDates } from "../agreements/AgreementDates.abi";
 
 export async function RegisterEcosystem(
   client: Client,
@@ -418,10 +418,12 @@ export class Contracts {
 
   /**
    * @param actingUserAddress user who is a franchisee or belongs to a franchisee party
-   * @param intervalId the identity of the completable in the space of intervals
-   * @param timestamp the timestamp at which to record/schedule the ratification
+   * @param agreementAdress the agreement under which the related dates live
+   * @param derivedDate the date whose value is derived from the base date
+   * @param baseDate the date from which the derive date's value is derived
+   * @param offset the interval from the base date to the derived date
    */
-  async relateDates(
+  async setDateRelation(
     actingUserAddress: string,
     agreementAdress: string,
     derivedDate: string,
@@ -436,7 +438,7 @@ export class Contracts {
       agreementAdress,
       actingUserAddress
     );
-    const payload = DateRelations.Encode(this.client).relate(
+    const payload = AgreementDates.Encode(this.client).setRelation(
       agreementAdress,
       BytesFromString(derivedDate),
       BytesFromString(baseDate),
@@ -444,10 +446,119 @@ export class Contracts {
     );
     const output = await this.callOnBehalfOf(
       actingUserAddress,
-      this.manager.DateRelations.address,
+      this.manager.AgreementDates.address,
       payload
     );
-    return DateRelations.Decode(this.client, DecodeHex(output)).relate();
+    return AgreementDates.Decode(this.client, DecodeHex(output)).setRelation();
+  }
+
+  /**
+   * @param actingUserAddress user who is a franchisee or belongs to a franchisee party
+   * @param agreementAdress the agreement under which the date lives
+   * @param date the identifier of the cycling date
+   * @param recurred the number of times the cycle has recurred
+   */
+  async setDateCycle(
+    actingUserAddress: string,
+    agreementAdress: string,
+    date: string,
+    metadata: string,
+    recurred: number
+  ): Promise<void> {
+    this.log.debug(
+      "REQUEST: Set date %s to recur with config %s on agreement %s by user %s",
+      date,
+      metadata,
+      agreementAdress,
+      actingUserAddress
+    );
+    const payload = AgreementDates.Encode(this.client).setCycle(
+      agreementAdress,
+      BytesFromString(date),
+      metadata,
+      recurred
+    );
+    const output = await this.callOnBehalfOf(
+      actingUserAddress,
+      this.manager.AgreementDates.address,
+      payload
+    );
+    return AgreementDates.Decode(this.client, DecodeHex(output)).setCycle();
+  }
+
+  /**
+   * @param actingUserAddress user who is a franchisee or belongs to a franchisee party
+   * @param agreementAdress the agreement under which the date lives
+   * @param date the identifier of the cycling date
+   * @param recurred the number of times the cycle has recurred
+   */
+  async removeDateCycle(
+    actingUserAddress: string,
+    agreementAdress: string,
+    date: string
+  ): Promise<void> {
+    this.log.debug(
+      "REQUEST: Removing cycling of date %s on agreement %s by user %s",
+      date,
+      agreementAdress,
+      actingUserAddress
+    );
+    const payload = AgreementDates.Encode(this.client).removeCycle(
+      agreementAdress,
+      BytesFromString(date)
+    );
+    const output = await this.callOnBehalfOf(
+      actingUserAddress,
+      this.manager.AgreementDates.address,
+      payload
+    );
+    return AgreementDates.Decode(this.client, DecodeHex(output)).removeCycle();
+  }
+
+  /**
+   * @param actingUserAddress user who is a franchisee or belongs to a franchisee party
+   * @param agreementAdress the agreement under which the date lives
+   * @param date the identifier of the cycling date
+   * @param recurred the number of times the cycle has recurred
+   */
+  async incrementDateCycleRecurrences(
+    agreementAdress: string,
+    date: string
+  ): Promise<number> {
+    this.log.debug(
+      "REQUEST: Increment recurrences of cycling date %s on agreement %s",
+      date,
+      agreementAdress
+    );
+    const [recurred] = await this.manager.AgreementDates.incrementRecurrences(
+      agreementAdress,
+      BytesFromString(date)
+    );
+    return recurred;
+  }
+
+  /**
+   * @param actingUserAddress user who is a franchisee or belongs to a franchisee party
+   * @param agreementAdress the agreement under which the date lives
+   * @param date the identifier of the cycling date
+   * @param metadata the number of times the cycle has metadata
+   */
+  async setCycleMetadata(
+    agreementAdress: string,
+    date: string,
+    metadata: string
+  ): Promise<void> {
+    this.log.debug(
+      "REQUEST: Set metadata %s for cycling date %s on agreement %s",
+      metadata,
+      date,
+      agreementAdress
+    );
+    await this.manager.AgreementDates.setCycleMetadata(
+      agreementAdress,
+      BytesFromString(date),
+      metadata
+    );
   }
 
   async createArchetype(archetype: archetype) {
