@@ -2,6 +2,7 @@
 
 ## Release History
 
+- Version [5.0.0](#v5.0.0)
 - Version [4.0.0](#v4.0.0)
 - Version [3.0.0](#v3.0.0)
 - Version [2.2.0](#v2.2.0)
@@ -20,6 +21,14 @@
 - Version [0.6.0](#v0.6.0)
 - Version [0.5.2](#v0.5.2)
 - Version [0.5.1](#v0.5.1)
+
+## <a name="v5.0.0">Release 5.0.0</a>
+
+### Added
+
+- Set timestamps for agreement cancelation and creation system parameters
+- Replace DateRelations.sol with AgreementDates.sol
+- Add date cycles to AgreementDates.sol
 
 ## <a name="v4.0.0">Release 4.0.0</a>
 
