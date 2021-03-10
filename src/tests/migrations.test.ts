@@ -11,8 +11,10 @@ describe('Migrations', () => {
 
   before(async () => {
     config({path: resolve(__dirname, "../../.env")})
-    const client = new Client(process.env.CHAIN_URL_GRPC, process.env.SIGNING_ADDRESS);
-    migrations = new Migrations.Contract(client, await Migrations.Deploy(client, await Strings.Deploy(client)))
+    const signingaddress = process.env.SIGNING_ADDRESS;
+    const client = new Client(process.env.CHAIN_URL_GRPC, signingaddress);
+    const stringsAddress = await Strings.Deploy(client);
+    migrations = new Migrations.Contract(client, await Migrations.Deploy(client, stringsAddress))
   });
 
   it('migrates', async () => {

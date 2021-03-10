@@ -16,6 +16,13 @@ dotenv := $(shell grep -v '^\#' .env | sed 's/=/?=/')
 exp:=export
 $(foreach pair,$(dotenv),$(eval $(exp) $(pair)))
 
+.PHONY: test
+test:  docker_run_deps
+	yarn install
+	yarn build
+	yarn test
+
+
 .PHONY: clean
 clean:
 	rm -rf dist
@@ -55,5 +62,5 @@ dist: src/build.ts $(shell find src -name '*.sol')
 	cp -r src/bin dist
 
 .PHONY: publish
-publish: clean dist
-	yarn publish --access public
+publish:
+	yarn publish --non-interactive --access public --no-git-tag-version --new-version $(shell ./scripts/version.sh)

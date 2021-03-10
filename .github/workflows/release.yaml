@@ -14,7 +14,8 @@ jobs:
     - run: git fetch --prune --unshallow
     - uses: actions/setup-node@v1
       with:
-        node-version: '13.x'
+        always-auth: true
+        node-version: '14.x'
         registry-url: 'https://registry.npmjs.org'
     - name: publish
       env:
@@ -23,5 +24,4 @@ jobs:
         git config --global user.email "${GITHUB_ACTOR}"
         git config --global user.name "${GITHUB_ACTOR}"
         yarn install
-        yarn version --no-git-tag-version --new-version $(git describe --tags)
         make publish
