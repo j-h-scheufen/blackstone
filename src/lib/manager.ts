@@ -32,6 +32,9 @@ export type Manager = {
 
 export async function NewManager(client: Client): Promise<Manager> {
   const addr = await GetFromNameRegistry(client, "DOUG");
+  if (!addr) {
+    throw new Error("could not find doug")
+  }
   const doug = new DOUG.Contract(client, addr);
 
   const ecosystemRegistry = lookup(doug, Contracts.EcosystemRegistry);
