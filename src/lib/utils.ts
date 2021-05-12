@@ -1,7 +1,7 @@
-import {UserAccount} from "../commons-auth/UserAccount.abi";
-import {Client} from "./client";
-import {Keccak} from 'sha3';
-import {HexString} from "./types";
+import { Keccak } from 'sha3';
+import { UserAccount } from '../commons-auth/UserAccount.abi';
+import { Client } from './client';
+import { HexString } from './types';
 
 const GRPC_NOT_FOUND = 5;
 
@@ -38,29 +38,35 @@ export function EncodeHex(data: Buffer) {
  * The 'payload' parameter must be the output of calling the 'encode(...)' function on a contract's function. E.g. <contract>.<function>.encode(param1, param2)
  * 'shouldWaitForVent' is a boolean parameter which indicates whether this.callOnBehalfOf should to wait for vent db to catch up to the block height in the forwardCall response, before resolving the promise.
  */
-export async function CallOnBehalfOf(client: Client, userAddress: string, targetAddress: string, payload: string): Promise<HexString> {
-  const actingUser = new UserAccount.Contract(client, userAddress)
-  return actingUser.forwardCall(targetAddress, DecodeHex(payload))
-    .then(data => EncodeHex(trimBufferPadding(data.returnData)));
+export async function CallOnBehalfOf(
+  client: Client,
+  userAddress: string,
+  targetAddress: string,
+  payload: string,
+): Promise<HexString> {
+  const actingUser = new UserAccount.Contract(client, userAddress);
+  return actingUser
+    .forwardCall(targetAddress, DecodeHex(payload))
+    .then((data) => EncodeHex(trimBufferPadding(data.returnData)));
 }
 
 export async function GetFromNameRegistry(client: Client, name: string): Promise<string | void> {
   try {
-    const entry = await client.namereg.get(name)
-    return entry.getData()
+    const entry = await client.burrow.namereg.get(name);
+    return entry.getData();
   } catch (err) {
     if (err.code === GRPC_NOT_FOUND) {
-      return undefined
+      return undefined;
     }
-    throw err
+    throw err;
   }
 }
 
 export async function SetToNameRegistry(client: Client, name: string, value: string): Promise<void> {
-  await client.namereg.set(name, value)
+  await client.burrow.namereg.set(name, value);
 }
 
 export function SHA3(str: string) {
-  const hash = (new Keccak(256)).update(str);
+  const hash = new Keccak(256).update(str);
   return hash.digest('hex').toUpperCase();
 }

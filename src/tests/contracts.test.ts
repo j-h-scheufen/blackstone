@@ -1,18 +1,20 @@
 import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import {Contracts, NewSync, SyncContracts} from '../lib/contracts';
-import {Agreement, Archetype, Model} from '../lib/types';
-import {SHA3} from '../lib/utils';
-import {VentListener} from "../lib/vent";
-import {load} from './before';
+import { Contracts, NewSync, SyncContracts } from '../lib/contracts';
+import { Agreement, Archetype, Model } from '../lib/types';
+import { SHA3 } from '../lib/utils';
+import { VentListener } from '../lib/vent';
+import { load } from './before';
 import rid = require('random-id');
 
 chai.use(chaiAsPromised);
-const {expect, assert} = chai;
+const { expect, assert } = chai;
 
-const bd = 'blackstone_development'
+const bd = 'blackstone_development';
 
-const connectionString = `postgres://${process.env.POSTGRES_DB_USER || bd}:${process.env.POSTGRES_DB_PASSWORD || bd}@${process.env.POSTGRES_DB_HOST || 'localhost'}:${process.env.POSTGRES_DB_PORT || 5432}/${process.env.POSTGRES_DB_DATABASE || bd}`;
+const connectionString = `postgres://${process.env.POSTGRES_DB_USER || bd}:${process.env.POSTGRES_DB_PASSWORD || bd}@${
+  process.env.POSTGRES_DB_HOST || 'localhost'
+}:${process.env.POSTGRES_DB_PORT || 5432}/${process.env.POSTGRES_DB_DATABASE || bd}`;
 
 describe('CONTRACTS', () => {
   let pmAddress: string;
@@ -27,8 +29,8 @@ describe('CONTRACTS', () => {
     version: [1, 0, 0],
     address: '',
   };
-  const formationProcess = {id: 'testProcessDefn1', name: 'Formation Process'};
-  const executionProcess = {id: 'testProcessDefn2', name: 'Execution Process'};
+  const formationProcess = { id: 'testProcessDefn1', name: 'Formation Process' };
+  const executionProcess = { id: 'testProcessDefn2', name: 'Execution Process' };
   const pAccount = {
     id: 'participantAcct',
     address: '',
@@ -116,19 +118,18 @@ describe('CONTRACTS', () => {
   let syncContracts: SyncContracts;
 
   before(async () => {
-    contracts = await load()
-    vent = new VentListener(connectionString, 5000)
-    syncContracts = await NewSync(contracts, vent)
+    contracts = await load();
+    vent = new VentListener(connectionString, 5000);
+    syncContracts = await NewSync(contracts, vent);
   });
 
   after(async () => {
-    await vent.close()
-  })
-
+    await vent.close();
+  });
 
   it('Should create a user', async () => {
     const res = await contracts.createUser({
-      username: SHA3(rid(16, 'aA0'))
+      username: SHA3(rid(16, 'aA0')),
     });
     expect(res).to.match(/[0-9A-Fa-f]{40}/);
     pAccount.address = res;
@@ -143,7 +144,7 @@ describe('CONTRACTS', () => {
 
   it('Should create a process model (and sync with VentListener)', async () => {
     // Smoke test for vent listener
-    await syncContracts.do(async c => {
+    await syncContracts.do(async (c) => {
       const res = await c.createProcessModel(model.id, model.version, archetype.author, false, 'hoard-grant');
       expect(res).to.match(/[0-9A-Fa-f]{40}/);
       pmAddress = res;
@@ -170,11 +171,15 @@ describe('CONTRACTS', () => {
   });
 
   it('Should add formation process interface implementation', () => {
-    return assert.isFulfilled(contracts.addProcessInterfaceImplementation(pmAddress, pdFormAddress, formationInterface));
+    return assert.isFulfilled(
+      contracts.addProcessInterfaceImplementation(pmAddress, pdFormAddress, formationInterface),
+    );
   });
 
   it('Should add execution process interface implementation', () => {
-    return assert.isFulfilled(contracts.addProcessInterfaceImplementation(pmAddress, pdExecAddress, executionInterface));
+    return assert.isFulfilled(
+      contracts.addProcessInterfaceImplementation(pmAddress, pdExecAddress, executionInterface),
+    );
   });
 
   it('Should add a participant with account address', async () => {
@@ -182,14 +187,9 @@ describe('CONTRACTS', () => {
   });
 
   it('Should add a conditional performer', () => {
-    return assert.isFulfilled(contracts.addParticipant(
-      pmAddress,
-      pConditional.id,
-      "",
-      pConditional.dataPath,
-      pConditional.dataStorageId,
-      ""
-    ));
+    return assert.isFulfilled(
+      contracts.addParticipant(pmAddress, pConditional.id, '', pConditional.dataPath, pConditional.dataStorageId, ''),
+    );
   });
 
   // // it('Should create first activity definition', () => {
