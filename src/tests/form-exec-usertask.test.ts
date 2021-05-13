@@ -1,10 +1,10 @@
-import { Contracts } from '../lib/contracts';
-import { Archetype, Agreement, Parameter, ParameterType, Model, DataType, ActivityInstanceState, LegalState } from '../lib/types';
-import rid = require('random-id');
 import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import { Contracts } from '../lib/contracts';
+import { Agreement, Archetype, Model, Parameter, ParameterType } from '../lib/types';
 import { SHA3 } from '../lib/utils';
 import { load } from './before';
+import rid = require('random-id');
 chai.use(chaiAsPromised);
 const { expect, assert } = chai;
 
@@ -12,8 +12,12 @@ let contracts: Contracts;
 
 before(function (done) {
   this.timeout(99999999);
-  load().then(loaded => { contracts = loaded; done(); })
-        .catch(error => done(error));
+  load()
+    .then((loaded) => {
+      contracts = loaded;
+      done();
+    })
+    .catch((error) => done(error));
 });
 
 describe('FORMATION - EXECUTION with 1 User Task each', () => {
@@ -25,22 +29,22 @@ describe('FORMATION - EXECUTION with 1 User Task each', () => {
     version: [1, 0, 0],
     address: '',
   };
-  
+
   const INTERFACE_FORMATION = 'Agreement Formation';
   const INTERFACE_EXECUTION = 'Agreement Execution';
 
-  let buyer = {
+  const buyer = {
     username: `buyer${rid(5, 'aA0')}`,
     address: '',
   };
 
-  let seller = {
+  const seller = {
     username: `seller${rid(5, 'aA0')}`,
     address: '',
   };
 
-  let buyProcessID = 'buy';
-  let sellProcessID = 'sell';
+  const buyProcessID = 'buy';
+  const sellProcessID = 'sell';
 
   const archetype: Archetype = {
     price: 10,
@@ -55,14 +59,14 @@ describe('FORMATION - EXECUTION with 1 User Task each', () => {
   };
 
   const parameters: Array<Parameter> = [
-    { 
-      type: ParameterType.SIGNING_PARTY, 
-      name: 'Buyer' 
-    }, 
-    { 
-      type: ParameterType.USER_ORGANIZATION, 
-      name: 'Seller' 
-    }
+    {
+      type: ParameterType.SIGNING_PARTY,
+      name: 'Buyer',
+    },
+    {
+      type: ParameterType.USER_ORGANIZATION,
+      name: 'Seller',
+    },
   ];
 
   const agreement: Agreement = {
@@ -76,7 +80,7 @@ describe('FORMATION - EXECUTION with 1 User Task each', () => {
     governingAgreements: [],
   };
 
-  let buyTask = {
+  const buyTask = {
     activityId: 'buy',
     activityType: 0,
     taskType: 1,
@@ -85,7 +89,7 @@ describe('FORMATION - EXECUTION with 1 User Task each', () => {
     multiInstance: false,
   };
 
-  let sellTask = {
+  const sellTask = {
     activityId: 'sell',
     activityType: 0,
     taskType: 1,
@@ -95,11 +99,11 @@ describe('FORMATION - EXECUTION with 1 User Task each', () => {
   };
 
   it('Should create a buyer and a seller', async () => {
-    let resBuyer = await contracts.createUser({
-      username: SHA3(buyer.username)
+    const resBuyer = await contracts.createUser({
+      username: SHA3(buyer.username),
     });
-    let resSeller = await contracts.createUser({
-      username: SHA3(seller.username)
+    const resSeller = await contracts.createUser({
+      username: SHA3(seller.username),
     });
     expect(resBuyer).to.match(/[0-9A-Fa-f]{40}/);
     expect(resSeller).to.match(/[0-9A-Fa-f]{40}/);
@@ -225,7 +229,7 @@ describe('FORMATION - EXECUTION with 1 User Task each', () => {
    *  START PROCESS AND COMPLETE TASKS
    ************************************/
 
-  it('Should start process from agreement', done => {
+  it('Should start process from agreement', (done) => {
     setTimeout(async () => {
       piAddress = await contracts.startProcessFromAgreement(agreement.address);
       expect(piAddress).to.match(/[0-9A-Fa-f]{40}/);
@@ -234,7 +238,7 @@ describe('FORMATION - EXECUTION with 1 User Task each', () => {
   }).timeout(10000);
 
   it('Should sign agreement by buyer', async () => {
-    await assert.isFulfilled(contracts.signAgreement(buyer.address, agreement.address))
+    await assert.isFulfilled(contracts.signAgreement(buyer.address, agreement.address));
   }).timeout(10000);
 
   // TODO: re-enable!

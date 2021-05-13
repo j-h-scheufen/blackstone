@@ -22,7 +22,7 @@ import "agreements/AbstractRenewable.sol";
  * Note that this legacy version is an abstract contract due to not inheriting AbstractVersionedArtifact which must be inherited and initialized with a version at the current DefaultActiveAgreement contract.
  */
 contract AbstractActiveAgreement_v1_0_1 is AbstractDelegateTarget, AbstractDataStorage, AbstractAddressScopes, DefaultEventEmitter, ActiveAgreement_v1_0_1, AbstractRenewable {
-	
+
 	using ArrayUtilsLib for address[];
 	using TypeUtilsLib for bytes32;
 	using MappingsLib for Mappings.Bytes32StringMap;
@@ -47,7 +47,7 @@ contract AbstractActiveAgreement_v1_0_1 is AbstractDelegateTarget, AbstractDataS
 	 * @dev Checks the valid state transitions according to the below rules.
 	 * The modifer will simply return if the current state already equals the new state.
 	 * It is allowed to "jump" to any legal state, if the current state is UNDEFINED.
-	 * 
+	 *
 	 * Allowed legal state changes:
 	 * UNDEFINED -> *ANY*
 	 * *ANY* -> REDACTED
@@ -99,11 +99,11 @@ contract AbstractActiveAgreement_v1_0_1 is AbstractDelegateTarget, AbstractDataS
 	 * @param _governingAgreements array of agreement addresses which govern this agreement (optional)
 	 */
 	function initialize(
-		address _archetype, 
-		address _creator, 
-		string calldata _privateParametersFileReference, 
-		bool _isPrivate, 
-		address[] calldata _parties, 
+		address _archetype,
+		address _creator,
+		string calldata _privateParametersFileReference,
+		bool _isPrivate,
+		address[] calldata _parties,
 		address[] calldata _governingAgreements)
 		external
 		pre_post_initialize
@@ -112,7 +112,7 @@ contract AbstractActiveAgreement_v1_0_1 is AbstractDelegateTarget, AbstractDataS
 			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultActiveAgreement.initialize", "Archetype address must not be empty");
 		ErrorsLib.revertIf(!Archetype(_archetype).isActive(),
 			ErrorsLib.INVALID_PARAMETER_STATE(), "DefaultActiveAgreement.initialize", "Archetype must be active");
-		
+
 		validateGoverningAgreements(_governingAgreements, Archetype(_archetype).getGoverningArchetypes());
 
 		archetype = _archetype;
@@ -151,7 +151,7 @@ contract AbstractActiveAgreement_v1_0_1 is AbstractDelegateTarget, AbstractDataS
 	 * This function makes sure that all governing agreements that are required were passed.
 	 */
 	function validateGoverningAgreements(address[] memory _governingAgreements, address[] memory _governingArchetypes) internal view {
-	
+
 		// _governingAgreements length must match governingArchetypes length. This is a shortcut verification to avoid expensive looping
 		ErrorsLib.revertIf(_governingAgreements.length != _governingArchetypes.length,
 			ErrorsLib.INVALID_INPUT(), "DefaultActiveAgreement.validateGoverningAgreements", "The number of provided governing agreements does not match the required number of governing archetypes");
@@ -171,7 +171,7 @@ contract AbstractActiveAgreement_v1_0_1 is AbstractDelegateTarget, AbstractDataS
 		}
 
 		ErrorsLib.revertIf(_governingArchetypes.length > 0 && verifiedArchetypesCount != _governingArchetypes.length,
-			ErrorsLib.INVALID_INPUT(), "DefaultActiveAgreement.validateGoverningAgreements", 
+			ErrorsLib.INVALID_INPUT(), "DefaultActiveAgreement.validateGoverningAgreements",
 				"The provided governing agreements do not match all of the governing archetypes required by the archetype of this agreement");
 	}
 
@@ -209,10 +209,10 @@ contract AbstractActiveAgreement_v1_0_1 is AbstractDelegateTarget, AbstractDataS
 		if (_index < parties.length)
 			return parties[_index];
 	}
-	
+
 	/**
 	 * @dev Returns the archetype
-	 * @return the archetype address 
+	 * @return the archetype address
 	 */
 	function getArchetype() external view returns (address) {
 		return archetype;
@@ -298,7 +298,7 @@ contract AbstractActiveAgreement_v1_0_1 is AbstractDelegateTarget, AbstractDataS
 
 	/**
 	 * @dev Returns the private flag
-	 * @return the private flag 
+	 * @return the private flag
 	 */
 	function isPrivate() external view returns (bool) {
 		return privateFlag;
@@ -384,7 +384,7 @@ contract AbstractActiveAgreement_v1_0_1 is AbstractDelegateTarget, AbstractDataS
 
 	/**
      * @dev Sets the legal state of this agreement to Agreements.LegalState.FULFILLED.
-	 * !deprecated! use #setLegalState(Agreements.LegalState) instead 
+	 * !deprecated! use #setLegalState(Agreements.LegalState) instead
 	 */
 	function setFulfilled() external {
         legalState = Agreements.LegalState.FULFILLED;
@@ -397,7 +397,7 @@ contract AbstractActiveAgreement_v1_0_1 is AbstractDelegateTarget, AbstractDataS
 	 * During execution (legal state EXECUTED), the agreement can only be canceled if all parties agree to do so by invoking this function.
 	 * REVERTS if:
 	 * - the caller could not be authorized (see AgreementsAPI.authorizePartyActor())
-	 */ 
+	 */
 	function cancel() external {
 
 		address actor;

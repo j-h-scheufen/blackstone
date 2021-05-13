@@ -29,6 +29,7 @@ library AgreementsAPI {
     return true;
   }
 
+
   /**
    * @dev Evaluates the msg.sender and tx.origin against the given agreement to determine if there is an authorized party/actor relationship.
    * @param _agreementAddress an ActiveAgreement address
@@ -37,7 +38,6 @@ library AgreementsAPI {
    * an Organization address if an Organization was registered as a party. 0x0 if authorization failed
    */
   function authorizePartyActor(address _agreementAddress) public returns (address actor, address party) {
-
     ActiveAgreement agreement = ActiveAgreement(_agreementAddress);
     address current;
     uint i;
@@ -86,4 +86,52 @@ library AgreementsAPI {
     }
   }
 
+  /**
+   * @dev Evaluates the possible actors of msg.sender and tx.origin against the given agreement to determine if they
+   * may act as party.
+   * @param _agreementAddress an ActiveAgreement address
+   * @param _party the party to check
+   * @return party - the agreement party associated with the identified actor. This is typically the same as the actor, but can also contain
+   * @return actor - the address of either msg.sender or tx.origin depending on which one was authorized; 0x0 if authorization failed
+   * an Organization address if an Organization was registered as a party. 0x0 if authorization failed
+   */
+  function authorizeActorAsParty(address _agreementAddress, address _party) public returns (address actor) {
+    ActiveAgreement agreement = ActiveAgreement(_agreementAddress);
+
+    // First ensure _party is a party to this agreement;
+    for (uint i = 0; i < agreement.getNumberOfParties(); i++) {
+      if (agreement.getPartyAtIndex(i) == _party) {
+        if (_party == msg.sender || _party == tx.origin) {
+          // for a direct match, the actor is the party
+          return _party;
+        }
+
+        if (ERC165Utils.implementsInterface(_party, Governance.ERC165_ID_Organization())) {
+          // Now we know that 'current' is a party, and that party is an organisation. The agreement may further specify
+          // that the current party belongs to an organisation AND a scope on that organisation
+
+          // Note: this 'scope' currently only ever means 'department' (team).
+
+          // Note: this is just a very indirected way of accessing a map of scopes on the agreement
+          bytes32 scope = agreement.resolveAddressScope(_party, agreement.DATA_FIELD_AGREEMENT_PARTIES(), agreement);
+
+          // Now we know that an actor for this party needs to hold 'scope' (possibly empty) on the organisation in order
+          // to act
+
+          // See if sender holds scope on org
+          if (Organization(_party).authorizeUser(msg.sender, scope)) {
+            return msg.sender;
+          }
+          // See if origin holds cope on org
+          else if (Organization(_party).authorizeUser(tx.origin, scope)) {
+            return tx.origin;
+          }
+        }
+        // _party _is_ a party on this agreement but current actor is not authorised
+        return address(0);
+      }
+    }
+    // _party _is not_ a party on this agreement
+    return address(0);
+  }
 }

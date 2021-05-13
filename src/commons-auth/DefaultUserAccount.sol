@@ -67,12 +67,12 @@ contract DefaultUserAccount is AbstractVersionedArtifact(1,0,0), AbstractDelegat
         );
 
     }
-    
+
     /**
      * @dev Forwards a call to the specified target using the given bytes message.
      * @param _target the address to call
      * @param _payload the function payload consisting of the 4-bytes function hash and the abi-encoded function parameters which is typically created by
-     * calling abi.encodeWithSelector(bytes4, args...) or abi.encodeWithSignature(signatureString, args...) 
+     * calling abi.encodeWithSelector(bytes4, args...) or abi.encodeWithSignature(signatureString, args...)
      * @return returnData - the bytes returned from calling the target function, if successful.
      * REVERTS if:
      * - the target address is empty (0x0)

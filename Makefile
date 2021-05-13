@@ -64,3 +64,12 @@ dist: src/build.ts $(shell find src -name '*.sol')
 .PHONY: publish
 publish:
 	yarn publish --non-interactive --access public --no-git-tag-version --new-version $(shell ./scripts/version.sh)
+
+.PHONY: test_completables
+test_completables:
+	burrow deploy \
+		--chain=localhost:10997 \
+		--address=$(CONTRACTS_DEPLOYMENT_ADDRESS) \
+		--jobs=1 \
+		--timeout=30 \
+		src/test-completables.yaml
