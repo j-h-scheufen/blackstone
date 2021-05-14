@@ -1,6 +1,6 @@
 {
   "name": "@monax/blackstone",
-  "version": "0.0.0",
+  "version": "5.0.0-10.ga8c3962",
   "description": "Contract Suite for the Agreements Network",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

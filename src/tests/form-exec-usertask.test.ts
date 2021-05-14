@@ -1,24 +1,11 @@
 import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { Contracts } from '../lib/contracts';
 import { Agreement, Archetype, Model, Parameter, ParameterType } from '../lib/types';
 import { SHA3 } from '../lib/utils';
-import { load } from './before';
 import rid = require('random-id');
+import {contracts} from "./before";
 chai.use(chaiAsPromised);
 const { expect, assert } = chai;
-
-let contracts: Contracts;
-
-before(function (done) {
-  this.timeout(99999999);
-  load()
-    .then((loaded) => {
-      contracts = loaded;
-      done();
-    })
-    .catch((error) => done(error));
-});
 
 describe('FORMATION - EXECUTION with 1 User Task each', () => {
   let piAddress: string;

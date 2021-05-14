@@ -1,20 +1,11 @@
-import { Contracts } from '../lib/contracts';
+import * as chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import { SHA3 } from '../lib/utils';
 import rid = require('random-id');
 import nanoid = require('nanoid');
-import * as chai from 'chai';
-import chaiAsPromised from 'chai-as-promised';
-import { load } from './before';
+import {contracts} from "./before";
 chai.use(chaiAsPromised);
 const { expect } = chai;
-
-let contracts: Contracts;
-
-before(function (done) {
-  this.timeout(99999999);
-  load().then(loaded => { contracts = loaded; done(); })
-        .catch(error => done(error));
-});
 
 describe('USER MIGRATION', () => {
   const user = {
