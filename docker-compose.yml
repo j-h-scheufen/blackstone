@@ -37,7 +37,7 @@ services:
     - chain
 
   chain:
-    image: hyperledger/burrow:0.31.0
+    image: hyperledger/burrow:0.31.3-dev.e0955fc
     ports:
     # GRPC port for most interaction
     - "10997:10997"
