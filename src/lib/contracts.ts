@@ -194,9 +194,10 @@ export class Contracts {
     return this.manager.ActiveAgreementRegistry.addAgreementToCollection(DecodeHex(collectionId), agreement);
   }
 
-  async signAgreement(actingUserAddress: string, agreementAddress: string) {
+  async signAgreement(actingUserAddress: string, agreementAddress: string, partyAddress?: string) {
     this.log.debug(`REQUEST: Sign agreement ${agreementAddress} by user ${actingUserAddress}`);
-    const payload = ActiveAgreement.Encode(this.client).sign();
+    const agreement = ActiveAgreement.Encode(this.client);
+    const payload = partyAddress ? agreement.signAsParty(partyAddress) : agreement.sign();
     await this.callOnBehalfOf(actingUserAddress, agreementAddress, payload);
   }
 
@@ -206,10 +207,19 @@ export class Contracts {
    * @param actingUserAddress user who is a franchisee or belongs to a franchisee party
    * @param intervalId the identity of the completable in the space of intervals
    * @param timestamp the timestamp at which to record/schedule the attestation
+   * @param partyAddress the party as which the acting user would like to attest
    */
-  async attestCompletable(actingUserAddress: string, intervalId: Buffer, timestamp: number): Promise<boolean> {
+  async attestCompletable(
+    actingUserAddress: string,
+    intervalId: Buffer,
+    timestamp: number,
+    partyAddress?: string,
+  ): Promise<boolean> {
     this.log.debug('REQUEST: Attest to completable %s by user %s', intervalId.toString('hex'), actingUserAddress);
-    const payload = Completables.Encode(this.client).attest(intervalId, timestamp);
+    const completables = Completables.Encode(this.client);
+    const payload = partyAddress
+      ? completables.attestAsParty(intervalId, timestamp, partyAddress)
+      : completables.attest(intervalId, timestamp);
     const output = await this.callOnBehalfOf(actingUserAddress, this.manager.Completables.address, payload);
     return Completables.Decode(this.client, DecodeHex(output)).attest()[0];
   }
@@ -231,9 +241,10 @@ export class Contracts {
     return isSignedBy;
   }
 
-  async cancelAgreement(actingUserAddress: string, agreementAddress: string) {
+  async cancelAgreement(actingUserAddress: string, agreementAddress: string, partyAddress?: string) {
     this.log.debug('REQUEST: Cancel agreement %s by user %s', agreementAddress, actingUserAddress);
-    const payload = ActiveAgreement.Encode(this.client).cancel();
+    const agreement = ActiveAgreement.Encode(this.client);
+    const payload = partyAddress ? agreement.cancelAsParty(partyAddress) : agreement.cancel();
     return this.callOnBehalfOf(actingUserAddress, agreementAddress, payload);
   }
 

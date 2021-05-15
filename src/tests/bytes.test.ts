@@ -12,7 +12,13 @@ describe('bytes32', () => {
   });
 
   it('pads byteNN according to their ABI type', () => {
-    const args = ['foo', { antelopes: true }, 'not a very long string', 'silly old goatee'];
+    const args = [
+      Buffer.from('foo'),
+      { antelopes: true },
+      Buffer.from('not a very long string').toString('hex'),
+      // Exactly 32 bytes
+      Buffer.from('silly old goatee'),
+    ];
     padBytesNN(['bytes4', 'frogman', 'bytes32', 'bytes16'], args);
     expect(args).to.deep.equal([
       Buffer.from([0x66, 0x6f, 0x6f, 0x00]),

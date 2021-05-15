@@ -1,3 +1,5 @@
+import { toBuffer } from '@hyperledger/burrow/dist/convert';
+
 const bytesNN = /bytes([0-9]+)/;
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
@@ -25,6 +27,10 @@ export function padBytesNN(types: string[], values: unknown[]): void {
 }
 
 export function padBytes(buf: Uint8Array | string, n: number): Buffer {
+  if (typeof buf === 'string') {
+    // Parse hex (possible 0x prefixed) into bytes!
+    buf = toBuffer(buf);
+  }
   if (buf.length > n) {
     throw new Error(`cannot pad buffer ${buf} of length ${buf.length} to ${n} because it is longer than ${n}`);
   }

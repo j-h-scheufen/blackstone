@@ -1,17 +1,21 @@
-import {TxExecution, TxHeader} from '@hyperledger/burrow/proto/exec_pb';
-import {EventEmitter} from 'events';
-import {getLogger} from 'log4js';
-import createPostgresSubscriber, {Subscriber} from "pg-listen";
+import { TxExecution, TxHeader } from '@hyperledger/burrow/proto/exec_pb';
+import { EventEmitter } from 'events';
+import { getLogger } from 'log4js';
+import createPostgresSubscriber, { Subscriber } from 'pg-listen';
 
-const heightChannel = "height";
+const heightChannel = 'height';
 
 export class VentSyncError extends Error {
   public readonly isVentSyncError = true;
 
-  constructor(public readonly targetHeight: number,
-              public readonly highWater: number,
-              public readonly maxWaitTimeMs: number) {
-    super(`VentSyncError: timed out after ${maxWaitTimeMs}ms waiting for target height [ ${targetHeight} ] having only seen up to height ${highWater} (is Vent healthy?) [${new Date()}]`);
+  constructor(
+    public readonly targetHeight: number,
+    public readonly highWater: number,
+    public readonly maxWaitTimeMs: number,
+  ) {
+    super(
+      `VentSyncError: timed out after ${maxWaitTimeMs}ms waiting for target height [ ${targetHeight} ] having only seen up to height ${highWater} (is Vent healthy?) [${new Date()}]`,
+    );
   }
 
   public static isTypeOf(err: Error): err is VentSyncError {
@@ -47,7 +51,13 @@ export class BurrowWatcher {
     return new Promise<TxExecution>((resolve, reject) => {
       const target = BurrowWatcher.heightFromResult(this.capture);
       if (target === undefined) {
-        return reject(new Error(`BurrowWatcher.wait(): could not extract height from previously captured Burrow result: '${JSON.stringify(this.capture)}'`));
+        return reject(
+          new Error(
+            `BurrowWatcher.wait(): could not extract height from previously captured Burrow result: '${JSON.stringify(
+              this.capture,
+            )}'`,
+          ),
+        );
       }
 
       if (this.vent.highWater >= target) {
@@ -77,7 +87,7 @@ export class BurrowWatcher {
           const err = new VentSyncError(target, this.vent.highWater, this.vent.maxWaitTimeMs);
           this.vent.log.error(err);
           if (this.vent.errOnTimeout) {
-            reject(err)
+            reject(err);
           }
         }
       }, this.vent.maxWaitTimeMs);
@@ -98,18 +108,21 @@ export class BurrowWatcher {
     return result;
   }
 
-
   private static heightFromResult(result: TxExecution): number {
-    if (!result) return undefined;
-    else if (!result.getHeader()) return undefined;
-    else return result.getHeader().getHeight();
+    if (!result) {
+      return undefined;
+    } else if (!result.getHeader()) {
+      return undefined;
+    } else {
+      return result.getHeader().getHeight();
+    }
   }
 }
 
 export class VentListener {
   highWater = 0;
   emitter = new EventEmitter();
-  subscriber: Subscriber<Record<'height', { '_height': string }>>;
+  subscriber: Subscriber<Record<'height', { _height: string }>>;
   log = getLogger('vent-listener');
 
   /**
@@ -119,11 +132,12 @@ export class VentListener {
    * @param maxWaitTimeMs The maximum amount of time to wait for a target height before timing out in milliseconds
    * @param errOnTimeout Whether to throw an error if maxWaitTimeMs is breached
    */
-  constructor(private readonly connection: string, public maxWaitTimeMs: number = 3000,
-              public readonly errOnTimeout = true) {
-    this.subscriber = createPostgresSubscriber(
-      {connectionString: this.connection},
-      {retryTimeout: Infinity});
+  constructor(
+    private readonly connection: string,
+    public maxWaitTimeMs: number = 3000,
+    public readonly errOnTimeout = true,
+  ) {
+    this.subscriber = createPostgresSubscriber({ connectionString: this.connection }, { retryTimeout: Infinity });
   }
 
   NewWatcher(): BurrowWatcher {
@@ -140,23 +154,26 @@ export class VentListener {
   }
 
   async listen() {
-    this.subscriber.notifications.on(heightChannel, msg => this.handleHeight(Number(msg._height)));
+    this.subscriber.notifications.on(heightChannel, (msg) => this.handleHeight(Number(msg._height)));
 
-    this.subscriber.events.on("error", (error) => {
+    this.subscriber.events.on('error', (error) => {
       // With our retry option this _should_ never happen (pg-listen only errs if retry limit or timeout is exceeded) so
-      console.error("Fatal database connection error from VentListener (this should not happen - we should reconnect indefinitely):", error)
-      process.exit(1)
-    })
+      console.error(
+        'Fatal database connection error from VentListener (this should not happen - we should reconnect indefinitely):',
+        error,
+      );
+      process.exit(1);
+    });
 
-    process.on("exit", () => {
-      this.subscriber.close()
-    })
+    process.on('exit', () => {
+      this.subscriber.close();
+    });
 
     try {
       await this.subscriber.connect();
-      await this.subscriber.listenTo(heightChannel)
+      await this.subscriber.listenTo(heightChannel);
     } catch (err) {
-      throw new Error(`VentListener: could not start listening: ${err.stack || JSON.stringify(err)}`)
+      throw new Error(`VentListener: could not start listening: ${err.stack || JSON.stringify(err)}`);
     }
   }
 

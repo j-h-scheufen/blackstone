@@ -24,17 +24,23 @@ export class Client {
   }
 
   deploy(msg: CallTx, callback: (err: Error, addr: Uint8Array) => void): void {
-    this.burrow.call(msg).then(
-      (txe) => callback(undefined, txe.getReceipt().getContractaddress_asU8()),
-      (err) => callback(err, undefined),
-    );
+    this.burrow
+      .call(msg)
+      .then((txe) => this.interceptor(txe))
+      .then(
+        (txe) => callback(undefined, txe.getReceipt().getContractaddress_asU8()),
+        (err) => callback(err, undefined),
+      );
   }
 
   call(msg: CallTx, callback: (err: Error, exec: Uint8Array) => void): void {
-    this.burrow.call(msg).then(
-      (txe) => callback(undefined, txe.getResult().getReturn_asU8()),
-      (err) => callback(err, undefined),
-    );
+    this.burrow
+      .call(msg)
+      .then((txe) => this.interceptor(txe))
+      .then(
+        (txe) => callback(undefined, txe.getResult().getReturn_asU8()),
+        (err) => callback(err, undefined),
+      );
   }
 
   callSim(msg: CallTx, callback: (err: Error, exec: Uint8Array) => void): void {

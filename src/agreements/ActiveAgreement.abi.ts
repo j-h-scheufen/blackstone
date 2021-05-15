@@ -189,6 +189,12 @@ export module ActiveAgreement {
                 return Decode(this.client, exec).cancel();
             });
         }
+        cancelAsParty(_party: string) {
+            const data = Encode(this.client).cancelAsParty(_party);
+            return Call<Tx, void>(this.client, this.address, data, false, (exec: Uint8Array) => {
+                return Decode(this.client, exec).cancelAsParty();
+            });
+        }
         castRenewalVote(_renew: boolean) {
             const data = Encode(this.client).castRenewalVote(_renew);
             return Call<Tx, void>(this.client, this.address, data, false, (exec: Uint8Array) => {
@@ -736,6 +742,12 @@ export module ActiveAgreement {
                 return Decode(this.client, exec).sign();
             });
         }
+        signAsParty(_party: string) {
+            const data = Encode(this.client).signAsParty(_party);
+            return Call<Tx, void>(this.client, this.address, data, false, (exec: Uint8Array) => {
+                return Decode(this.client, exec).signAsParty();
+            });
+        }
         transferPermission(_permission: Buffer, _newHolder: string) {
             const data = Encode(this.client).transferPermission(_permission, _newHolder);
             return Call<Tx, void>(this.client, this.address, data, false, (exec: Uint8Array) => {
@@ -770,6 +782,7 @@ export module ActiveAgreement {
                 return client.encode("6EA1944B", ["bytes32"], _event);
         },
         cancel: () => { return client.encode("EA8A1AF0", []); },
+        cancelAsParty: (_party: string) => { return client.encode("B14E09BB", ["address"], _party); },
         castRenewalVote: (_renew: boolean) => { return client.encode("B20BA337", ["bool"], _renew); },
         closeRenewalWindow: () => { return client.encode("C0647C2E", []); },
         compareArtifactVersion: (_other: string, _version: [number, number, number]) => {
@@ -868,6 +881,7 @@ export module ActiveAgreement {
         setPrivateParametersReference: (_privateParametersFileReference: string) => { return client.encode("4773F6FC", ["string"], _privateParametersFileReference); },
         setSignatureLogReference: (_signatureLogFileReference: string) => { return client.encode("F8D660D3", ["string"], _signatureLogFileReference); },
         sign: () => { return client.encode("2CA15122", []); },
+        signAsParty: (_party: string) => { return client.encode("9AAEE210", ["address"], _party); },
         transferPermission: (_permission: Buffer, _newHolder: string) => { return client.encode("EC9CB2CE", ["bytes32", "address"], _permission, _newHolder); }
     }; };
     export const Decode = <Tx>(client: Provider<Tx>, data: Uint8Array) => { return {
@@ -892,6 +906,7 @@ export module ActiveAgreement {
         ROLE_ID_OWNER: (): [Buffer] => { return client.decode(data, ["bytes32"]); },
         addEventListener: (): void => { return; },
         cancel: (): void => { return; },
+        cancelAsParty: (): void => { return; },
         castRenewalVote: (): void => { return; },
         closeRenewalWindow: (): void => { return; },
         compareArtifactVersion: (): {
@@ -1069,6 +1084,7 @@ export module ActiveAgreement {
         setPrivateParametersReference: (): void => { return; },
         setSignatureLogReference: (): void => { return; },
         sign: (): void => { return; },
+        signAsParty: (): void => { return; },
         transferPermission: (): void => { return; }
     }; };
 }

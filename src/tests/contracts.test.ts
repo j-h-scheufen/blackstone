@@ -1,10 +1,10 @@
 import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { Contracts, NewSync, SyncContracts } from '../lib/contracts';
+import { NewSync, SyncContracts } from '../lib/contracts';
 import { Agreement, Archetype, Model } from '../lib/types';
 import { SHA3 } from '../lib/utils';
 import { VentListener } from '../lib/vent';
-import { load } from './before';
+import { contracts } from './before';
 import rid = require('random-id');
 
 chai.use(chaiAsPromised);
@@ -113,12 +113,10 @@ describe('CONTRACTS', () => {
     governingAgreements: [],
   };
 
-  let contracts: Contracts;
   let vent: VentListener;
   let syncContracts: SyncContracts;
 
   before(async () => {
-    contracts = await load();
     vent = new VentListener(connectionString, 5000);
     syncContracts = await NewSync(contracts, vent);
   });
