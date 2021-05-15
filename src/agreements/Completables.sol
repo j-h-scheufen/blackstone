@@ -237,7 +237,7 @@ contract Completables is CompletableOptions, AbstractVersionedArtifact(1, 2, 0),
    */
   function attest(bytes32 intervalId, int timestamp)
   external
-  returns (bool)
+  returns (bool isRatified)
   {
     address actor;
     address party;
@@ -257,12 +257,12 @@ contract Completables is CompletableOptions, AbstractVersionedArtifact(1, 2, 0),
    */
   function attestAsParty(bytes32 intervalId, int timestamp, address party)
   external
-  returns (bool)
+  returns (bool isRatified)
   {
     address actor = AgreementsAPI.authorizeActorAsParty(completables[intervalId].agreementAddress, party);
 
     ErrorsLib.revertIf(actor == address(0),
-      ErrorsLib.UNAUTHORIZED(), "Completables.attest()",
+      ErrorsLib.UNAUTHORIZED(), "Completables.attestAsParty()",
       Strings.concat("The caller is not authorized to attest to ", intervalId.toHex(), " as party ", party.toHex()));
 
     return executeAttest(intervalId, timestamp, actor, party);
@@ -272,7 +272,7 @@ contract Completables is CompletableOptions, AbstractVersionedArtifact(1, 2, 0),
   internal
   completableExists(intervalId)
   intervalOpen(intervalId, timestamp)
-  returns (bool)
+  returns (bool isRatified)
   {
     if (ratifyAndCount(intervalId, actor, party) >= completables[intervalId].threshold) {
       completables[intervalId].ratified = timestamp;
@@ -280,7 +280,7 @@ contract Completables is CompletableOptions, AbstractVersionedArtifact(1, 2, 0),
     // Avoid stack too deep issues with local variables
     Completable memory completable = completables[intervalId];
 
-    bool isRatified = completable.ratified != 0;
+    isRatified = completable.ratified != 0;
     if (active) {
       emit LogAgreementCompletableAttest(EVENT_ID_AGREEMENT_COMPLETABLE,
         intervalId,

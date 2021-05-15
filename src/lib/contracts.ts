@@ -17,7 +17,7 @@ import { Agreement as agreement, Archetype as archetype, DataType, Parameter } f
 import {
   BytesFromString,
   BytesToString,
-  CallOnBehalfOf,
+  callOnBehalfOf,
   DecodeHex,
   GetFromNameRegistry,
   SetToNameRegistry,
@@ -58,7 +58,7 @@ export class Contracts {
 
   async callOnBehalfOf(userAddress: string, targetAddress: string, payload: string) {
     this.log.debug(`REQUEST: Call target ${targetAddress} on behalf of user ${userAddress} with payload: ${payload}`);
-    const data = await CallOnBehalfOf(this.client, userAddress, targetAddress, payload);
+    const data = await callOnBehalfOf(this.client, userAddress, targetAddress, payload);
     this.log.info(
       `SUCCESS: ReturnData from target ${targetAddress} forwardCall on behalf of user ${userAddress}: ${data}`,
     );
@@ -1401,14 +1401,20 @@ export class Contracts {
     this.log.info(`SUCCESS: Added external address ${externalAddress} to ecosystem at ${ecosystemAddress}`);
   }
 
-  async createUserInEcosystem(user: { username: string }, ecosystemAddress: string) {
-    this.log.debug(`REQUEST: Create a new user with ID: ${user.username} in ecosystem at ${ecosystemAddress}`);
-    return this.manager.ParticipantsManager.createUserAccount(DecodeHex(user.username), '0x0', ecosystemAddress).then(
-      (data) => {
-        this.log.info(`SUCCESS: Created new user ${user.username} at address ${data.userAccount}`);
-        return data.userAccount;
-      },
-    );
+  async createUserInEcosystem({ username }: { username: string }, ecosystemAddress: string) {
+    // FIXME[Silas]: I mean... this is a pretty weird dance, what we are expecting is not really much of a username is it?
+    if (!username) {
+      throw new Error('Username passed is empty');
+    }
+    if (!/^[0-9a-fA-F]+$/.test(username)) {
+      throw new Error(`createUserInEcosystem expects username to be hex-encoded, but got '${username}'`);
+    }
+    this.log.debug(`REQUEST: Create a new user with ID: ${username} in ecosystem at ${ecosystemAddress}`);
+    const id = DecodeHex(username);
+    return this.manager.ParticipantsManager.createUserAccount(id, '0x0', ecosystemAddress).then((data) => {
+      this.log.info(`SUCCESS: Created new user ${username} at address ${data.userAccount}`);
+      return data.userAccount;
+    });
   }
 
   async createUser(user: { username: string }) {

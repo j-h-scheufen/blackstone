@@ -2,6 +2,8 @@ import { Burrow } from '@hyperledger/burrow';
 import { abiToBurrowResult, burrowToAbiResult, unprefixedHexString } from '@hyperledger/burrow/dist/convert';
 import { TxExecution } from '@hyperledger/burrow/proto/exec_pb';
 import { CallTx, TxInput } from '@hyperledger/burrow/proto/payload_pb';
+import { StatusParam } from '@hyperledger/burrow/proto/rpcquery_pb';
+import { ResultStatus } from '@hyperledger/burrow/proto/rpc_pb';
 import { AbiCoder, ParamType } from 'ethers/lib/utils';
 import { Readable } from 'stream';
 import { padBytesNN } from '../bytes';
@@ -21,6 +23,12 @@ export class Client {
 
     // NOTE: in general interceptor may be async
     this.interceptor = async (data) => data;
+  }
+
+  status(): Promise<ResultStatus> {
+    return new Promise((resolve, reject) =>
+      this.burrow.query.status(new StatusParam(), (err, resp) => (err ? reject(err) : resolve(resp))),
+    );
   }
 
   deploy(msg: CallTx, callback: (err: Error, addr: Uint8Array) => void): void {

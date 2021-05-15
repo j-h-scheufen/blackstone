@@ -38,7 +38,7 @@ export function EncodeHex(data: Buffer) {
  * The 'payload' parameter must be the output of calling the 'encode(...)' function on a contract's function. E.g. <contract>.<function>.encode(param1, param2)
  * 'shouldWaitForVent' is a boolean parameter which indicates whether this.callOnBehalfOf should to wait for vent db to catch up to the block height in the forwardCall response, before resolving the promise.
  */
-export async function CallOnBehalfOf(
+export async function callOnBehalfOf(
   client: Client,
   userAddress: string,
   targetAddress: string,
@@ -66,7 +66,7 @@ export async function SetToNameRegistry(client: Client, name: string, value: str
   await client.burrow.namereg.set(name, value);
 }
 
-export function SHA3(str: string) {
+export function sha3(str: string): string {
   const hash = new Keccak(256).update(str);
   return hash.digest('hex').toUpperCase();
 }
