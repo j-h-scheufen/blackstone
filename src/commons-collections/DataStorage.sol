@@ -1,8 +1,9 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 /**
  * @title DataStorage Interface
- * @dev Definition of the public API for Data Storage 
+ * @dev Definition of the public API for Data Storage
  */
 contract DataStorage {
 
@@ -93,7 +94,7 @@ contract DataStorage {
 	// );
 
 	bytes32 public constant EVENT_ID_DATA_STORAGE = "AN://data-storage";
-  
+
   /**
    * @dev Returns the data type of the Data object identified by the given id
    * @param _id the id of the data
@@ -110,7 +111,7 @@ contract DataStorage {
   /**
    * @dev Returns the data id at the given index
    * @param _index the index of the data
-   * @return error uint error code 
+   * @return error uint error code
    * @return id bytes32 id of the data
    */
   function getDataIdAtIndex(uint _index) external view returns (uint error, bytes32 id);
@@ -155,7 +156,7 @@ contract DataStorage {
    * @return string the value of the data
    */
   function getDataValueAsString (bytes32 _id) external view returns (string memory);
-  
+
   /**
    * @dev Creates a Data object with the given value and inserts it into the DataMap
    * @param _id the id of the data
@@ -183,7 +184,7 @@ contract DataStorage {
    * @return int the value of the data
    */
   function getDataValueAsInt (bytes32 _id) external view returns (int);
-  
+
   /**
    * @dev Creates a Data object with the given value and inserts it into the DataMap
    * @param _id the id of the data

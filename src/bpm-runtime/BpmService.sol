@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-management/Upgradeable.sol";
 import "bpm-model/ProcessModelRepository.sol";
@@ -106,11 +107,11 @@ contract BpmService is ObjectFactory, Upgradeable {
 	 * @return created - the creation timestamp
 	 * @return completed - the completion timestamp
 	 * @return performer - the account who is performing the activity (for interactive activities only)
-	 * @return completedBy - the account who completed the activity (for interactive activities only) 
+	 * @return completedBy - the account who completed the activity (for interactive activities only)
 	 * @return state - the uint8 representation of the BpmRuntime.ActivityInstanceState of this activity instance
 	 */
 	function getActivityInstanceData(address _processInstance, bytes32 _id) external view returns (
-        bytes32 activityId, 
+        bytes32 activityId,
         uint created,
         uint completed,
         address performer,

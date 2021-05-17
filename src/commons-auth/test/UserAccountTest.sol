@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-utils/TypeUtilsLib.sol";
 
@@ -142,10 +143,10 @@ contract TestService {
 			return true;
 		else
 			return false;
-	} 
+	}
 
 	function getSuccessMessage() public pure returns (bytes32) {
-		return "congrats";	
+		return "congrats";
 	}
 
 	function invokeRevert() public pure {

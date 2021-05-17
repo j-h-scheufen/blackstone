@@ -1,9 +1,6 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as solc from 'solc';
-import * as solts from 'solts';
+import { build } from '@hyperledger/burrow';
 
-const contracts = [
+const contractsSolcV5 = [
   'active-agreements/TotalCounterCheck.sol',
 
   'agreements/AgreementsAPI.sol',
@@ -21,7 +18,7 @@ const contracts = [
   'agreements/RenewalWindowManager.sol',
   'agreements/RenewalInitializer.sol',
   'agreements/RenewalEvaluator.sol',
-  'agreements/Completables.sol',
+  'agreements/Completables_v1_1_0.sol',
   'agreements/DateRelations.sol',
   'agreements/AgreementDates.sol',
 
@@ -97,7 +94,11 @@ const contracts = [
   'commons-utils/Strings.sol',
 
   'migrations/Migrations.sol',
+
+  'agreements/Completables.sol',
 ];
+
+const contractsSolcV8 = [];
 
 const binPath = 'bin';
 
@@ -108,35 +109,6 @@ const binPath = 'bin';
  *  - Generates typescript code to deploy the contracts
  *  - Outputs the ABI files into bin to be later included in the distribution (for Vent and other ABI-consuming services)
  */
-function main() {
-  fs.mkdirSync(binPath, { recursive: true });
-  const inputDescription = solts.InputDescriptionFromFiles(...contracts);
-  const input = solts.EncodeInput(inputDescription);
-  const solcOutput = solc.compile(input, { import: solts.ImportLocal });
-  const output = solts.DecodeOutput(solcOutput);
-  if (output.errors && output.errors.length > 0) {
-    throw new Error(output.errors.map((err) => err.formattedMessage).join('\n'));
-  }
+// build(contractsSolcV8, { binPath, solcVersion: 'v8' });
 
-  for (const filename of Object.keys(output.contracts)) {
-    const compiled: solts.Compiled[] = [];
-    const solidity = output.contracts[filename];
-    for (const contract of Object.keys(solidity)) {
-      const comp = output.contracts[filename][contract];
-      compiled.push({
-        name: contract,
-        abi: comp.abi,
-        bin: comp.evm.bytecode.object,
-        links: solts.TokenizeLinks(comp.evm.bytecode.linkReferences),
-      });
-    }
-    const target = filename.replace(/\.[^/.]+$/, '.abi.ts');
-    const basename = path.basename(filename, '.sol');
-    // Write the ABIs emitted for each file to the name of that file without extension. We flatten into a single
-    // directory because that's what burrow deploy has always done.
-    fs.writeFileSync(path.join(binPath, basename + '.bin'), JSON.stringify(solidity[basename]));
-    fs.writeFileSync(target, solts.Print(...solts.NewFile(compiled)));
-  }
-}
-
-main();
+build(contractsSolcV5, { binPath, solcVersion: 'v5' });

@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-collections/AbstractDataStorage.sol";
 import "commons-collections/DataStorageUtils.sol";
@@ -7,7 +8,7 @@ import "bpm-model/BpmModel.sol";
 import "bpm-model/BpmModelLib.sol";
 
 contract BpmModelLibTest {
-	
+
 	using BpmModelLib for BpmModel.TransitionCondition;
 
 	string constant SUCCESS = "success";
@@ -15,13 +16,13 @@ contract BpmModelLibTest {
 	bytes32 EMPTY = "";
 
 	function testConditionalDataFunctions() external returns (string memory) {
-	
+
 		// this is the DataStorage used for resolving conditions
 		TestData dataStorage = new TestData();
 		TestData subStorage = new TestData();
 		dataStorage.setDataValueAsAddress("subStorage", address(subStorage));
 		TestData rightHandData = new TestData();
-		
+
 		// PRIMITIVE ADDRESS EQ
 		testCondition = BpmModel.createLeftHandTransitionCondition("Buyer", EMPTY, address(0), uint8(DataStorageUtils.COMPARISON_OPERATOR.EQ));
 		testCondition.rhPrimitive.addressValue = address(this);

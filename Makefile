@@ -56,13 +56,13 @@ build_ci_image:
 push_ci_image: build_ci_image
 	docker push ${CI_IMAGE}
 
-dist: src/build.ts $(shell find src -name '*.sol')
+dist: src/build.ts $(shell find src -name '*.sol' -o -name '*.ts')
 	yarn build
 	rsync -avzC --include='*/' --include='*.sol' --include='*.yaml' --exclude='*' src dist
 	cp -r src/bin dist
 
 .PHONY: publish
-publish:
+publish: dist
 	yarn publish --non-interactive --access public --no-git-tag-version --new-version $(shell ./scripts/version.sh)
 
 .PHONY: test_completables

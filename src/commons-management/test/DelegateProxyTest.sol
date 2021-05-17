@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-utils/TypeUtilsLib.sol";
 import "commons-management/AbstractDelegateProxy.sol";
@@ -15,11 +16,11 @@ contract DelegateProxyTest {
 
         TestDelegate delegate = new TestDelegate();
         TestProxy proxy = new TestProxy(address(delegate));
-        
+
         if (proxy.getDelegate() != address(delegate)) return "The delegate should be set in the proxy";
         string memory result = TestDelegate(address(proxy)).regularFunction();
         if (keccak256(abi.encodePacked(result)) != keccak256(abi.encodePacked("message"))) return "Proxy invocation of regularFunction should have returned the message";
-        
+
         // check that the revert reason from the inner delegate function is returned as the proxy's revert reason
         bytes memory data = abi.encodeWithSignature("revertFunction()");
         address target = address(proxy);

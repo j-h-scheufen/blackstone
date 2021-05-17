@@ -1,26 +1,27 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-collections/DataStorage.sol";
 import "commons-collections/FullDataStorage.sol";
 import "commons-collections/DataStorageUtils.sol";
 
 contract DataStorageUtilsTest {
-	
+
 	using DataStorageUtils for DataStorageUtils.ConditionalData;
 
 	string SUCCESS = "success";
 	bytes32 EMPTY = "";
-	
+
 	// Storage contracts used in tests
 	DataStorage myStorage;
 	DataStorage mySubDataStorage;
 	ResolverHelper helper = new ResolverHelper();
-	DataStorageUtils.ConditionalData conditionalData;	
-	
+	DataStorageUtils.ConditionalData conditionalData;
+
 	uint error;
 
 	function testConditionalDataHandling() external returns (string memory) {
-		
+
 		address addr;
 		bytes32 path;
 		bool success;
@@ -64,7 +65,7 @@ contract DataStorageUtilsTest {
  */
 contract ResolverHelper {
 
-	DataStorageUtils.ConditionalData conditionalData;	
+	DataStorageUtils.ConditionalData conditionalData;
 
 	function resolveDataStorageAddress(bytes32 _dataStorageId, address _dataStorageAddress, DataStorage _refDataStorage) public view returns (address) {
 		return DataStorageUtils.resolveDataStorageAddress(_dataStorageId, _dataStorageAddress, _refDataStorage);

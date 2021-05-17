@@ -1,9 +1,9 @@
 import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import rid from 'random-id';
 import { Agreement, Archetype, Model, Parameter, ParameterType } from '../lib/types';
 import { sha3 } from '../lib/utils';
-import rid = require('random-id');
-import {contracts} from "./before";
+import { contracts } from './before';
 chai.use(chaiAsPromised);
 const { expect, assert } = chai;
 

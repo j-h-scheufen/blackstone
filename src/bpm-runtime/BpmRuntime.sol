@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "bpm-model/BpmModel.sol";
 import "bpm-model/ProcessDefinition.sol";
@@ -8,12 +9,12 @@ import "bpm-model/ProcessDefinition.sol";
  * @dev This library defines the data structures to be used in conjunction with the BPM Runtime API library.
  */
 library BpmRuntime {
-	
+
 	enum ProcessInstanceState {CREATED,ABORTED,ACTIVE,COMPLETED}
 	enum ActivityInstanceState {CREATED,ABORTED,COMPLETED,INTERRUPTED,SUSPENDED,APPLICATION}
     enum BoundaryEventInstanceState {ACTIVE,INACTIVE}
     enum TransitionType {NONE,XOR,OR,AND}
-	
+
 	struct ProcessInstance {
         address addr;
         address startedBy;
@@ -24,7 +25,7 @@ library BpmRuntime {
         ActivityInstanceMap activities;
         IntermediateEventInstanceMap intermediateEvents;
 	}
-	
+
 	struct ActivityInstance {
         bytes32 id;
         bytes32 activityId;

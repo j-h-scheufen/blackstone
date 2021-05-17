@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "documents-commons/Agreement.sol";
 
@@ -51,7 +52,7 @@ contract SignatoryProxy {
 	function addSignatory(address _signatory) external returns (uint) {
 		return agreement.addSignatory(_signatory);
 	}
-	
+
 	/**
 	* @dev Enable calling `confirmExecutionVersion` on `agreement`.
 	*

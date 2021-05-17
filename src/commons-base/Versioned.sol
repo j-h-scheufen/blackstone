@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 /**
  * @title Versioned Interface
@@ -33,7 +34,7 @@ contract Versioned {
      * @return the minor version
 	 */
     function getVersionMinor() external view returns (uint8);
-	
+
     /**
 	 * @dev returns the patch version number
      * @return the patch version

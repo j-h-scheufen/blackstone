@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/SystemOwned.sol";
@@ -22,7 +23,7 @@ import "bpm-runtime/DefaultBpmService.sol";
 import "bpm-runtime/DefaultProcessInstance.sol";
 import "bpm-runtime/ApplicationRegistry.sol";
 // import "bpm-runtime/ApplicationRegistryDb.sol";
-// import "bpm-runtime/DefaultApplicationRegistry.sol"; 
+// import "bpm-runtime/DefaultApplicationRegistry.sol";
 import "bpm-runtime/Application.sol";
 import "bpm-runtime/TransitionConditionResolver.sol";
 
@@ -171,7 +172,7 @@ contract BpmServiceTest {
 		graph.addActivity(activityId1);
 		graph.addActivity(activityId2);
 		graph.addActivity(activityId3);
-	
+
 		// add connections
 		graph.connect(activityId1, BpmModel.ModelElementType.ACTIVITY, activityId2, BpmModel.ModelElementType.ACTIVITY, "");
 		graph.connect(activityId2, BpmModel.ModelElementType.ACTIVITY, activityId3, BpmModel.ModelElementType.ACTIVITY, "");
@@ -226,7 +227,7 @@ contract BpmServiceTest {
 	function testProcessGraphColoredPaths() external returns (string memory) {
 
 		//              coloredPath -> activity3
-		//             /  
+		//             /
 		// Graph: activity1 -> activity2
 		//                          \
 		//                           coloredPath -> activity4
@@ -237,7 +238,7 @@ contract BpmServiceTest {
 		graph.addActivity(activityId2);
 		graph.addActivity(activityId3);
 		graph.addActivity(activityId4);
-	
+
 		// add connections
 		graph.connect(activityId1, BpmModel.ModelElementType.ACTIVITY, activityId2, BpmModel.ModelElementType.ACTIVITY, EMPTY);
 		bytes32 coloredTransition1Id = graph.connect(activityId1, BpmModel.ModelElementType.ACTIVITY, activityId3, BpmModel.ModelElementType.ACTIVITY, marker1);
@@ -309,7 +310,7 @@ contract BpmServiceTest {
 
 		//                                 /-> activity2 ->\
 		// Graph: activity1 -> AND SPLIT ->                 -> AND JOIN -> activity4
-		//                                 \-> activity3 ->/ 
+		//                                 \-> activity3 ->/
 
 		graph.clear();
 
@@ -322,7 +323,7 @@ contract BpmServiceTest {
 		// add transitions
 		graph.addTransition(transitionId1, BpmRuntime.TransitionType.AND);
 		graph.addTransition(transitionId2, BpmRuntime.TransitionType.AND);
-	
+
 		// add connections
 		graph.connect(activityId1, BpmModel.ModelElementType.ACTIVITY, transitionId1, BpmModel.ModelElementType.GATEWAY, "");
 		graph.connect(transitionId1, BpmModel.ModelElementType.GATEWAY, activityId2, BpmModel.ModelElementType.ACTIVITY, "");
@@ -384,7 +385,7 @@ contract BpmServiceTest {
 
 		//                                 /-> activity2 ->\
 		// Graph: activity1 -> XOR SPLIT ----> activity3 ----> XOR JOIN -> activity5
-		//                                 \-> activity4 ->/ 
+		//                                 \-> activity4 ->/
 
 		graph.clear();
 
@@ -398,7 +399,7 @@ contract BpmServiceTest {
 		// add transitions
 		graph.addTransition(transitionId1, BpmRuntime.TransitionType.XOR);
 		graph.addTransition(transitionId2, BpmRuntime.TransitionType.XOR);
-	
+
 		// add connections
 		graph.connect(activityId1, BpmModel.ModelElementType.ACTIVITY, transitionId1, BpmModel.ModelElementType.GATEWAY, "");
 		graph.connect(transitionId1, BpmModel.ModelElementType.GATEWAY, activityId2, BpmModel.ModelElementType.ACTIVITY, "");
@@ -472,7 +473,7 @@ contract BpmServiceTest {
 
 		//                                 /-> activity2 ->\ // default transition
 		// Graph: activity1 -> XOR SPLIT --
-		//                                 \-> activity3 ->/ 
+		//                                 \-> activity3 ->/
 
 		graph.clear();
 
@@ -483,7 +484,7 @@ contract BpmServiceTest {
 
 		// add transitions
 		graph.addTransition(transitionId1, BpmRuntime.TransitionType.XOR);
-	
+
 		// add connections
 		graph.connect(activityId1, BpmModel.ModelElementType.ACTIVITY, transitionId1, BpmModel.ModelElementType.GATEWAY, "");
 		graph.connect(transitionId1, BpmModel.ModelElementType.GATEWAY, activityId2, BpmModel.ModelElementType.ACTIVITY, "");
@@ -522,7 +523,7 @@ contract BpmServiceTest {
 		//                                 /---------------> activity2 --------------->\
 		// Graph: activity1 -> AND SPLIT ->                                             -> AND JOIN -> activity5
 		//                                 \             /-> activity3 ->\             /
-		//                                  -> OR SPLIT -                 -> OR JOIN -/ 
+		//                                  -> OR SPLIT -                 -> OR JOIN -/
 		//                                               \-> activity4 ->/
 
 		graph.clear();
@@ -539,7 +540,7 @@ contract BpmServiceTest {
 		graph.addTransition(transitionId2, BpmRuntime.TransitionType.XOR);
 		graph.addTransition(transitionId3, BpmRuntime.TransitionType.XOR);
 		graph.addTransition(transitionId4, BpmRuntime.TransitionType.AND);
-	
+
 		// add connections
 		graph.connect(activityId1, BpmModel.ModelElementType.ACTIVITY, transitionId1, BpmModel.ModelElementType.GATEWAY, "");
 		graph.connect(transitionId1, BpmModel.ModelElementType.GATEWAY, activityId2, BpmModel.ModelElementType.ACTIVITY, "");
@@ -633,11 +634,11 @@ contract BpmServiceTest {
 	 */
 	function testProcessGraphConditionalLoop() external returns (string memory) {
 
-		//                               
+		//
 		// Graph: activity1 -> XOR JOIN ->  -------- activity2 -------> activity3 ------> XOR SPLIT -> activity5
 		//                        |                                                          |
 		//                         \<---------------------- activity4 <---------------------/
-		
+
 
 		graph.clear();
 
@@ -651,7 +652,7 @@ contract BpmServiceTest {
 		// add transitions
 		graph.addTransition(transitionId1, BpmRuntime.TransitionType.XOR);
 		graph.addTransition(transitionId2, BpmRuntime.TransitionType.XOR);
-	
+
 		// add connections
 		graph.connect(activityId1, BpmModel.ModelElementType.ACTIVITY, transitionId1, BpmModel.ModelElementType.GATEWAY, "");
 		graph.connect(transitionId1, BpmModel.ModelElementType.GATEWAY, activityId2, BpmModel.ModelElementType.ACTIVITY, "");
@@ -833,7 +834,7 @@ contract BpmServiceTest {
 		pd.createActivityDefinition(activityId3, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.SEND, EMPTY, false, EMPTY, EMPTY, EMPTY);
 		pd.createTransition(activityId1, activityId2);
 		pd.createTransition(activityId2, activityId3);
-		
+
 		// Validate to set the start activity and enable runtime configuration
 		pd.validate();
 
@@ -890,7 +891,7 @@ contract BpmServiceTest {
 		pd.createActivityDefinition(activityId3, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.SEND, EMPTY, false, EMPTY, EMPTY, EMPTY);
 		pd.createTransition(activityId1, eventId1);
 		pd.createTransition(eventId1, activityId3);
-		
+
 		// Validate to set the start activity and enable runtime configuration
 		pd.validate();
 
@@ -937,7 +938,7 @@ contract BpmServiceTest {
 	function testBoundaryEventHandling() external returns (string memory) {
 
 		uint activityTimerTarget = block.timestamp+2000;
-		
+
 		// Graph: activity1 ->  intermediateEvent1
 		(error, addr) = processModelRepository.createProcessModel("testModelBoundaryEvents", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == address(0)) return "Unable to create a ProcessModel";
@@ -1002,12 +1003,12 @@ contract BpmServiceTest {
 		( , , , , , state) = pi.getActivityInstanceData(aiId);
 		if (state != uint8(BpmRuntime.ActivityInstanceState.COMPLETED)) return "Activity1 should be completed";
 		if (pi.getNumberOfBoundaryEventInstances(aiId) != 0) return "There should be no boundary event instance remaining after completion of Activity1";
-	
+
 		aiId = pi.getActivityInstanceAtIndex(1);
 		eventInstanceId = pi.getBoundaryEventIdAtIndex(aiId, 0);
 		if (eventInstanceId.isEmpty()) return "There should be an event instance at index 0 in Activity2's boundary events";
 		(state, timerResolution) = pi.getBoundaryEventDetails(aiId, eventInstanceId);
-		
+
 		// Activity 2: Automatic activation. The boundary event should already be active based on a constant deadline value
 
 
@@ -1015,7 +1016,7 @@ contract BpmServiceTest {
 		// boundary event 3 should not be active as long as the process variable is empty
 		pi.setDataValueAsUint("deadlineVariable", block.timestamp+5000);
 
-		
+
 
 
 		// Automatic activation 2. The boundary event on activity 2 should be activated and data autmatically bound from conditional data
@@ -1026,7 +1027,7 @@ contract BpmServiceTest {
 		// External binding: make an event with a string target date in the PI. Test state and event activation
 
 		// Activation with and without target functions
-		// Activation of different types (interrupting, non-interrupting) 
+		// Activation of different types (interrupting, non-interrupting)
 
 
 		return SUCCESS;
@@ -1079,7 +1080,7 @@ contract BpmServiceTest {
 		pd.createTransition(transitionId4, activityId5);
 		pd.createTransitionConditionForUint(transitionId2, activityId3, "Age", EMPTY, address(0), uint8(DataStorageUtils.COMPARISON_OPERATOR.GTE), 18);
 		pd.setDefaultTransition(transitionId2, activityId4);
-		
+
 		// Validate to set the start activity and enable runtime configuration
 		(success, bytes32Value) = pd.validate();
 		if (!success) return bytes32Value.toString();
@@ -1130,7 +1131,7 @@ contract BpmServiceTest {
 	 */
 	function testConditionalLoopRoute() external returns (string memory) {
 
-		//                               
+		//
 		// Graph: activity1 -> XOR JOIN ->  -------- activity2  ------> XOR SPLIT -> activity4
 		//                        |                                        |
 		//                         \<--------------- activity3 <----------/
@@ -1160,7 +1161,7 @@ contract BpmServiceTest {
  		pd.createTransition(activityId3, transitionId1);
 		pd.createTransitionConditionForBool(transitionId2, activityId4, "PaymentsMade", "agreement", address(0), uint8(DataStorageUtils.COMPARISON_OPERATOR.EQ), true);
 		pd.setDefaultTransition(transitionId2, activityId3);
-		
+
 		// Validate to set the start activity and enable runtime configuration
 		(bool valid, bytes32 errorMsg) = pd.validate();
 		if (!valid) return errorMsg.toString();
@@ -1201,7 +1202,7 @@ contract BpmServiceTest {
 		service.addProcessInstance(pi);
 		TestData dataStorage = new TestData();
 		pi.setDataValueAsAddress("agreement", address(dataStorage));
-	
+
 		// verify expected routing decisions ahead of start
 		if (pi.resolveTransitionCondition(transitionId2, activityId4)) return "TransitionCondition to activity4 should be false with default value";
 
@@ -1265,7 +1266,7 @@ contract BpmServiceTest {
 
 		addr = pm.createProcessDefinition("TwoGatewayPD", address(artifactsRegistry));
 		ProcessDefinition pd = ProcessDefinition(addr);
-		
+
 		// the process definition is using straight-through activities
 		pd.createActivityDefinition(activityId1, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.SEND, EMPTY, false, EMPTY, EMPTY, EMPTY);
 		pd.createActivityDefinition(activityId2, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.SEND, EMPTY, false, EMPTY, EMPTY, EMPTY);
@@ -1287,7 +1288,7 @@ contract BpmServiceTest {
 		pd.setDefaultTransition(transitionId1, transitionId2);
 		pd.createTransitionConditionForString(transitionId2, transitionId3, "Lastname", "agreement", address(0), uint8(DataStorageUtils.COMPARISON_OPERATOR.EQ), "Smith");
 		pd.setDefaultTransition(transitionId2, activityId3);
-		
+
 		// Validate to set the start activity and enable runtime configuration
 		(bool valid, bytes32 errorMsg) = pd.validate();
 		if (!valid) return errorMsg.toString();
@@ -1320,7 +1321,7 @@ contract BpmServiceTest {
 
 		// FIRST RUN: Set conditions to make process go through ALL conditional activities (activities 2 + 3)
 		dataStorage.setDataValueAsUint("Year", uint(1950));
-	
+
 		// Initialize the graph within the PI in order to correctly access transition conditions
 		pi.initRuntime();
 		// verify expected routing decisions ahead of start. The resolveTransitionCondition needs to handle the artificial activity inserted between gateway2 and gateway3
@@ -1406,7 +1407,7 @@ contract BpmServiceTest {
 		error = pd.createActivityDefinition(activityId2, BpmModel.ActivityType.TASK, BpmModel.TaskType.SERVICE, BpmModel.TaskBehavior.SEND, EMPTY, false, serviceApp2Id, EMPTY, EMPTY);
 		if (error != BaseErrors.NO_ERROR()) return "Error creating SERVICE task activity2 definition";
 		pd.createTransition(activityId1, activityId2);
-		
+
 		// Validate to set the start activity and enable runtime configuration
 		(success, bytes32Value) = pd.validate();
 		if (!success) return bytes32Value.toString();
@@ -1488,7 +1489,7 @@ contract BpmServiceTest {
 		bytes32 dataPathOnAgreement = "buyer";
 		bytes32 dataStorageId = "agreement";
 		bytes32 dataPathOnProcess = "customAssignee";
-	
+
 		(error, addr) = processModelRepository.createProcessModel("conditionalPerformerModel", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == address(0)) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
@@ -1688,7 +1689,7 @@ contract BpmServiceTest {
 
 		UserAccount user1 = new DefaultUserAccount();
 		user1.initialize(address(this), address(0));
-	
+
 		(error, addr) = processModelRepository.createProcessModel("testModelAbort", [1,0,0], modelAuthor, false, dummyModelFileReference);
 		if (addr == address(0)) return "Unable to create a ProcessModel";
 		ProcessModel pm = ProcessModel(addr);
@@ -1706,7 +1707,7 @@ contract BpmServiceTest {
 		error = pd.createActivityDefinition(activityId2, BpmModel.ActivityType.TASK, BpmModel.TaskType.USER, BpmModel.TaskBehavior.SENDRECEIVE, participantId1, false, EMPTY, EMPTY, EMPTY);
 		if (error != BaseErrors.NO_ERROR()) return "Error creating USER task activity for participant1";
 		pd.createTransition(activityId1, activityId2);
-		
+
 		// Validate to set the start activity and enable runtime configuration
 		(success, bytes32Value) = pd.validate();
 		if (!success) return bytes32Value.toString();
@@ -1790,7 +1791,7 @@ contract BpmServiceTest {
 		error = pd.createActivityDefinition(activityId2, BpmModel.ActivityType.TASK, BpmModel.TaskType.NONE, BpmModel.TaskBehavior.SEND, EMPTY, false, EMPTY, EMPTY, EMPTY);
 		if (error != BaseErrors.NO_ERROR()) return "Error creating NONE task activity definition";
 		pd.createTransition(activityId1, activityId2);
-		
+
 		// Validate to set the start activity and enable runtime configuration
 		(success, bytes32Value) = pd.validate();
 		if (!success) return bytes32Value.toString();
@@ -1909,7 +1910,7 @@ contract BpmServiceTest {
 		if (service.getBpmServiceDb().getNumberOfActivityInstances() != 4) return "There should be 4 AIs total";
 		subProcesses[0] = ProcessInstance(service.getProcessInstanceAtIndex(1));
 		subProcesses[1] = ProcessInstance(service.getProcessInstanceAtIndex(2));
-	
+
 		// all processes should be active after main start
 		if (piMain.getState() != uint8(BpmRuntime.ProcessInstanceState.ACTIVE)) return "The Main PI should be active";
 		if (piMain.getNumberOfActivityInstances() != 2) return "There should be 2 AIs in the main process after start";
@@ -1944,8 +1945,8 @@ contract BpmServiceTest {
 		( , , , , , state) = piMain.getActivityInstanceData(piMain.getActivityInstanceAtIndex(2));
 		if (state != uint8(BpmRuntime.ActivityInstanceState.COMPLETED)) return "Activity2 in Main should be completed";
 		if (subProcesses[0].getState() != uint8(BpmRuntime.ProcessInstanceState.ACTIVE)) return "Aynchronous SubprocessA should still be active";
-		if (subProcesses[1].getState() != uint8(BpmRuntime.ProcessInstanceState.COMPLETED)) return "SubprocessB should be completed";		
-		if (subProcesses[2].getState() != uint8(BpmRuntime.ProcessInstanceState.COMPLETED)) return "SubprocessA2 should be completed";		
+		if (subProcesses[1].getState() != uint8(BpmRuntime.ProcessInstanceState.COMPLETED)) return "SubprocessB should be completed";
+		if (subProcesses[2].getState() != uint8(BpmRuntime.ProcessInstanceState.COMPLETED)) return "SubprocessA2 should be completed";
 		if (piMain.getState() != uint8(BpmRuntime.ProcessInstanceState.COMPLETED)) return "The Main PI should be completed";
 
 		return SUCCESS;
@@ -2013,7 +2014,7 @@ contract FailureServiceApplication is Application {
 
 /**
  * Test application which uses IN/OUT data mappings to communicate with the process.
- * 
+ *
  */
 contract EventApplication is Application {
 

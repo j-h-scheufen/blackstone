@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-utils/TypeUtilsLib.sol";
 
@@ -32,20 +33,20 @@ contract TypeUtilsTest {
         if (v.toBytes32() != "0") { return "Converting uint 0 to bytes32 failed."; }
     	v = 69238422394;
         if (v.toBytes32() != "69238422394") { return "Converting uint 69238422394 to bytes32 failed."; }
-        
+
         return "success";
     }
-    
+
     function testIsEmpty() external pure returns (string memory) {
-    	
+
     	bytes32 b32val1 = "";
     	bytes32 b32val2 = "bla";
     	bytes32 b32val3 = "0";
-    	
+
     	if (b32val1.isEmpty() == false) return "Empty bytes32 val1 not detected.";
     	if (b32val2.isEmpty() == true) return "bytes32 val2 has content.";
     	if (b32val3.isEmpty() == true) return "bytes32 val3 has content.";
-    	
+
     	return "success";
     }
 
@@ -66,7 +67,7 @@ contract TypeUtilsTest {
 		if (s.toBytes32() != "  blanks and underscores __") { return "Converting string '  blanks and underscores __' to bytes32 failed."; }
 		s = "This text is longer then 32 ASCII characters and should be cut off.";
 		if (s.toBytes32() != "This text is longer then 32 ASCI") { return "Converting string longer then 32 chars to bytes32 failed."; }
-		
+
 		return "success";
 	}
 
@@ -79,7 +80,7 @@ contract TypeUtilsTest {
 		if (b.toBytes32() != "  blanks and underscores __") { return "Converting bytes '  blanks and underscores __' to bytes32 failed."; }
 		b = "This text is longer then 32 ASCII characters and should be cut off.";
 		if (b.toBytes32() != "This text is longer then 32 ASCI") { return "Converting bytes longer then 32 chars to bytes32 failed."; }
-		
+
 		return "success";
 	}
 
@@ -87,7 +88,7 @@ contract TypeUtilsTest {
 		uint number = 928349;
 		bytes memory b = abi.encode(number);
 		if (b.toUint() != number) { return "Converting bytes to number should return same value"; }
-		
+
 		return "success";
 	}
 }

@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-utils/TypeUtilsLib.sol";
@@ -9,7 +10,7 @@ import "bpm-model/ProcessDefinition.sol";
 import "bpm-model/DefaultProcessModel.sol";
 
 contract ProcessDefinitionTest {
-	
+
 	using TypeUtilsLib for bytes32;
 	using ArrayUtilsLib for bytes32[];
 
@@ -50,11 +51,11 @@ contract ProcessDefinitionTest {
 	 * @dev Tests building of the ProcessDefinition and checking for validity along the way
 	 */
 	function testProcessDefinition() external returns (string memory) {
-	
+
 		//                               boundaryEvent1
-		//                              /                
+		//                              /
 		// Graph: activity1 -> activity2 -> XOR SPLIT -/---------------> XOR JOIN -> intermediateEvent1 -> activity4
-		//                                            \                /                               
+		//                                            \                /
 		//                                             \-> activity3 -/
 
 		// re-usable test variables
@@ -66,7 +67,7 @@ contract ProcessDefinitionTest {
 		pm.initialize("testModel", [1,0,0], author, false, dummyModelFileReference);
 		ProcessDefinition pd = new DefaultProcessDefinition();
 		pd.initialize("p1", address(pm));
-		
+
 		// test process interface handling
 		error = pd.addProcessInterfaceImplementation(address(pm), "AgreementFormation");
 		if (error != BaseErrors.RESOURCE_NOT_FOUND()) return "Expected error for adding non-existent process interface.";
@@ -111,7 +112,7 @@ contract ProcessDefinitionTest {
 
 		(success, errorMsg) = pd.validate();
 		if (success) return "The process definition has duplicate start activities and should not be valid";
-		
+
 		// Scenario 1: Sequential Process
 		(success, ) = address(pd).call(abi.encodeWithSignature(functionSigCreateTransition, bytes32("blablaActivity"), activity2Id));
 		if (success)
@@ -266,7 +267,7 @@ contract ProcessDefinitionTest {
 
 		// this is the DataStorage used for resolving conditions
 		TestData dataStorage = new TestData();
-		
+
 		if (pd.resolveTransitionCondition(transition1Id, activity2Id, address(dataStorage))) return "The condition for transition1/activity2 should be false as the data is not set";
 		dataStorage.setDataValueAsAddress("buyer", address(this));
 		if (!pd.resolveTransitionCondition(transition1Id, activity2Id, address(dataStorage))) return "The condition for transition1/activity2 should be true after data is set";
@@ -279,9 +280,9 @@ contract ProcessDefinitionTest {
 }
 
 contract TestApplication {
-	
+
 	bool public success;
-	
+
 	function doSomething() external {
 		success = true;
 	}

@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/SystemOwned.sol";
@@ -11,7 +12,7 @@ import "commons-collections/MappingsLib.sol";
  * @dev Stores and manages UserAccount and Organization entities.
  */
 contract ParticipantsManagerDb is SystemOwned {
-  
+
   using MappingsLib for Mappings.AddressBoolMap;
 
   Mappings.AddressBoolMap userAccounts;
@@ -23,7 +24,7 @@ contract ParticipantsManagerDb is SystemOwned {
   constructor() public {
     systemOwner = msg.sender;
   }
- 
+
   function addUserAccount(address _account) external pre_onlyBySystemOwner returns (uint error) {
     error = userAccounts.insert(_account, true);
   }
@@ -60,6 +61,6 @@ contract ParticipantsManagerDb is SystemOwned {
   function getOrganizationAtIndex(uint _index) external view returns (address) {
     ( , address key) = organizations.keyAtIndex(_index);
     return key;
-  } 
-  
+  }
+
 }

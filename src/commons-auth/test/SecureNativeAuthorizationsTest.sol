@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 // Tested Contracts
 import "commons-auth/SecureNativeAuthorizations.sol";
@@ -31,8 +32,8 @@ contract SecureNativeAuthorizationsTest {
      */
     function testFunctions() external returns (string memory) {
         // Confirm contract has correct initial authorizations
-        
-       
+
+
 //        if (sNativeAuthorizations.hasBase(this, SET_BASE_AUTHORIZATION)) return "Expected setBase: true";
 //        if (sNativeAuthorizations.hasBase(this, HAS_ROLE_AUTHORIZATION)) return "Expected hasRole: true";
 //

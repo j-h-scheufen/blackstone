@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/ErrorsLib.sol";
 import "commons-standards/AbstractERC165.sol";
@@ -10,11 +11,11 @@ import "commons-management/ArtifactsFinder.sol";
  * @dev To be inherited by contracts that need to look up other contracts by name, e.g. for dependency resolution.
  */
 contract ArtifactsFinderEnabled is AbstractERC165 {
-	
+
 	bytes4 public constant ERC165_ID_ArtifactsFinderEnabled = bytes4(keccak256(abi.encodePacked("setArtifactsFinder(address)")));
 
 	ArtifactsFinder artifactsFinder;
-	
+
 	/**
 	 * @dev Internal constructor to enforce abstract character of the contract.
 	 */
@@ -31,5 +32,5 @@ contract ArtifactsFinderEnabled is AbstractERC165 {
 			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "ArtifactsFinderEnabled.setArtifactsFinder", "The ArtifactsFinder address must not be null");
 		artifactsFinder = ArtifactsFinder(_artifactsFinder);
 	}
-    
+
 }

@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "../AgreementDates.sol";
 import "./Mocks.sol";
@@ -20,7 +21,7 @@ contract AgreementDatesTest {
   bytes32 baz = "baz";
   bytes32 qux = "qux";
   bytes32 quux = "quux";
-  
+
   string offset = "P1Y";
   string metadata = "{}";
 

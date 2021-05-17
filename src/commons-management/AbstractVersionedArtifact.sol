@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-standards/AbstractERC165.sol";
 import "commons-management/VersionedArtifact.sol";
@@ -56,7 +57,7 @@ contract AbstractVersionedArtifact is AbstractERC165, VersionedArtifact {
         if (result != 0) { return result; }
         result = compareUint8ArtifactValues(_a[2], _b[2]);
 	}
-	
+
     /**
      * @dev returns 0 (equal), -1 (b is lower), or 1 (b is higher).
      * //TODO move to a math library

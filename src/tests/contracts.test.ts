@@ -1,11 +1,11 @@
 import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import rid from 'random-id';
 import { NewSync, SyncContracts } from '../lib/contracts';
 import { Agreement, Archetype, Model } from '../lib/types';
 import { sha3 } from '../lib/utils';
 import { VentListener } from '../lib/vent';
 import { contracts } from './before';
-import rid = require('random-id');
 
 chai.use(chaiAsPromised);
 const { expect, assert } = chai;

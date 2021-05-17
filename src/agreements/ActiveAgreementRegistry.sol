@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-management/ObjectFactory.sol";
 import "commons-management/Upgradeable.sol";
@@ -14,13 +15,13 @@ import "agreements/Agreements.sol";
 contract ActiveAgreementRegistry is ObjectFactory, Upgradeable, ProcessStateChangeListener {
 
 	event LogAgreementFormationProcessUpdate(
-		bytes32 indexed eventId, 
+		bytes32 indexed eventId,
 		address agreementAddress,
 		address formationProcessInstance
 	);
 
 	event LogAgreementExecutionProcessUpdate(
-		bytes32 indexed eventId, 
+		bytes32 indexed eventId,
 		address agreementAddress,
 		address executionProcessInstance
 	);
@@ -60,13 +61,13 @@ contract ActiveAgreementRegistry is ObjectFactory, Upgradeable, ProcessStateChan
 	 */
 	function createAgreement(
 		address _archetype,
-		address _creator, 
-		address _owner, 
+		address _creator,
+		address _owner,
 		string calldata _privateParametersFileReference,
 		bool _isPrivate,
-		address[] calldata _parties, 
-		bytes32 _collectionId, 
-		address[] calldata _governingAgreements) 
+		address[] calldata _parties,
+		bytes32 _collectionId,
+		address[] calldata _governingAgreements)
 		external returns (address activeAgreement);
 
 	/**
@@ -228,7 +229,7 @@ contract ActiveAgreementRegistry is ObjectFactory, Upgradeable, ProcessStateChan
 	 * @return id bytes32 id
 	 */
 	function getAgreementCollectionAtIndex(uint _index) external view returns (bytes32 id);
-	
+
 	/**
 	 * @dev Gets collection data by id
 	 * @param _id bytes32 collection id

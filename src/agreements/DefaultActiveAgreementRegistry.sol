@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/ErrorsLib.sol";
 import "commons-base/BaseErrors.sol";
@@ -78,13 +79,13 @@ contract DefaultActiveAgreementRegistry is AbstractVersionedArtifact(1,1,0), Abs
 	 */
 	function createAgreement(
 		address _archetype,
-		address _creator, 
-		address _owner, 
+		address _creator,
+		address _owner,
 		string calldata _privateParametersFileReference,
-		bool _isPrivate, 
-		address[] calldata _parties, 
-		bytes32 _collectionId, 
-		address[] calldata _governingAgreements) 
+		bool _isPrivate,
+		address[] calldata _parties,
+		bytes32 _collectionId,
+		address[] calldata _governingAgreements)
 		external returns (address agreementAddress)
 	{
     agreementAddress = address(new ObjectProxy(address(artifactsFinder), OBJECT_CLASS_AGREEMENT));
@@ -174,7 +175,7 @@ contract DefaultActiveAgreementRegistry is AbstractVersionedArtifact(1,1,0), Abs
 				ErrorsLib.INVALID_PARAMETER_STATE(), "DefaultActiveAgreementRegistry.startProcessLifecycle", "The ActiveAgreement must be in state FORMULATED to start the formation process");
 			ErrorsLib.revertIf(ActiveAgreementRegistryDb(database).getAgreementFormationProcess(address(_agreement)) != address(0),
 				ErrorsLib.OVERWRITE_NOT_ALLOWED(), "DefaultActiveAgreementRegistry.startProcessLifecycle", "The provided agreement already has an ongoing formation ProcessInstance");
-			
+
 			pi = createFormationProcess(_agreement);
 			// keep track of the process for the agreement, regardless of whether the start (below) actually succeeds, because the PI is created
 			ActiveAgreementRegistryDb(database).setAgreementFormationProcess(address(_agreement), address(pi));
@@ -375,7 +376,7 @@ contract DefaultActiveAgreementRegistry is AbstractVersionedArtifact(1,1,0), Abs
 			creator = ActiveAgreement(_activeAgreement).getCreator();
 			privateParametersFileReference = ActiveAgreement(_activeAgreement).getPrivateParametersReference();
 			eventLogFileReference = ActiveAgreement(_activeAgreement).getEventLogReference();
-			maxNumberOfEvents = ActiveAgreement(_activeAgreement).getMaxNumberOfEvents();			
+			maxNumberOfEvents = ActiveAgreement(_activeAgreement).getMaxNumberOfEvents();
 			isPrivate = ActiveAgreement(_activeAgreement).isPrivate();
 			legalState = ActiveAgreement(_activeAgreement).getLegalState();
 			//TODO currently the references to process instances are being tracked in the registry, so they can be added

@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-collections/VersionLinkedAppendOnly.sol";
 
@@ -13,7 +14,7 @@ contract TestCurrencies2 is IsoCurrencies {
     currencies[KLM] = Currency(KLM, "456", "KLM currency", true);
 		currencies[IOU] = Currency(IOU, "123", "IOU currency", true);
     currencyKeys.push(KLM);
-    currencyKeys.push(IOU);    
+    currencyKeys.push(IOU);
   }
 }
 
@@ -25,7 +26,7 @@ contract TestCurrencies3 is IsoCurrencies {
     currencies[FOO] = Currency(FOO, "935", "FOO currency", true);
 		currencies[BAR] = Currency(BAR, "028", "BAR currency", true);
     currencyKeys.push(FOO);
-    currencyKeys.push(BAR);    
+    currencyKeys.push(BAR);
   }
 }
 
@@ -52,7 +53,7 @@ contract IsoCurrenciesTest {
     // standard tests
     if (c100.getNumberOfCurrencies() != 178) { return "Unexpected currency count"; }
     if (c100.getCurrencyAtIndex(148) != "USD") { return "Unexpected currency found at index 148"; }
-    if (c100.isCurrency("FOO")) { return "FOO should not be an existing curreny in c100"; } 
+    if (c100.isCurrency("FOO")) { return "FOO should not be an existing curreny in c100"; }
     if (!c100.isCurrency("AED")) { return "AED should be an existing curreny in c100"; }
 
     if (IsoCurrencies(c100.getSuccessor()).isCurrency("USD")) { return "c200 should not have USD"; }

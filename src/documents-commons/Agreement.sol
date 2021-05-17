@@ -130,7 +130,7 @@ contract Agreement is AbstractDocument {
 
     /**
      * @dev Returns the confirmed version of this agreement, if it has been set.
-     * @return 
+     * @return the confirmed version
      */
     function getConfirmedVersion() external view returns (string memory) {
         return confirmedVersion;

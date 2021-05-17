@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-collections/VersionLinkedAppendOnly.sol";
 
@@ -38,7 +39,7 @@ contract TestCountries3 is IsoCountries {
 }
 
 contract IsoCountriesTest {
-  
+
   bytes2 USA = "US";
   bytes32 USA_NY = keccak256(abi.encodePacked(USA, "NY"));
 
@@ -63,9 +64,9 @@ contract IsoCountriesTest {
     // standards tests
     if (c100.getNumberOfCountries() != uint(246)) { return "Unexpected country count"; }
     if (c100.getCountryAtIndex(232) != bytes2("US")) { return "Unexpected country found at index 0"; }
-    if (c100.getCountryAtIndex(40) != bytes2("CA")) { return "Unexpected country found at index 1"; }    
+    if (c100.getCountryAtIndex(40) != bytes2("CA")) { return "Unexpected country found at index 1"; }
     if (c100.getNumberOfRegions(bytes2("US")) != 57) return "Unexpected number of regions found for US";
-    
+
     bytes32 nyRegionKey = c100.getRegionAtIndex(USA, 31);
     if (nyRegionKey != USA_NY) return "Unexpected region key found for USA_NY";
     if (!c100.isCountry("CA")) { return "Expected to find CA as an existing country"; }

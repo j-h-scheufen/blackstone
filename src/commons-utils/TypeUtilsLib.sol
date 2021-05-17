@@ -1,11 +1,12 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 /**
  * @title TypeUtils Library
  * @dev Library containing various conversion and other utility functions for primitive Solidity data types.
  */
 library TypeUtilsLib {
-	
+
     /**
      * 3RD PARTY - https://github.com/Arachnid/solidity-stringutils
      * LICENSE: Apache 2.0 - https://github.com/Arachnid/solidity-stringutils/blob/master/LICENSE
@@ -38,12 +39,12 @@ library TypeUtilsLib {
         }
         return 32 - ret;
     }
-    
+
    	/**
 	 * @dev Checks if the given bytes32 is empty, i.e. does not have any content.
 	 * @param _value the value to check
 	 * @return true if empty, false otherwise
-	 */	
+	 */
     function isEmpty(bytes32 _value) public pure returns (bool) {
     	return contentLength(_value) == 0;
     }

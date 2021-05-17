@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-collections/DataStorageUtils.sol";
 
@@ -19,7 +20,7 @@ library BpmModel {
     enum TaskBehavior {SEND,SENDRECEIVE,RECEIVE}
     enum ApplicationType {EVENT,SERVICE,WEB}
     enum Direction {IN,OUT}
-	
+
     /**
      * @dev wrapper struct around an activity, a gateway, or an intermediate event.
      * Facilitates traversing the model.
@@ -137,7 +138,7 @@ library BpmModel {
         // If the timerValue.uintValue is 0 and timerValue.stringValue is "", then the timer is in storage
         DataStorageUtils.ConditionalData timerStorage;
         // datetimeStorage and offsetStorage are meant to be used together to point to two values
-        // in a DataStorage (typically the agreement) - 
+        // in a DataStorage (typically the agreement) -
         // one is a timestamp, and the other is a positive or negative offset
         // represented as a string in the ISO 8601 format
         DataStorageUtils.ConditionalData datetimeStorage;

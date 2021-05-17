@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/Versioned.sol";
 import "commons-base/AbstractVersioned.sol";
@@ -12,9 +13,9 @@ contract VersionedTest {
 
         // Test access functions
         VersionedContract sub = new VersionedContract([2,5,17]);
-        if (sub.getVersion()[0] != 2) return "getVersion()[0] expected to be 2"; 
-        if (sub.getVersion()[1] != 5) return "getVersion()[0] expected to be 5"; 
-        if (sub.getVersion()[2] != 17) return "getVersion()[0] expected to be 17"; 
+        if (sub.getVersion()[0] != 2) return "getVersion()[0] expected to be 2";
+        if (sub.getVersion()[1] != 5) return "getVersion()[0] expected to be 5";
+        if (sub.getVersion()[2] != 17) return "getVersion()[0] expected to be 17";
         if (sub.getVersionMajor() != 2) return "getVersionMajor() expected to be 2";
         if (sub.getVersionMinor() != 5) return "getVersionMinor() expected to be 5";
         if (sub.getVersionPatch() != 17) return "getVersionPatch() expected to be 17";
@@ -32,7 +33,7 @@ contract VersionedTest {
         if( v020.compareVersion(address(v240)) != 1 ) { return  "Comparison (0.2.0 < 2.4.0) failed"; }
         if( v020.compareVersion(address(v731)) != 1 ) { return  "Comparison (0.2.0 < 7.3.1) failed"; }
         if( v240.compareVersion(address(v731)) != 1 ) { return  "Comparison (2.4.0 < 7.3.1) failed"; }
-        
+
         return "success";
     }
 }

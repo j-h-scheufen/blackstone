@@ -4,7 +4,8 @@ import "commons-utils/Strings.sol";
 import "commons-management/AbstractUpgradeable.sol";
 import "commons-management/AbstractVersionedArtifact.sol";
 
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 contract AgreementDates is AbstractVersionedArtifact(1, 0, 0), AbstractUpgradeable {
   using Strings for *;

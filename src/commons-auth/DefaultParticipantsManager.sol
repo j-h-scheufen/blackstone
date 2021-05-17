@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/ErrorsLib.sol";
 import "commons-base/BaseErrors.sol";
@@ -90,7 +91,7 @@ contract DefaultParticipantsManager is AbstractVersionedArtifact(1,0,0), Abstrac
     function getNumberOfOrganizations() external view returns (uint size) {
         return ParticipantsManagerDb(database).getNumberOfOrganizations();
     }
-    	
+
 	/**
 	 * @dev Returns the address of the Organization at the given index.
 	 * @param _pos the index position
@@ -112,7 +113,7 @@ contract DefaultParticipantsManager is AbstractVersionedArtifact(1,0,0), Abstrac
     function departmentExists(address _organization, bytes32 _departmentId) external view returns (bool) {
         return Organization(_organization).departmentExists(_departmentId);
     }
-    
+
     function getNumberOfDepartments(address _organization) external view returns (uint size) {
         return Organization(_organization).getNumberOfDepartments();
     }
@@ -141,7 +142,7 @@ contract DefaultParticipantsManager is AbstractVersionedArtifact(1,0,0), Abstrac
     function getNumberOfApprovers(address _organization) external view returns (uint size) {
         return Organization(_organization).getNumberOfApprovers();
     }
-	
+
 	/**
 	 * @dev Returns the approver's address at the given index position of the specified organization.
 	 * @param _organization the organization's address

@@ -1,11 +1,11 @@
+import { Caller, Client, Provider } from '@hyperledger/burrow';
+import { Buffer } from 'buffer';
 import { Keccak } from 'sha3';
 import { UserAccount } from '../commons-auth/UserAccount.abi';
-import { Client } from './client';
-import { HexString } from './types';
 
 const GRPC_NOT_FOUND = 5;
 
-const trimBufferPadding = (buf: Buffer) => {
+export function trimBufferPadding(buf: Buffer): Buffer{
   let lo = 0;
   let hi = buf.length;
   for (let i = 0; i < buf.length && buf[i] === 0; i += 1) {
@@ -15,44 +15,43 @@ const trimBufferPadding = (buf: Buffer) => {
     hi = i;
   }
   return buf.slice(lo, hi);
-};
+}
 
-export function BytesFromString(str: string) {
+export function bytesFromString(str: string): Buffer {
   return Buffer.from(str, 'utf8');
 }
 
-export function BytesToString(data: Buffer) {
+export function bytesToString(data: Buffer): string {
   return trimBufferPadding(data).toString('utf8');
 }
 
-export function DecodeHex(str: string) {
+export function decodeHex(str: string): Buffer {
   return Buffer.from(str, 'hex');
 }
 
-export function EncodeHex(data: Buffer) {
+export function encodeHex(data: Buffer): string {
   return data.toString('hex');
 }
 
-/**
- * Returns a promise to call the forwardCall function of the given userAddress to invoke the function encoded in the given payload on the provided target address and return the result bytes representation
- * The 'payload' parameter must be the output of calling the 'encode(...)' function on a contract's function. E.g. <contract>.<function>.encode(param1, param2)
- * 'shouldWaitForVent' is a boolean parameter which indicates whether this.callOnBehalfOf should to wait for vent db to catch up to the block height in the forwardCall response, before resolving the promise.
- */
-export async function callOnBehalfOf(
-  client: Client,
-  userAddress: string,
-  targetAddress: string,
-  payload: string,
-): Promise<HexString> {
-  const actingUser = new UserAccount.Contract(client, userAddress);
-  return actingUser
-    .forwardCall(targetAddress, DecodeHex(payload))
-    .then((data) => EncodeHex(trimBufferPadding(data.returnData)));
+export function callOnBehalfOf(user: UserAccount.Contract | string): Caller {
+  return async <Output>(
+    client: Provider,
+    address: string,
+    data: Uint8Array,
+    isSim: boolean,
+    callback: (returnBytes: Uint8Array) => Output,
+  ): Promise<Output> => {
+    if (typeof user === 'string') {
+      user = UserAccount.contract(client, user);
+    }
+    const { returnData } = await user.functions.forwardCall(address, Buffer.from(data));
+    return callback(returnData);
+  };
 }
 
-export async function GetFromNameRegistry(client: Client, name: string): Promise<string | void> {
+export async function getFromNameRegistry(client: Client, name: string): Promise<string | void> {
   try {
-    const entry = await client.burrow.namereg.get(name);
+    const entry = await client.namereg.get(name);
     return entry.getData();
   } catch (err) {
     if (err.code === GRPC_NOT_FOUND) {
@@ -62,8 +61,8 @@ export async function GetFromNameRegistry(client: Client, name: string): Promise
   }
 }
 
-export async function SetToNameRegistry(client: Client, name: string, value: string): Promise<void> {
-  await client.burrow.namereg.set(name, value);
+export async function setInNameRegistry(client: Client, name: string, value: string): Promise<void> {
+  await client.namereg.set(name, value);
 }
 
 export function sha3(str: string): string {

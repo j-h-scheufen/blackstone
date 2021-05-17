@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-auth/Ecosystem.sol";
 import "commons-auth/DefaultEcosystem.sol";
@@ -11,7 +12,7 @@ import "commons-management/DefaultArtifactsRegistry.sol";
 import "commons-management/AbstractDbUpgradeable.sol";
 
 contract EcosystemTest {
-	
+
 	string constant SUCCESS = "success";
 
 	ArtifactsRegistry artifactsRegistry;

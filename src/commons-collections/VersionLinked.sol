@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/Owned.sol";
@@ -11,10 +12,10 @@ import "commons-base/AbstractVersioned.sol";
  * A new element can be inserted through any VersionLinked instance that is already connected and the new element will be passed along the versions to find its appropriate placement in the list.
  */
 contract VersionLinked is AbstractVersioned, Owned {
-	
+
 	VersionLinked currentPredecessor;
 	VersionLinked currentSuccessor;
-	
+
 	/**
 	 * @dev Constructor - Sets the msg.sender as the owner.
 	 * @param _version the version of this VersionLinked contract
@@ -23,7 +24,7 @@ contract VersionLinked is AbstractVersioned, Owned {
 		owner = msg.sender;
 		semanticVersion = _version;
 	}
-	
+
 	/**
 	 * @dev Adds the given VersionLinked contract into the linked version list or returns an error, if the operation is not possible
 	 * @param _link a new VersionedLink contract.
@@ -55,11 +56,11 @@ contract VersionLinked is AbstractVersioned, Owned {
 			return setSuccessor(_link);
 		}
 	}
-	
+
 	/**
 	 * @dev Attempts to set the specified version as the predecessor of this contract.
 	 * If a predecessor is already set, an attempt is made to insert the _newPredecessor as a link between this contract and the existing predecessor.
-	 * 
+	 *
 	 * @param _newPredecessor the VersionLinked instance to set as new predecessor
 	 * @return BaseErrors.NO_ERROR() if the relationship between the given predecessor and this contract (and a potentially existing predecessor) is established successfully, i.e. the predecessor has been set and this contract is its successor.
 	 * 		   BaseErrors.INVALID_STATE() if the given _newPredecessor does not or would not accept this contract as its successor
@@ -96,7 +97,7 @@ contract VersionLinked is AbstractVersioned, Owned {
 	/**
 	 * @dev Attempts to set the specified version as the successor of this contract.
 	 * If a successor is already set, an attempt is made to insert the _newPredecessor as a link between this contract and the existing successor.
-	 * 
+	 *
 	 * @param _newSuccessor the VersionLinked instance to set as new successor
 	 * @return BaseErrors.NO_ERROR() if the relationship between the given successor and this contract (and a potentially existing successor) is established successfully, i.e. the successor has been set and this contract is its predecessor.
 	 * 		   BaseErrors.INVALID_STATE() if the given _newSuccessor does not or would not accept this contract as its predecessor
@@ -107,7 +108,7 @@ contract VersionLinked is AbstractVersioned, Owned {
 		VersionLinked oldSuccessor = currentSuccessor;
 		currentSuccessor = _newSuccessor;
 		error = BaseErrors.NO_ERROR();
-		
+
 		// if the new successor has not yet linked to this contract as a predecessor, attempt establishing the link first
 		if (_newSuccessor.getPredecessor() != address(this)) {
 			_newSuccessor.acceptVersionLink(this); // ignoring error code here since outcome is checked below
@@ -129,7 +130,7 @@ contract VersionLinked is AbstractVersioned, Owned {
 			currentSuccessor = oldSuccessor; // Rollback
 		}
 	}
-	
+
 	/**
 	 * @dev Returns the predecessor version
 	 * @return the address of the predecessor or 0x0 if not set
@@ -145,5 +146,5 @@ contract VersionLinked is AbstractVersioned, Owned {
 	function getSuccessor() external view returns (address) {
 		return address(currentSuccessor);
 	}
-	
+
 }

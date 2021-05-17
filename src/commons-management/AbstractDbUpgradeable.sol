@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/ErrorsLib.sol";
 import "commons-base/SystemOwned.sol";
@@ -9,7 +10,7 @@ import "commons-management/AbstractUpgradeable.sol";
 
 /**
  * @title AbstractDbUpgradeable
- * @dev Provides the ability to hold the contracts state in a database contract and upgrade by migrating the database. 
+ * @dev Provides the ability to hold the contracts state in a database contract and upgrade by migrating the database.
  */
 contract AbstractDbUpgradeable is StorageDefDatabase, AbstractUpgradeable, DbInterchangeable {
 

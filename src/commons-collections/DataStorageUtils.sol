@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/ErrorsLib.sol";
 import "commons-base/BaseErrors.sol";
@@ -49,7 +50,7 @@ library DataStorageUtils {
     int intValue;
     address addressValue;
     bytes32 bytes32Value;
-    
+
     string[] stringArrayValue;
     address[] addressArrayValue;
     bool[] boolArrayValue;
@@ -121,7 +122,7 @@ library DataStorageUtils {
   }
 
   /**
-    * @dev Inserts the given Data structure under its data ID in the provided map. 
+    * @dev Inserts the given Data structure under its data ID in the provided map.
     * If the ID already exists, an update is performed.
     * //TODO because this is an internal function, it gets inlined and due to its heavy usage in AbstractDataStorage it blows up the binary footprint of that contract. Better: Provide insertOrUpdate(DataMap storage _map, bytes32 _key, <valuetype> _value) functions here
     *
@@ -158,15 +159,15 @@ library DataStorageUtils {
     * @return BaseErrors.NO_ERROR or BaseErrors.RESOURCE_NOT_FOUND.
     */
   function remove(DataMap storage _map, bytes32 _key) public returns (uint) {
-    
+
     if (!_map.rows[_key].exists) { return BaseErrors.RESOURCE_NOT_FOUND(); }
     DataElement memory elem = _map.rows[_key];
-    
+
     bytes32 swapKey = Mappings.deleteInKeys(_map.keys, _map.rows[_key].keyIdx);
     if (TypeUtilsLib.contentLength(swapKey) > 0) {
       _map.rows[swapKey].keyIdx = elem.keyIdx;
     }
-    
+
     delete _map.rows[_key];
     return BaseErrors.NO_ERROR();
   }
@@ -279,11 +280,11 @@ library DataStorageUtils {
   /**
    * @dev Resolves the location of a ConditionalData against the provided DataStorage. This function is guaranteed to return a data location
    * consisting of an address/path combination. If that is not possible, the functions reverts.
-   * REVERTS if: 
+   * REVERTS if:
    * - the DataStorage address cannot be determined and is empty
    * @param _conditionalData a ConditionalData with instructions how to find the desired data
    * @param _dataStorage a DataStorage contract to use as a basis for the resolution
-   * @return dataStorage - the address of a DataStorage that contains the requested data or 0x0 if a dataStorageId was provided that has no value in the 
+   * @return dataStorage - the address of a DataStorage that contains the requested data or 0x0 if a dataStorageId was provided that has no value in the
    * @return dataPath - the ID with which the data can be retrieved from the DataStorage
    */
   function resolveDataLocation(ConditionalData storage _conditionalData, DataStorage _dataStorage)
@@ -334,7 +335,7 @@ library DataStorageUtils {
    * @param _dataStorage a DataStorage contract where the target data is located
    * @param _dataId an optional dataId which if supplied is then used to find a different DataStorage where the target data is located
    * @param _dataPath a dataPath where the target data is located
-   * @param _op a valid comparison operator 
+   * @param _op a valid comparison operator
    * @param _value a string value to use as right-hand value to compare against the target data
    * @return boolean result of the comparison
    */
@@ -365,7 +366,7 @@ library DataStorageUtils {
    * @param _dataStorage a DataStorage contract where the target data is located
    * @param _dataId an optional dataId which if supplied is then used to find a different DataStorage where the target data is located
    * @param _dataPath a dataPath where the target data is located
-   * @param _op a valid comparison operator 
+   * @param _op a valid comparison operator
    * @param _value a bytes32 value to use as right-hand value to compare against the target data
    * @return boolean result of the comparison
    */
@@ -396,7 +397,7 @@ library DataStorageUtils {
    * @param _dataStorage a DataStorage contract where the target data is located
    * @param _dataId an optional dataId which if supplied is then used to find a different DataStorage where the target data is located
    * @param _dataPath a dataPath where the target data is located
-   * @param _op a valid comparison operator 
+   * @param _op a valid comparison operator
    * @param _value a address value to use as right-hand value to compare against the target data
    * @return boolean result of the comparison
    */
@@ -427,7 +428,7 @@ library DataStorageUtils {
    * @param _dataStorage a DataStorage contract where the target data is located
    * @param _dataId an optional dataId which if supplied is then used to find a different DataStorage where the target data is located
    * @param _dataPath a dataPath where the target data is located
-   * @param _op a valid comparison operator 
+   * @param _op a valid comparison operator
    * @param _value a uint value to use as right-hand value to compare against the target data
    * @return boolean result of the comparison
    */
@@ -465,7 +466,7 @@ library DataStorageUtils {
    * @param _dataStorage a DataStorage contract where the target data is located
    * @param _dataId an optional dataId which if supplied is then used to find a different DataStorage where the target data is located
    * @param _dataPath a dataPath where the target data is located
-   * @param _op a valid comparison operator 
+   * @param _op a valid comparison operator
    * @param _value a uint value to use as right-hand value to compare against the target data
    * @return boolean result of the comparison
    */
@@ -503,7 +504,7 @@ library DataStorageUtils {
    * @param _dataStorage a DataStorage contract where the target data is located
    * @param _dataId an optional dataId which if supplied is then used to find a different DataStorage where the target data is located
    * @param _dataPath a dataPath where the target data is located
-   * @param _op a valid comparison operator 
+   * @param _op a valid comparison operator
    * @param _value a bool value to use as right-hand value to compare against the target data
    * @return boolean result of the comparison
    */

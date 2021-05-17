@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/SystemOwned.sol";
 import "commons-collections/Mappings.sol";
@@ -9,7 +10,7 @@ import "commons-collections/MappingsLib.sol";
  * @dev Stores and manages Ecosystem references.
  */
 contract EcosystemRegistryDb is SystemOwned {
-  
+
   using MappingsLib for Mappings.StringAddressMap;
 
   Mappings.StringAddressMap ecosystems;

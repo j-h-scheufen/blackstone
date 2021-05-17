@@ -1,9 +1,9 @@
 import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import nanoid from 'nanoid';
+import rid from 'random-id';
 import { sha3 } from '../lib/utils';
-import rid = require('random-id');
-import nanoid = require('nanoid');
-import {contracts} from "./before";
+import { contracts } from './before';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 

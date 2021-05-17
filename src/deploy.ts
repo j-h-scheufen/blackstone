@@ -1,4 +1,4 @@
-import { CallTx } from '@hyperledger/burrow/proto/payload_pb';
+import { Client } from '@hyperledger/burrow';
 import { TotalCounterCheck } from './active-agreements/TotalCounterCheck.abi';
 import { ActiveAgreementRegistryDb } from './agreements/ActiveAgreementRegistryDb.abi';
 import { AgreementDates } from './agreements/AgreementDates.abi';
@@ -50,9 +50,8 @@ import { ArrayUtilsLib } from './commons-utils/ArrayUtilsLib.abi';
 import { DataTypesAccess } from './commons-utils/DataTypesAccess.abi';
 import { Strings } from './commons-utils/Strings.abi';
 import { TypeUtilsLib } from './commons-utils/TypeUtilsLib.abi';
-import { Client } from './lib/client';
 import { Contracts, Libraries } from './lib/constants';
-import { SetToNameRegistry } from './lib/utils';
+import { setInNameRegistry } from './lib/utils';
 
 function assert(left: string, right: string) {
   if (left != right) {
@@ -64,77 +63,77 @@ export async function DeployDOUG(client: Client, errorsLib: Promise<string>, eRC
   const errorsLibAddress = await errorsLib;
   const eRC165UtilsAddress = await eRC165Utils;
 
-  const defaultArtifactsRegistryAddress = await DefaultArtifactsRegistry.Deploy(client, errorsLibAddress);
-  const artifactsRegistryAddress = await OwnedDelegateUnstructuredProxy.Deploy(
+  const defaultArtifactsRegistryAddress = await DefaultArtifactsRegistry.deploy(client, errorsLibAddress);
+  const artifactsRegistryAddress = await OwnedDelegateUnstructuredProxy.deploy(
     client,
     errorsLibAddress,
     defaultArtifactsRegistryAddress,
   );
-  const defaultArtifactsRegistry = new DefaultArtifactsRegistry.Contract(client, artifactsRegistryAddress);
-  await defaultArtifactsRegistry.initialize();
+  const defaultArtifactsRegistry = DefaultArtifactsRegistry.contract(client, artifactsRegistryAddress);
+  await defaultArtifactsRegistry.functions.initialize();
 
-  const defaultDougAddress = await DefaultDoug.Deploy(client, errorsLibAddress, eRC165UtilsAddress);
-  const dougProxyAddress = await DougProxy.Deploy(client, errorsLibAddress, defaultDougAddress);
-  const defaultDoug = new DefaultDoug.Contract(client, dougProxyAddress);
+  const defaultDougAddress = await DefaultDoug.deploy(client, errorsLibAddress, eRC165UtilsAddress);
+  const dougProxyAddress = await DougProxy.deploy(client, errorsLibAddress, defaultDougAddress);
+  const defaultDoug = DefaultDoug.contract(client, dougProxyAddress);
 
-  await defaultArtifactsRegistry.transferSystemOwnership(dougProxyAddress);
-  await defaultDoug.setArtifactsRegistry(artifactsRegistryAddress);
+  await defaultArtifactsRegistry.functions.transferSystemOwnership(dougProxyAddress);
+  await defaultDoug.functions.setArtifactsRegistry(artifactsRegistryAddress);
 
-  const getArtifactsRegistryFromProxy = await defaultDoug.getArtifactsRegistry().then((data) => data[0]);
+  const getArtifactsRegistryFromProxy = await defaultDoug.functions.getArtifactsRegistry().then((data) => data[0]);
   assert(artifactsRegistryAddress, getArtifactsRegistryFromProxy);
 
-  return new DOUG.Contract(client, dougProxyAddress);
+  return DOUG.contract(client, dougProxyAddress);
 }
 
 export async function DeployEcosystemRegistry(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
+  doug: DOUG.Contract,
   errorsLib: Promise<string>,
   mappingsLib: Promise<string>,
 ) {
   const errorsLibAddress = await errorsLib;
   const mappingsLibAddress = await mappingsLib;
 
-  const ecosystemRegistryAddress = await DefaultEcosystemRegistry.Deploy(client, errorsLibAddress);
-  const ecosystemRegistry = new DefaultEcosystemRegistry.Contract(client, ecosystemRegistryAddress);
-  const ecosystemRegistryDbAddress = await EcosystemRegistryDb.Deploy(client, errorsLibAddress, mappingsLibAddress);
-  const ecosystemRegistryDb = new EcosystemRegistryDb.Contract(client, ecosystemRegistryDbAddress);
+  const ecosystemRegistryAddress = await DefaultEcosystemRegistry.deploy(client, errorsLibAddress);
+  const ecosystemRegistry = DefaultEcosystemRegistry.contract(client, ecosystemRegistryAddress);
+  const ecosystemRegistryDbAddress = await EcosystemRegistryDb.deploy(client, errorsLibAddress, mappingsLibAddress);
+  const ecosystemRegistryDb = EcosystemRegistryDb.contract(client, ecosystemRegistryDbAddress);
 
-  await ecosystemRegistryDb.transferSystemOwnership(ecosystemRegistryAddress);
-  await ecosystemRegistry.acceptDatabase(ecosystemRegistryDb.address);
-  const upgradeEcosystemOwnership = new UpgradeOwned.Contract(client, ecosystemRegistry.address);
-  await upgradeEcosystemOwnership.transferUpgradeOwnership(doug.address);
-  await doug.deploy(Contracts.EcosystemRegistry, ecosystemRegistry.address);
+  await ecosystemRegistryDb.functions.transferSystemOwnership(ecosystemRegistryAddress);
+  await ecosystemRegistry.functions.acceptDatabase(ecosystemRegistryDb.address);
+  const upgradeEcosystemOwnership = UpgradeOwned.contract(client, ecosystemRegistry.address);
+  await upgradeEcosystemOwnership.functions.transferUpgradeOwnership(doug.address);
+  await doug.functions.deploy(Contracts.EcosystemRegistry, ecosystemRegistry.address);
   return ecosystemRegistry;
 }
 
 export async function DeployParticipantsManager(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
+  doug: DOUG.Contract,
   errorsLib: Promise<string>,
   mappingsLib: Promise<string>,
 ) {
   const errorsLibAddress = await errorsLib;
   const mappingsLibAddress = await mappingsLib;
 
-  const participantsManagerAddress = await DefaultParticipantsManager.Deploy(client, errorsLibAddress);
-  const participantsManager = new DefaultParticipantsManager.Contract(client, participantsManagerAddress);
-  const participantsManagerDbAddress = await ParticipantsManagerDb.Deploy(client, errorsLibAddress, mappingsLibAddress);
-  const participantsManagerDb = new ParticipantsManagerDb.Contract(client, participantsManagerDbAddress);
+  const participantsManagerAddress = await DefaultParticipantsManager.deploy(client, errorsLibAddress);
+  const participantsManager = DefaultParticipantsManager.contract(client, participantsManagerAddress);
+  const participantsManagerDbAddress = await ParticipantsManagerDb.deploy(client, errorsLibAddress, mappingsLibAddress);
+  const participantsManagerDb = ParticipantsManagerDb.contract(client, participantsManagerDbAddress);
 
-  await participantsManagerDb.transferSystemOwnership(participantsManager.address);
-  await participantsManager.acceptDatabase(participantsManagerDb.address);
-  const upgradeParticipantsOwnership = new UpgradeOwned.Contract(client, participantsManager.address);
-  await upgradeParticipantsOwnership.transferUpgradeOwnership(doug.address);
-  await doug.deploy(Contracts.ParticipantsManager, participantsManager.address);
+  await participantsManagerDb.functions.transferSystemOwnership(participantsManager.address);
+  await participantsManager.functions.acceptDatabase(participantsManagerDb.address);
+  const upgradeParticipantsOwnership = UpgradeOwned.contract(client, participantsManager.address);
+  await upgradeParticipantsOwnership.functions.transferUpgradeOwnership(doug.address);
+  await doug.functions.deploy(Contracts.ParticipantsManager, participantsManager.address);
   return participantsManager;
 }
 
 export async function RegisterEcosystemAndParticipantClasses(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
-  participantsManager: Promise<DefaultParticipantsManager.Contract<CallTx>>,
-  ecosystemRegistry: Promise<DefaultEcosystemRegistry.Contract<CallTx>>,
+  doug: DOUG.Contract,
+  participantsManager: Promise<DefaultParticipantsManager.Contract>,
+  ecosystemRegistry: Promise<DefaultEcosystemRegistry.Contract>,
   errorsLib: Promise<string>,
   mappingsLib: Promise<string>,
   arrayUtilsLib: Promise<string>,
@@ -146,25 +145,25 @@ export async function RegisterEcosystemAndParticipantClasses(
   const participants = await participantsManager;
   const ecosystem = await ecosystemRegistry;
 
-  const defaultOrganizationAddress = await DefaultOrganization.Deploy(
+  const defaultOrganizationAddress = await DefaultOrganization.deploy(
     client,
     errorsLibAddress,
     mappingsLibAddress,
     arrayUtilsLibAddress,
   );
-  const objectClassOrganization = await participants.OBJECT_CLASS_ORGANIZATION().then((data) => data[0]);
-  await doug.register(objectClassOrganization, defaultOrganizationAddress);
-  const defaultUserAccountAddress = await DefaultUserAccount.Deploy(client, errorsLibAddress, mappingsLibAddress);
-  const objectClassUserAccount = await participants.OBJECT_CLASS_USER_ACCOUNT().then((data) => data[0]);
-  await doug.register(objectClassUserAccount, defaultUserAccountAddress);
-  const defaultEcosystemAddress = await DefaultEcosystem.Deploy(client, errorsLibAddress, mappingsLibAddress);
-  const objectClassEcosystem = await ecosystem.OBJECT_CLASS_ECOSYSTEM().then((data) => data[0]);
-  await doug.register(objectClassEcosystem, defaultEcosystemAddress);
+  const objectClassOrganization = await participants.functions.OBJECT_CLASS_ORGANIZATION().then((data) => data[0]);
+  await doug.functions.register(objectClassOrganization, defaultOrganizationAddress);
+  const defaultUserAccountAddress = await DefaultUserAccount.deploy(client, errorsLibAddress, mappingsLibAddress);
+  const objectClassUserAccount = await participants.functions.OBJECT_CLASS_USER_ACCOUNT().then((data) => data[0]);
+  await doug.functions.register(objectClassUserAccount, defaultUserAccountAddress);
+  const defaultEcosystemAddress = await DefaultEcosystem.deploy(client, errorsLibAddress, mappingsLibAddress);
+  const objectClassEcosystem = await ecosystem.functions.OBJECT_CLASS_ECOSYSTEM().then((data) => data[0]);
+  await doug.functions.register(objectClassEcosystem, defaultEcosystemAddress);
 }
 
 export async function DeployProcessModelRepository(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
+  doug: DOUG.Contract,
   errorsLib: Promise<string>,
   mappingsLib: Promise<string>,
   arrayUtilsLib: Promise<string>,
@@ -173,76 +172,72 @@ export async function DeployProcessModelRepository(
   const mappingsLibAddress = await mappingsLib;
   const arrayUtilsLibAddress = await arrayUtilsLib;
 
-  const processModelRepositoryAddress = await DefaultProcessModelRepository.Deploy(client, errorsLibAddress);
-  const processModelRepository = new DefaultProcessModelRepository.Contract(client, processModelRepositoryAddress);
-  const processModelRepositoryDbAddress = await ProcessModelRepositoryDb.Deploy(
+  const processModelRepositoryAddress = await DefaultProcessModelRepository.deploy(client, errorsLibAddress);
+  const processModelRepository = DefaultProcessModelRepository.contract(client, processModelRepositoryAddress);
+  const processModelRepositoryDbAddress = await ProcessModelRepositoryDb.deploy(
     client,
     errorsLibAddress,
     mappingsLibAddress,
     arrayUtilsLibAddress,
   );
-  const processModelRepositoryDb = new ProcessModelRepositoryDb.Contract(client, processModelRepositoryDbAddress);
+  const processModelRepositoryDb = ProcessModelRepositoryDb.contract(client, processModelRepositoryDbAddress);
 
-  await processModelRepositoryDb.transferSystemOwnership(processModelRepository.address);
-  await processModelRepository.acceptDatabase(processModelRepositoryDb.address);
-  const upgradeProcessModelOwnership = new UpgradeOwned.Contract(client, processModelRepository.address);
-  await upgradeProcessModelOwnership.transferUpgradeOwnership(doug.address);
-  await doug.deploy(Contracts.ProcessModelRepository, processModelRepository.address);
+  await processModelRepositoryDb.functions.transferSystemOwnership(processModelRepository.address);
+  await processModelRepository.functions.acceptDatabase(processModelRepositoryDb.address);
+  const upgradeProcessModelOwnership = UpgradeOwned.contract(client, processModelRepository.address);
+  await upgradeProcessModelOwnership.functions.transferUpgradeOwnership(doug.address);
+  await doug.functions.deploy(Contracts.ProcessModelRepository, processModelRepository.address);
   return processModelRepository;
 }
 
-export async function DeployApplicationRegistry(
-  client: Client,
-  doug: DOUG.Contract<CallTx>,
-  errorsLib: Promise<string>,
-) {
+export async function DeployApplicationRegistry(client: Client, doug: DOUG.Contract, errorsLib: Promise<string>) {
   const errorsLibAddress = await errorsLib;
 
-  const applicationRegistryAddress = await DefaultApplicationRegistry.Deploy(client, errorsLibAddress);
-  const applicationRegistry = new DefaultApplicationRegistry.Contract(client, applicationRegistryAddress);
-  const applicationRegistryDbAddress = await ApplicationRegistryDb.Deploy(client, errorsLibAddress);
-  const applicationRegistryDb = new ApplicationRegistryDb.Contract(client, applicationRegistryDbAddress);
+  const applicationRegistryAddress = await DefaultApplicationRegistry.deploy(client, errorsLibAddress);
+  const applicationRegistry = DefaultApplicationRegistry.contract(client, applicationRegistryAddress);
+  const applicationRegistryDbAddress = await ApplicationRegistryDb.deploy(client, errorsLibAddress);
+  const applicationRegistryDb = ApplicationRegistryDb.contract(client, applicationRegistryDbAddress);
 
-  await applicationRegistryDb.transferSystemOwnership(applicationRegistry.address);
-  await applicationRegistry.acceptDatabase(applicationRegistryDb.address);
-  const upgradeApplicationRegistryOwnership = new UpgradeOwned.Contract(client, applicationRegistry.address);
-  await upgradeApplicationRegistryOwnership.transferUpgradeOwnership(doug.address);
-  await doug.deploy(Contracts.ApplicationRegistry, applicationRegistry.address);
+  await applicationRegistryDb.functions.transferSystemOwnership(applicationRegistry.address);
+  await applicationRegistry.functions.acceptDatabase(applicationRegistryDb.address);
+  const upgradeApplicationRegistryOwnership = UpgradeOwned.contract(client, applicationRegistry.address);
+  await upgradeApplicationRegistryOwnership.functions.transferUpgradeOwnership(doug.address);
+  await doug.functions.deploy(Contracts.ApplicationRegistry, applicationRegistry.address);
   return applicationRegistry;
 }
 
 export async function DeployBpmService(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
+  doug: DOUG.Contract,
   errorsLib: Promise<string>,
   mappingsLib: Promise<string>,
 ) {
   const errorsLibAddress = await errorsLib;
   const mappingsLibAddress = await mappingsLib;
 
-  const bpmServiceAddress = await DefaultBpmService.Deploy(
+  const bpmServiceAddress = await DefaultBpmService.deploy(
     client,
     errorsLibAddress,
     Contracts.ProcessModelRepository,
     Contracts.ApplicationRegistry,
   );
-  const bpmService = new DefaultBpmService.Contract(client, bpmServiceAddress);
-  const bpmServiceDbAddress = await BpmServiceDb.Deploy(client, errorsLibAddress, mappingsLibAddress);
-  const bpmServiceDb = new BpmServiceDb.Contract(client, bpmServiceDbAddress);
+  const bpmService = DefaultBpmService.contract(client, bpmServiceAddress);
+  const bpmServiceDbAddress = await BpmServiceDb.deploy(client, errorsLibAddress, mappingsLibAddress);
+  const bpmServiceDb = BpmServiceDb.contract(client, bpmServiceDbAddress);
 
-  await bpmServiceDb.transferSystemOwnership(bpmService.address);
-  await bpmService.acceptDatabase(bpmServiceDb.address);
-  const upgradeBpmServiceOwnership = new UpgradeOwned.Contract(client, bpmService.address);
-  await upgradeBpmServiceOwnership.transferUpgradeOwnership(doug.address);
-  await doug.deploy(Contracts.BpmService, bpmService.address);
+  await bpmServiceDb.functions.transferSystemOwnership(bpmService.address);
+  await bpmService.functions.acceptDatabase(bpmServiceDb.address);
+  const upgradeBpmServiceOwnership = UpgradeOwned.contract(client, bpmService.address);
+  await upgradeBpmServiceOwnership.functions.transferUpgradeOwnership(doug.address);
+  await doug.functions.deploy(Contracts.BpmService, bpmService.address);
   return bpmService;
 }
 
 export async function RegisterProcessModelRepositoryClasses(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
-  contract: Promise<DefaultProcessModelRepository.Contract<CallTx>>,
-  service: Promise<DefaultBpmService.Contract<CallTx>>,
+  doug: DOUG.Contract,
+  contract: Promise<DefaultProcessModelRepository.Contract>,
+  service: Promise<DefaultBpmService.Contract>,
   errorsLib: Promise<string>,
   mappingsLib: Promise<string>,
   arrayUtilsLib: Promise<string>,
@@ -258,35 +253,39 @@ export async function RegisterProcessModelRepositoryClasses(
   const processModelRepository = await contract;
   const bpmService = await service;
 
-  const getModelRepositoryFromBpmService = await bpmService.getProcessModelRepository().then((data) => data[0]);
+  const getModelRepositoryFromBpmService = await bpmService.functions
+    .getProcessModelRepository()
+    .then((data) => data[0]);
   assert(getModelRepositoryFromBpmService, processModelRepository.address);
 
-  const defaultProcessModelImplementationAddress = await DefaultProcessModel.Deploy(
+  const defaultProcessModelImplementationAddress = await DefaultProcessModel.deploy(
     client,
     errorsLibAddress,
     mappingsLibAddress,
   );
-  const objectClassProcessModel = await processModelRepository.OBJECT_CLASS_PROCESS_MODEL().then((data) => data[0]);
-  await doug.register(objectClassProcessModel, defaultProcessModelImplementationAddress);
+  const objectClassProcessModel = await processModelRepository.functions
+    .OBJECT_CLASS_PROCESS_MODEL()
+    .then((data) => data[0]);
+  await doug.functions.register(objectClassProcessModel, defaultProcessModelImplementationAddress);
 
-  const defaultProcessDefinitionImplementationAddress = await DefaultProcessDefinition.Deploy(
+  const defaultProcessDefinitionImplementationAddress = await DefaultProcessDefinition.deploy(
     client,
     bpmModelLibAddress,
     errorsLibAddress,
     arrayUtilsLibAddress,
     typeUtilsLibAddress,
   );
-  const objectClassProcessDefinition = await processModelRepository
+  const objectClassProcessDefinition = await processModelRepository.functions
     .OBJECT_CLASS_PROCESS_DEFINITION()
     .then((data) => data[0]);
-  await doug.register(objectClassProcessDefinition, defaultProcessDefinitionImplementationAddress);
+  await doug.functions.register(objectClassProcessDefinition, defaultProcessDefinitionImplementationAddress);
 }
 
 export async function RegisterApplicationRepositoryClasses(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
-  contract: Promise<DefaultApplicationRegistry.Contract<CallTx>>,
-  service: Promise<DefaultBpmService.Contract<CallTx>>,
+  doug: DOUG.Contract,
+  contract: Promise<DefaultApplicationRegistry.Contract>,
+  service: Promise<DefaultBpmService.Contract>,
   errorsLib: Promise<string>,
   bpmRuntimeLib: Promise<string>,
   dataStorageUtils: Promise<string>,
@@ -298,22 +297,24 @@ export async function RegisterApplicationRepositoryClasses(
   const bpmRuntimeLibAddress = await bpmRuntimeLib;
   const dataStorageUtilsAddress = await dataStorageUtils;
 
-  const getApplicationRegistryFromBpmService = await bpmService.getApplicationRegistry().then((data) => data[0]);
+  const getApplicationRegistryFromBpmService = await bpmService.functions
+    .getApplicationRegistry()
+    .then((data) => data[0]);
   assert(getApplicationRegistryFromBpmService, applicationRegistry.address);
 
-  const defaultProcessInstanceImplementationAddress = await DefaultProcessInstance.Deploy(
+  const defaultProcessInstanceImplementationAddress = await DefaultProcessInstance.deploy(
     client,
     bpmRuntimeLibAddress,
     errorsLibAddress,
     dataStorageUtilsAddress,
   );
-  const objectClassProcessInstance = await bpmService.OBJECT_CLASS_PROCESS_INSTANCE().then((data) => data[0]);
-  await doug.register(objectClassProcessInstance, defaultProcessInstanceImplementationAddress);
+  const objectClassProcessInstance = await bpmService.functions.OBJECT_CLASS_PROCESS_INSTANCE().then((data) => data[0]);
+  await doug.functions.register(objectClassProcessInstance, defaultProcessInstanceImplementationAddress);
 }
 
 export async function DeployArchetypeRegistry(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
+  doug: DOUG.Contract,
   errorsLib: Promise<string>,
   mappingsLib: Promise<string>,
   arrayUtilsLib: Promise<string>,
@@ -322,27 +323,27 @@ export async function DeployArchetypeRegistry(
   const mappingsLibAddress = await mappingsLib;
   const arrayUtilsLibAddress = await arrayUtilsLib;
 
-  const archetypeRegistryAddress = await DefaultArchetypeRegistry.Deploy(client, errorsLibAddress);
-  const archetypeRegistry = new DefaultArchetypeRegistry.Contract(client, archetypeRegistryAddress);
-  const archetypeRegistryDbAddress = await ArchetypeRegistryDb.Deploy(
+  const archetypeRegistryAddress = await DefaultArchetypeRegistry.deploy(client, errorsLibAddress);
+  const archetypeRegistry = DefaultArchetypeRegistry.contract(client, archetypeRegistryAddress);
+  const archetypeRegistryDbAddress = await ArchetypeRegistryDb.deploy(
     client,
     errorsLibAddress,
     mappingsLibAddress,
     arrayUtilsLibAddress,
   );
-  const archetypeRegistryDb = new ArchetypeRegistryDb.Contract(client, archetypeRegistryDbAddress);
+  const archetypeRegistryDb = ArchetypeRegistryDb.contract(client, archetypeRegistryDbAddress);
 
-  await archetypeRegistryDb.transferSystemOwnership(archetypeRegistry.address);
-  await archetypeRegistry.acceptDatabase(archetypeRegistryDb.address);
-  const upgradeArchetypeRegistryOwnership = new UpgradeOwned.Contract(client, archetypeRegistry.address);
-  await upgradeArchetypeRegistryOwnership.transferUpgradeOwnership(doug.address);
-  await doug.deploy(Contracts.ArchetypeRegistry, archetypeRegistry.address);
+  await archetypeRegistryDb.functions.transferSystemOwnership(archetypeRegistry.address);
+  await archetypeRegistry.functions.acceptDatabase(archetypeRegistryDb.address);
+  const upgradeArchetypeRegistryOwnership = UpgradeOwned.contract(client, archetypeRegistry.address);
+  await upgradeArchetypeRegistryOwnership.functions.transferUpgradeOwnership(doug.address);
+  await doug.functions.deploy(Contracts.ArchetypeRegistry, archetypeRegistry.address);
   return archetypeRegistry;
 }
 
 export async function DeployActiveAgreementRegistry(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
+  doug: DOUG.Contract,
   errorsLib: Promise<string>,
   dataStorageUtils: Promise<string>,
   mappingsLib: Promise<string>,
@@ -353,36 +354,36 @@ export async function DeployActiveAgreementRegistry(
   const mappingsLibAddress = await mappingsLib;
   const arrayUtilsLibAddress = await arrayUtilsLib;
 
-  const activeAgreementRegistryAddress = await DefaultActiveAgreementRegistry.Deploy(
+  const activeAgreementRegistryAddress = await DefaultActiveAgreementRegistry.deploy(
     client,
     errorsLibAddress,
     dataStorageUtilsAddress,
     Contracts.ArchetypeRegistry,
     Contracts.BpmService,
   );
-  const activeAgreementRegistry = new DefaultActiveAgreementRegistry.Contract(client, activeAgreementRegistryAddress);
-  const activeAgreementRegistryDbAddress = await ActiveAgreementRegistryDb.Deploy(
+  const activeAgreementRegistry = DefaultActiveAgreementRegistry.contract(client, activeAgreementRegistryAddress);
+  const activeAgreementRegistryDbAddress = await ActiveAgreementRegistryDb.deploy(
     client,
     errorsLibAddress,
     mappingsLibAddress,
     arrayUtilsLibAddress,
   );
-  const activeAgreementRegistryDb = new ActiveAgreementRegistryDb.Contract(client, activeAgreementRegistryDbAddress);
+  const activeAgreementRegistryDb = ActiveAgreementRegistryDb.contract(client, activeAgreementRegistryDbAddress);
 
-  await activeAgreementRegistryDb.transferSystemOwnership(activeAgreementRegistry.address);
-  await activeAgreementRegistry.acceptDatabase(activeAgreementRegistryDb.address);
-  const upgradeActiveAgreementRegistryOwnership = new UpgradeOwned.Contract(client, activeAgreementRegistry.address);
-  await upgradeActiveAgreementRegistryOwnership.transferUpgradeOwnership(doug.address);
-  await doug.deploy(Contracts.ActiveAgreementRegistry, activeAgreementRegistry.address);
+  await activeAgreementRegistryDb.functions.transferSystemOwnership(activeAgreementRegistry.address);
+  await activeAgreementRegistry.functions.acceptDatabase(activeAgreementRegistryDb.address);
+  const upgradeActiveAgreementRegistryOwnership = UpgradeOwned.contract(client, activeAgreementRegistry.address);
+  await upgradeActiveAgreementRegistryOwnership.functions.transferUpgradeOwnership(doug.address);
+  await doug.functions.deploy(Contracts.ActiveAgreementRegistry, activeAgreementRegistry.address);
   return activeAgreementRegistry;
 }
 
 export async function RegisterAgreementClasses(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
-  agreement: Promise<DefaultActiveAgreementRegistry.Contract<CallTx>>,
-  archetype: Promise<DefaultArchetypeRegistry.Contract<CallTx>>,
-  service: Promise<DefaultBpmService.Contract<CallTx>>,
+  doug: DOUG.Contract,
+  agreement: Promise<DefaultActiveAgreementRegistry.Contract>,
+  archetype: Promise<DefaultArchetypeRegistry.Contract>,
+  service: Promise<DefaultBpmService.Contract>,
   errorsLib: Promise<string>,
   mappingsLib: Promise<string>,
   eRC165Utils: Promise<string>,
@@ -401,25 +402,25 @@ export async function RegisterAgreementClasses(
   const agreementsAPIAddress = await agreementsAPI;
   const dataStorageUtilsAddress = await dataStorageUtils;
 
-  const getBpmServiceFromAgreementRegistry = await activeAgreementRegistry
+  const getBpmServiceFromAgreementRegistry = await activeAgreementRegistry.functions
     .getBpmService()
     .then((data) => data.location);
   assert(getBpmServiceFromAgreementRegistry, bpmService.address);
-  const getArchetypeRegistryFromAgreementRegistry = await activeAgreementRegistry
+  const getArchetypeRegistryFromAgreementRegistry = await activeAgreementRegistry.functions
     .getArchetypeRegistry()
     .then((data) => data.location);
   assert(getArchetypeRegistryFromAgreementRegistry, archetypeRegistry.address);
 
-  const defaultArchetypeImplementationAddress = await DefaultArchetype.Deploy(
+  const defaultArchetypeImplementationAddress = await DefaultArchetype.deploy(
     client,
     errorsLibAddress,
     mappingsLibAddress,
     eRC165UtilsAddress,
     arrayUtilsLibAddress,
   );
-  const objectClassArchetype = await archetypeRegistry.OBJECT_CLASS_ARCHETYPE().then((data) => data[0]);
-  await doug.register(objectClassArchetype, defaultArchetypeImplementationAddress);
-  const defaultActiveAgreementImplementationAddress = await DefaultActiveAgreement.Deploy(
+  const objectClassArchetype = await archetypeRegistry.functions.OBJECT_CLASS_ARCHETYPE().then((data) => data[0]);
+  await doug.functions.register(objectClassArchetype, defaultArchetypeImplementationAddress);
+  const defaultActiveAgreementImplementationAddress = await DefaultActiveAgreement.deploy(
     client,
     agreementsAPIAddress,
     errorsLibAddress,
@@ -428,8 +429,10 @@ export async function RegisterAgreementClasses(
     eRC165UtilsAddress,
     arrayUtilsLibAddress,
   );
-  const objectClassActiveAgreement = await activeAgreementRegistry.OBJECT_CLASS_AGREEMENT().then((data) => data[0]);
-  await doug.register(objectClassActiveAgreement, defaultActiveAgreementImplementationAddress);
+  const objectClassActiveAgreement = await activeAgreementRegistry.functions
+    .OBJECT_CLASS_AGREEMENT()
+    .then((data) => data[0]);
+  await doug.functions.register(objectClassActiveAgreement, defaultActiveAgreementImplementationAddress);
 }
 
 export async function DeployLib(
@@ -441,110 +444,110 @@ export async function DeployLib(
   return call(cli, ...addresses);
 }
 
-export async function RegisterLib(doug: DOUG.Contract<CallTx>, id: string, lib: Promise<string>) {
+export async function RegisterLib(doug: DOUG.Contract, id: string, lib: Promise<string>) {
   const address = await lib;
-  await doug.register(id, address);
+  await doug.functions.register(id, address);
 }
 
 export async function DeployRenewalWindowManager(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
-  service: Promise<DefaultBpmService.Contract<CallTx>>,
-  registry: Promise<DefaultApplicationRegistry.Contract<CallTx>>,
+  doug: DOUG.Contract,
+  service: Promise<DefaultBpmService.Contract>,
+  registry: Promise<DefaultApplicationRegistry.Contract>,
   errorsLib: Promise<string>,
 ) {
   const bpmService = await service;
   const errorsLibAddress = await errorsLib;
-  const renewalWindowManagerAddress = await RenewalWindowManager.Deploy(client, errorsLibAddress, bpmService.address);
+  const renewalWindowManagerAddress = await RenewalWindowManager.deploy(client, errorsLibAddress, bpmService.address);
   const applicationRegistry = await registry;
   await Promise.all([
-    applicationRegistry.addApplication(
+    applicationRegistry.functions.addApplication(
       Buffer.from('RenewalWindowManager'),
       0,
       renewalWindowManagerAddress,
       Buffer.from(''),
       Buffer.from(''),
     ),
-    doug.deploy('RenewalWindowManager', renewalWindowManagerAddress),
+    doug.functions.deploy('RenewalWindowManager', renewalWindowManagerAddress),
   ]);
 }
 
 export async function DeployCompletables(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
+  doug: DOUG.Contract,
   agreementsApi: Promise<string>,
   errorsLib: Promise<string>,
   stringsLib: Promise<string>,
 ) {
-  const completables = await DeployLib(client, Completables.Deploy, agreementsApi, errorsLib, stringsLib);
-  await new UpgradeOwned.Contract(client, completables).transferUpgradeOwnership(doug.address);
-  await doug.deploy(Contracts.Completables, completables);
+  const completables = await DeployLib(client, Completables.deploy, agreementsApi, errorsLib, stringsLib);
+  await UpgradeOwned.contract(client, completables).functions.transferUpgradeOwnership(doug.address);
+  await doug.functions.deploy(Contracts.Completables, completables);
 }
 
 export async function DeployAgreementDates(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
+  doug: DOUG.Contract,
   agreementsApi: Promise<string>,
   errorsLib: Promise<string>,
   stringsLib: Promise<string>,
 ) {
-  const agreementDates = await DeployLib(client, AgreementDates.Deploy, agreementsApi, errorsLib, stringsLib);
-  await new UpgradeOwned.Contract(client, agreementDates).transferUpgradeOwnership(doug.address);
-  await doug.deploy(Contracts.AgreementDates, agreementDates);
+  const agreementDates = await DeployLib(client, AgreementDates.deploy, agreementsApi, errorsLib, stringsLib);
+  await UpgradeOwned.contract(client, agreementDates).functions.transferUpgradeOwnership(doug.address);
+  await doug.functions.deploy(Contracts.AgreementDates, agreementDates);
 }
 
 export async function DeployRenewalInitializer(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
-  registry: Promise<DefaultApplicationRegistry.Contract<CallTx>>,
+  doug: DOUG.Contract,
+  registry: Promise<DefaultApplicationRegistry.Contract>,
   errorsLib: Promise<string>,
 ) {
   const errorsLibAddress = await errorsLib;
-  const renewalInitializer = await RenewalInitializer.Deploy(client, errorsLibAddress);
+  const renewalInitializer = await RenewalInitializer.deploy(client, errorsLibAddress);
   const applicationRegistry = await registry;
   await Promise.all([
-    applicationRegistry.addApplication(
+    applicationRegistry.functions.addApplication(
       Buffer.from('RenewalInitializer'),
       0,
       renewalInitializer,
       Buffer.from(''),
       Buffer.from(''),
     ),
-    doug.deploy('RenewalInitializer', renewalInitializer),
+    doug.functions.deploy('RenewalInitializer', renewalInitializer),
   ]);
 }
 
 export async function DeployRenewalEvaluator(
   client: Client,
-  doug: DOUG.Contract<CallTx>,
-  registry: Promise<DefaultApplicationRegistry.Contract<CallTx>>,
+  doug: DOUG.Contract,
+  registry: Promise<DefaultApplicationRegistry.Contract>,
 ) {
-  const renewalEvaluator = await RenewalEvaluator.Deploy(client);
+  const renewalEvaluator = await RenewalEvaluator.deploy(client);
   const applicationRegistry = await registry;
   await Promise.all([
-    applicationRegistry.addApplication(
+    applicationRegistry.functions.addApplication(
       Buffer.from('RenewalEvaluator'),
       0,
       renewalEvaluator,
       Buffer.from(''),
       Buffer.from(''),
     ),
-    doug.deploy('RenewalEvaluator', renewalEvaluator),
+    doug.functions.deploy('RenewalEvaluator', renewalEvaluator),
   ]);
 }
 
 export async function Deploy(client: Client) {
-  const errorsLib = ErrorsLib.Deploy(client);
-  const typeUtilsLib = TypeUtilsLib.Deploy(client);
-  const arrayUtilsLib = ArrayUtilsLib.Deploy(client);
-  const mappingsLib = DeployLib(client, MappingsLib.Deploy, arrayUtilsLib, typeUtilsLib);
-  const stringsLib = Strings.Deploy(client);
-  const dataStorageUtils = DeployLib(client, DataStorageUtils.Deploy, errorsLib, typeUtilsLib);
-  const eRC165Utils = ERC165Utils.Deploy(client);
-  const bpmModelLib = DeployLib(client, BpmModelLib.Deploy, errorsLib, dataStorageUtils);
-  const bpmRuntimeLib = DeployLib(client, BpmRuntimeLib.Deploy, errorsLib, dataStorageUtils, eRC165Utils, typeUtilsLib);
-  const agreementsAPI = DeployLib(client, AgreementsAPI.Deploy, eRC165Utils);
-  const dataTypesAccess = DataTypesAccess.Deploy(client);
+  const errorsLib = ErrorsLib.deploy(client);
+  const typeUtilsLib = TypeUtilsLib.deploy(client);
+  const arrayUtilsLib = ArrayUtilsLib.deploy(client);
+  const mappingsLib = DeployLib(client, MappingsLib.deploy, arrayUtilsLib, typeUtilsLib);
+  const stringsLib = Strings.deploy(client);
+  const dataStorageUtils = DeployLib(client, DataStorageUtils.deploy, errorsLib, typeUtilsLib);
+  const eRC165Utils = ERC165Utils.deploy(client);
+  const bpmModelLib = DeployLib(client, BpmModelLib.deploy, errorsLib, dataStorageUtils);
+  const bpmRuntimeLib = DeployLib(client, BpmRuntimeLib.deploy, errorsLib, dataStorageUtils, eRC165Utils, typeUtilsLib);
+  const agreementsAPI = DeployLib(client, AgreementsAPI.deploy, eRC165Utils);
+  const dataTypesAccess = DataTypesAccess.deploy(client);
 
   const doug = await DeployDOUG(client, errorsLib, eRC165Utils);
   const ecosystemRegistry = DeployEcosystemRegistry(client, doug, errorsLib, mappingsLib);
@@ -562,7 +565,7 @@ export async function Deploy(client: Client) {
     arrayUtilsLib,
   );
   await Promise.all([
-    SetToNameRegistry(client, Contracts.DOUG, doug.address),
+    setInNameRegistry(client, Contracts.DOUG, doug.address),
     RegisterEcosystemAndParticipantClasses(
       client,
       doug,
@@ -605,37 +608,37 @@ export async function Deploy(client: Client) {
       agreementsAPI,
       dataStorageUtils,
     ),
-    DeployLib(client, IsoCountries100.Deploy, errorsLib),
-    DeployLib(client, IsoCurrencies100.Deploy, errorsLib),
+    DeployLib(client, IsoCountries100.deploy, errorsLib),
+    DeployLib(client, IsoCurrencies100.deploy, errorsLib),
   ]);
 
   // Applications
   // ApplicationTypes Enum: {0=EVENT, 1=SERVICE, 2=WEB}
 
-  const appRegistry = new ApplicationRegistry.Contract(client, (await applicationRegistry).address);
-  const agreementSignatureCheckAddress = await AgreementSignatureCheck.Deploy(client);
-  const totalCounterCheckAddress = await TotalCounterCheck.Deploy(client);
+  const appRegistry = ApplicationRegistry.contract(client, (await applicationRegistry).address);
+  const agreementSignatureCheckAddress = await AgreementSignatureCheck.deploy(client);
+  const totalCounterCheckAddress = await TotalCounterCheck.deploy(client);
 
   await Promise.all([
-    appRegistry.addApplication(
+    appRegistry.functions.addApplication(
       Buffer.from('AgreementSignatureCheck'),
       2,
       agreementSignatureCheckAddress,
       Buffer.from(''),
       Buffer.from('SigningWebFormWithSignatureCheck'),
     ),
-    appRegistry.addAccessPoint(Buffer.from('AgreementSignatureCheck'), Buffer.from('agreement'), 59, 0),
-    appRegistry.addApplication(
+    appRegistry.functions.addAccessPoint(Buffer.from('AgreementSignatureCheck'), Buffer.from('agreement'), 59, 0),
+    appRegistry.functions.addApplication(
       Buffer.from('TotalCounterCheck'),
       1,
       totalCounterCheckAddress,
       Buffer.from(''),
       Buffer.from(''),
     ),
-    appRegistry.addAccessPoint(Buffer.from('TotalCounterCheck'), Buffer.from('numberIn'), 8, 0),
-    appRegistry.addAccessPoint(Buffer.from('TotalCounterCheck'), Buffer.from('totalIn'), 8, 0),
-    appRegistry.addAccessPoint(Buffer.from('TotalCounterCheck'), Buffer.from('numberOut'), 8, 1),
-    appRegistry.addAccessPoint(Buffer.from('TotalCounterCheck'), Buffer.from('completedOut'), 1, 1),
+    appRegistry.functions.addAccessPoint(Buffer.from('TotalCounterCheck'), Buffer.from('numberIn'), 8, 0),
+    appRegistry.functions.addAccessPoint(Buffer.from('TotalCounterCheck'), Buffer.from('totalIn'), 8, 0),
+    appRegistry.functions.addAccessPoint(Buffer.from('TotalCounterCheck'), Buffer.from('numberOut'), 8, 1),
+    appRegistry.functions.addAccessPoint(Buffer.from('TotalCounterCheck'), Buffer.from('completedOut'), 1, 1),
   ]);
 
   await Promise.all([

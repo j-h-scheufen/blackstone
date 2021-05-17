@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/SystemOwned.sol";
@@ -9,7 +10,7 @@ import "bpm-model/BpmModel.sol";
  * @dev DB contract to manage the data for an ApplicationRegistry
  */
 contract ApplicationRegistryDb is SystemOwned {
-  
+
   BpmModel.ApplicationMap applications;
 
   constructor() public {

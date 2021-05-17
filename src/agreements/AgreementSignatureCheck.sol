@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "bpm-runtime/Application.sol";
 import "bpm-runtime/ProcessInstance.sol";
@@ -6,7 +7,7 @@ import "bpm-runtime/ProcessInstance.sol";
 import "agreements/ActiveAgreement.sol";
 
 contract AgreementSignatureCheck is Application {
-    
+
     /**
      * @dev Accesses the "agreement" IN data mapping to retrieve the address of an ActiveAgreement and verifies that the TX performer has applied a signature.
      * REVERTS if:

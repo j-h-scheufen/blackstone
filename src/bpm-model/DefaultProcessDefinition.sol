@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/ErrorsLib.sol";
 import "commons-base/BaseErrors.sol";
@@ -32,7 +33,7 @@ contract DefaultProcessDefinition is AbstractVersionedArtifact(1,0,0), AbstractD
 	bytes32 startActivity;
 	bool valid;
 
-	// TODO need to express locking which prohibits any further changes. Initiated by the model which carries the lock. Can only lock if the model is valid and all process defs. 
+	// TODO need to express locking which prohibits any further changes. Initiated by the model which carries the lock. Can only lock if the model is valid and all process defs.
 
 	// marks the process definition as dirty prior to executing changes
 	modifier pre_invalidate() {
@@ -192,7 +193,7 @@ contract DefaultProcessDefinition is AbstractVersionedArtifact(1,0,0), AbstractD
 
 	/**
 	 * Creates a new intermediate event definition with the specified parameters and conditional (DataStorage-based) data
-	 * or constant uint value. If a constant value is provided, the conditional data will be ignored! 
+	 * or constant uint value. If a constant value is provided, the conditional data will be ignored!
 	 * REVERTS if:
 	 * - the ID already exists as a model element
 	 * @param _id the ID under which to register the element
@@ -205,7 +206,7 @@ contract DefaultProcessDefinition is AbstractVersionedArtifact(1,0,0), AbstractD
 	 * @param _durationConstant a fixed value for timer-based events representing a duration in secs
 	 */
 	function createIntermediateEvent(
-		bytes32 _id, 
+		bytes32 _id,
 		BpmModel.EventType _eventType,
 		BpmModel.IntermediateEventBehavior _eventBehavior,
 		bytes32 _dataPath,
@@ -291,7 +292,7 @@ contract DefaultProcessDefinition is AbstractVersionedArtifact(1,0,0), AbstractD
 	{
 		ErrorsLib.revertIf(!graphElements.rows[_id].exists,
 			ErrorsLib.RESOURCE_NOT_FOUND(), "ProcessDefinition.setIntermediateEventDatetimeAndOffset", "Graph element with _id not found");
-		
+
 		graphElements.rows[_id].intermediateEvent.datetimeStorage.dataPath = _datetimeDataPath;
 		graphElements.rows[_id].intermediateEvent.datetimeStorage.dataStorageId = _datetimeDataStorageId;
 		graphElements.rows[_id].intermediateEvent.datetimeStorage.dataStorage = _datetimeDataStorage;
@@ -344,7 +345,7 @@ contract DefaultProcessDefinition is AbstractVersionedArtifact(1,0,0), AbstractD
 
 	/**
 	 * @dev Adds a boundary event to the specified activity using the provided ID, parameters, conditional (DataStorage-based)
-	 * data or constant uint value. If a constant value is provided, the conditional data will be ignored! 
+	 * data or constant uint value. If a constant value is provided, the conditional data will be ignored!
 	 * REVERTS if:
 	 * - the activity does not exist
 	 * - the event ID already exists as a model element
@@ -364,12 +365,12 @@ contract DefaultProcessDefinition is AbstractVersionedArtifact(1,0,0), AbstractD
 		pre_invalidate
 		returns (bytes32 eventId)
 	{
-		ErrorsLib.revertIf(!graphElements.rows[_activityId].exists || graphElements.rows[_activityId].elementType != BpmModel.ModelElementType.ACTIVITY, 
+		ErrorsLib.revertIf(!graphElements.rows[_activityId].exists || graphElements.rows[_activityId].elementType != BpmModel.ModelElementType.ACTIVITY,
 			ErrorsLib.INVALID_PARAMETER_STATE(), "DefaultProcessDefinition.addBoundaryEvent", "Cannot create boundary event since given activityId is either non-existent or not of the correct type BpmModel.ModelElementType.ACTIVITY");
 		eventId = keccak256(abi.encodePacked(_activityId,_id));
 		ErrorsLib.revertIf(graphElements.rows[eventId].exists,
 			ErrorsLib.RESOURCE_ALREADY_EXISTS(),"ProcessDefinition.addBoundaryEvent","Graph element with generated eventId = (_activityId,_id) already exists in the process");
-		
+
 		graphElements.boundaryEventIds.push(eventId);
 		graphElements.rows[eventId].elementType = BpmModel.ModelElementType.BOUNDARY_EVENT;
 		graphElements.rows[eventId].boundaryEvent.id = _id;
@@ -405,11 +406,11 @@ contract DefaultProcessDefinition is AbstractVersionedArtifact(1,0,0), AbstractD
 		external
 		pre_invalidate
 	{
-		ErrorsLib.revertIf(!(graphElements.rows[_id].exists && graphElements.rows[_id].elementType == BpmModel.ModelElementType.BOUNDARY_EVENT), 
+		ErrorsLib.revertIf(!(graphElements.rows[_id].exists && graphElements.rows[_id].elementType == BpmModel.ModelElementType.BOUNDARY_EVENT),
 			ErrorsLib.INVALID_PARAMETER_STATE(), "DefaultProcessDefinition.addBoundaryEventAction", "Cannot add boundary event action since the given ID is either non-existent or not of the correct type BpmModel.ModelElementType.BOUNDARY_EVENT");
-		ErrorsLib.revertIf(_dataPath.isEmpty() && _fixedTarget == address(0), 
+		ErrorsLib.revertIf(_dataPath.isEmpty() && _fixedTarget == address(0),
 			ErrorsLib.INVALID_INPUT(), "DefaultProcessDefinition.addBoundaryEventAction", "Either a ConditionalData (via a _dataPath at a minimum) or a _fixedEscalationTartget must be provided");
-		ErrorsLib.revertIf(bytes(_actionFunction).length == 0, 
+		ErrorsLib.revertIf(bytes(_actionFunction).length == 0,
 			ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(), "DefaultProcessDefinition.addBoundaryEventAction", "Action function parameter must not be empty");
 		BpmModel.BoundaryEventAction memory action;
 		action.conditionalTarget.dataPath = _dataPath;
@@ -418,7 +419,7 @@ contract DefaultProcessDefinition is AbstractVersionedArtifact(1,0,0), AbstractD
 		action.fixedTarget = _fixedTarget;
 		action.targetFunction = bytes4(keccak256(abi.encodePacked(_actionFunction)));
 		graphElements.rows[_id].boundaryEvent.actions.push(action);
-		
+
 	}
 
 	/**
@@ -519,7 +520,7 @@ contract DefaultProcessDefinition is AbstractVersionedArtifact(1,0,0), AbstractD
 	 * @param _dataStorage an optional address of a DataStorage as basis for the data path other than the default one
 	 */
 	function createDataMapping(bytes32 _activityId, BpmModel.Direction _direction, bytes32 _accessPath, bytes32 _dataPath, bytes32 _dataStorageId, address _dataStorage) external pre_invalidate {
-		ErrorsLib.revertIf(!(graphElements.rows[_activityId].exists && graphElements.rows[_activityId].elementType == BpmModel.ModelElementType.ACTIVITY), 
+		ErrorsLib.revertIf(!(graphElements.rows[_activityId].exists && graphElements.rows[_activityId].elementType == BpmModel.ModelElementType.ACTIVITY),
 			ErrorsLib.RESOURCE_NOT_FOUND(), "DefaultProcessDefinition.createDataMapping", "Cannot create data mapping since given activityId is either non-existent or not of the correct type BpmModel.ModelElementType.ACTIVITY");
 		if (_direction == BpmModel.Direction.IN) {
 			if (!graphElements.rows[_activityId].activity.inMappings[_accessPath].exists) {
@@ -960,7 +961,7 @@ contract DefaultProcessDefinition is AbstractVersionedArtifact(1,0,0), AbstractD
 	 * @param _id the ID of the intermediate event
 	 * @return eventType - the BpmModel.EventType of the event
 	 * @return eventBehavior - the BpmModel.IntermediateEventBehavior of the event
-	 * @return predecessor - the ID of the prodecessor element 
+	 * @return predecessor - the ID of the prodecessor element
 	 * @return successor - the ID of the successor element, if there is one
 	 */
 	function getIntermediateEventGraphDetails(bytes32 _id) external view returns (BpmModel.EventType eventType, BpmModel.IntermediateEventBehavior eventBehavior, bytes32 predecessor, bytes32 successor) {
@@ -985,9 +986,9 @@ contract DefaultProcessDefinition is AbstractVersionedArtifact(1,0,0), AbstractD
 
 	/**
 	 * Get the timer for a boundary event or timer event. The value can be an absolute value, in which case it is a unix time stamp, or a string,
-	 * in which case it has to be converted into a time stamp by lair. If the value is not a constant, then it has to retrieved from storage. 
+	 * in which case it has to be converted into a time stamp by lair. If the value is not a constant, then it has to retrieved from storage.
 	 * @param _id the ID of the intermediate event or boundary event
-	 * @return dataPath 
+	 * @return dataPath
 	 * @return dataStorageId
 	 * @return dataStorage
 	 * @return timestampConstant - if this is non-zero it denotes the blocktime when the timer should fire

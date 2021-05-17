@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/ErrorsLib.sol";
 import "commons-auth/Ecosystem.sol";
@@ -15,7 +16,7 @@ import "commons-management/AbstractDelegateTarget.sol";
 contract DefaultEcosystem is AbstractVersionedArtifact(1,0,1), AbstractDelegateTarget, Ecosystem_v1_0_1 {
 
     using MappingsLib for Mappings.Bytes32AddressMap;
-    
+
     mapping (address => bool) publicKeys;
     Mappings.Bytes32AddressMap userAccounts;
 
@@ -54,30 +55,30 @@ contract DefaultEcosystem is AbstractVersionedArtifact(1,0,1), AbstractDelegateT
 
     // TODO protect function with modifier for owner or public key only
 
-    function addUserAccount(bytes32 _id, address _userAccount) 
+    function addUserAccount(bytes32 _id, address _userAccount)
         external
     {
         ErrorsLib.revertIf(
-            (_id == ""), 
+            (_id == ""),
             ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(),
             "DefaultEcosystem.addUserAccount",
             "User ID cannot be empty"
         );
         ErrorsLib.revertIf(
-            (_userAccount == address(0)), 
+            (_userAccount == address(0)),
             ErrorsLib.NULL_PARAMETER_NOT_ALLOWED(),
             "DefaultEcosystem.addUserAccount",
             "User account address cannot be empty"
         );
         ErrorsLib.revertIf(
-            userAccounts.exists(_id), 
+            userAccounts.exists(_id),
             ErrorsLib.RESOURCE_ALREADY_EXISTS(),
             "DefaultEcosystem.addUserAccount",
             "User with same ID already exists in given ecosystem"
         );
         uint error = userAccounts.insert(_id, _userAccount);
         ErrorsLib.revertIf(
-            error != BaseErrors.NO_ERROR(), 
+            error != BaseErrors.NO_ERROR(),
             ErrorsLib.RUNTIME_ERROR(),
             "DefaultEcosystem.addUserAccount",
             "User with same ID already exists in given ecosystem"
@@ -87,7 +88,7 @@ contract DefaultEcosystem is AbstractVersionedArtifact(1,0,1), AbstractDelegateT
     function getUserAccount(bytes32 _id)
         external
         view
-        returns (address userAccount) 
+        returns (address userAccount)
     {
         userAccount = userAccounts.get(_id);
         ErrorsLib.revertIf(
@@ -107,7 +108,7 @@ contract DefaultEcosystem is AbstractVersionedArtifact(1,0,1), AbstractDelegateT
      * @param _migrateFromId the user ID currently associated with the account
      * @param _migrateToId the new user ID for the account
      */
-    function migrateUserAccount(address _userAccount, bytes32 _migrateFromId, bytes32 _migrateToId) 
+    function migrateUserAccount(address _userAccount, bytes32 _migrateFromId, bytes32 _migrateToId)
         external
         pre_onlyByOwner
     {

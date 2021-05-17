@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/ErrorsLib.sol";
 import "commons-base/BaseErrors.sol";
@@ -13,7 +14,7 @@ contract RenewalWindowManager is Application {
 
     /**
      * @dev This event also emits the extendExpirationBy offset which
-     * must be used to calculate the next expiration timestamp and 
+     * must be used to calculate the next expiration timestamp and
      * included as an argument to the terminateRenewalWindow() call.
      */
     event LogRenewalWindowCloseOffset(
@@ -66,7 +67,7 @@ contract RenewalWindowManager is Application {
     constructor(address _service) public {
         bpmService = BpmService(_service);
     }
-    
+
     /**
      * @dev Accesses scheduleBase and scheduleOffset parameters from the process instance via data mappings in order to
      * emit those value for an extermal system to consume and process.
@@ -77,10 +78,10 @@ contract RenewalWindowManager is Application {
      */
     function complete(address _piAddress, bytes32 _activityInstanceId, bytes32 _activityId, address _txPerformer) public {
         address agreement = ProcessInstance(_piAddress).getActivityInDataAsAddress(_activityInstanceId, "agreement");
-        
+
         ErrorsLib.revertIf(agreement == address(0),
             ErrorsLib.INVALID_STATE(), "RenewalWindowManager.complete", "Empty agreement address found on given ProcessInstance");
-        
+
         int expirationDate;
         string memory closeOffset;
 
@@ -119,7 +120,7 @@ contract RenewalWindowManager is Application {
             expirationDate,
             extensionOffset
         );
-        
+
         activityParentMap[_activityInstanceId].processInstanceAddress = _piAddress;
         activityParentMap[_activityInstanceId].agreementAddress = agreement;
         activityParentMap[_activityInstanceId].exists = true;
@@ -138,7 +139,7 @@ contract RenewalWindowManager is Application {
                 (bytes32 activityId, , , address performer, , ) = ProcessInstance(_piAddress).getActivityInstanceData(aiId);
                 if (pendingUserTaskId == activityId) {
                     // The pendingUserTaskId must be set on the process instance in order for this event
-                    // to be emitted indicating a request to close any instances of the activity 
+                    // to be emitted indicating a request to close any instances of the activity
                     // at the correct scheduleBase +/- offset.
                     // If it's not set, we don't want to emit any task closure events because we don't know which
                     // tasks need to be closed.

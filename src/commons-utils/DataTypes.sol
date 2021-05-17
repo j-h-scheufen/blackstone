@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 /**
  * @title DataTypes Library
@@ -25,7 +26,7 @@ library DataTypes {
     REPRESENTATIVES,
     APPROVER
   }
-  
+
   // ************************* BOOL ********************************
   // Values: 1
   function BOOL() internal pure returns (uint8) { return 1; }
@@ -35,7 +36,7 @@ library DataTypes {
   // Values: 2
   function STRING() internal pure returns (uint8) { return 2; }
 
-  
+
   // ************************* UINT *********************************
   // Values: 3 - 8
   function UINT() internal pure returns (uint8) { return UINT256(); }
@@ -57,7 +58,7 @@ library DataTypes {
   function INT128() internal pure returns (uint8) { return 17; }
   function INT256() internal pure returns (uint8) { return 18; }
 
-  
+
   // ************************ ADDRESS *******************************
   // Values: 40
   function ADDRESS() internal pure returns (uint8) { return 40; }
@@ -79,12 +80,12 @@ library DataTypes {
   function BYTES() internal pure returns (uint8) { return 60; }
 
   // ************************* ARRAYS ********************************
-  
+
   // Values: 101 - 102
   function BOOLARRAY() internal pure returns (uint8) { return 101; }
   function STRINGARRAY() internal pure returns (uint8) { return 102; }
 
-  // Values 103 - 108 
+  // Values 103 - 108
   function UINTARRAY() internal pure returns (uint8) { return UINT256ARRAY(); }
   function UINT8ARRAY() internal pure returns (uint8) { return 103; }
   function UINT16ARRAY() internal pure returns (uint8) { return 104; }
@@ -101,10 +102,10 @@ library DataTypes {
   function INT64ARRAY() internal pure returns (uint8) { return 116; }
   function INT128ARRAY() internal pure returns (uint8) { return 117; }
   function INT256ARRAY() internal pure returns (uint8) { return 118; }
-  
+
   // Values: 140
   function ADDRESSARRAY() internal pure returns (uint8) { return 140; }
-  
+
   // Values: 150 - 160
   function BYTEARRAY() internal pure returns (uint8) { return BYTES1ARRAY(); }
   function BYTES1ARRAY() internal pure returns (uint8) { return 150; }
@@ -118,7 +119,7 @@ library DataTypes {
   function BYTES28ARRAY() internal pure returns (uint8) { return 158; }
   function BYTES32ARRAY() internal pure returns (uint8) { return 159; }
   function BYTESARRAY() internal pure returns (uint8) { return 160; }
-  
+
 
   /**
     * @dev Checks if given dataType is valid

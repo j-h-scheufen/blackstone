@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-collections/DataStorage.sol";
 import "bpm-runtime/Application.sol";
@@ -16,11 +17,11 @@ contract RenewalEvaluator is Application {
     );
 
     bytes32 constant MAPPING_ID_RENEWAL_LOOP_BACK = "renewalLoopBack";
-    
+
     bytes32 constant EVENT_ID_RENEWAL_EVALUATOR = "AN://agreement-renewal-evaluator";
-    
+
     /**
-     * @dev Retrieves the current renewal state of the Agreement and sets the value on the process instance 
+     * @dev Retrieves the current renewal state of the Agreement and sets the value on the process instance
      * @param _piAddress the address of the ProcessInstance in which context the application is invoked
      * @param _activityInstanceId the globally unique ID of the ActivityInstance invoking this contract
      * param _activityId the ID of the activity definition
@@ -29,7 +30,7 @@ contract RenewalEvaluator is Application {
     function complete(address _piAddress, bytes32 _activityInstanceId, bytes32 /* _activityId */, address /* _txPerformer */) public {
         address dataStorage;
         bytes32 dataPath;
-        
+
         address agreement = ProcessInstance(_piAddress).getActivityInDataAsAddress(_activityInstanceId, "agreement");
 
         // get renewal state boolean which drives renewalLoopBack for the process

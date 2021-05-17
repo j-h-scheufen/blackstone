@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-standards/ERC165.sol";
 
@@ -45,7 +46,7 @@ library ERC165Utils {
 
     //     uint256 success;
     //     uint256 result;
-        
+
     //     (success, result) = noThrowCall(_contract, erc165Id);
     //     if ((success==0)||(result==0)) {
     //         return false;

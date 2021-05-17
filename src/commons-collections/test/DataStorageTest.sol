@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-utils/DataTypes.sol";
@@ -9,10 +10,10 @@ import "commons-collections/AbstractAddressScopes.sol";
 import "commons-collections/DataStorageUtils.sol";
 
 contract DataStorageTest {
-	
+
 	string SUCCESS = "success";
 	bytes32 EMPTY = "";
-	
+
 	// Storage contracts used in tests
 	FullDataStorage myStorage;
 	FullDataStorage mySubDataStorage;
@@ -36,7 +37,7 @@ contract DataStorageTest {
 	bytes32 u256ArrId = "uint256ArrId";
 	bytes32 i256ArrId = "int256ArrId";
 	bytes32 bytesArrayId = "DCSuperheroes";
-	
+
 	bytes1 myVal = "a";
 	bytes16 my16bVal = "abcd1234";
 	bytes32 batman = "batman";
@@ -53,11 +54,11 @@ contract DataStorageTest {
 	bytes32 subStorageId = "substorage";
 	bytes32 compAddrId = "comparableAddr";
 	address compAddr = 0x94EcB18404251B0C8E88B0D8fbde7145c72AEC22;
-	
+
 	uint error;
 
 	function testPrimitivesDataStorageAndRetrieval() external returns (string memory) {
-		
+
 		myStorage = new TestDataStorage();
 
 		// bool
@@ -90,7 +91,7 @@ contract DataStorageTest {
 		myStorage.setDataValueAsBytes32Type(my16bValId, my16bVal, DataTypes.BYTES16());
 		if (myStorage.getDataType(my16bValId) != DataTypes.BYTES16()) return "bytes16 Data object should have type DataTypes.BYTES16()";
 		if (myStorage.getDataValueAsBytes32(my16bValId) != my16bVal) return "output value does not match saved bytes16";
-		
+
 		return SUCCESS;
 	}
 
@@ -154,20 +155,20 @@ contract DataStorageTest {
 		u256Arr.push(55);
 		u256Arr.push(237);
 		u256Arr.push(88);
-	
+
 		myStorage.setDataValueAsAddress("key1", address(this));
 		myStorage.setDataValueAsBool("key2", true);
 		myStorage.setDataValueAsBytes32("key3", "bla");
 		myStorage.setDataValueAsUintArray(i256ArrId, u256Arr);
 
 		if (myStorage.getNumberOfData() != 4) return "pre-removal storage size should be 4";
-		
+
 		myStorage.removeData(i256ArrId);
 		uint[] memory retUintArray = myStorage.getDataValueAsUintArray(i256ArrId);
 		if (retUintArray.length > 0) return "Returned array should be empty due to entry having been deleted";
-		
+
 		if (myStorage.getNumberOfData() != 3) return "post-removal storage size should be 9";
-		
+
 		myStorage.removeData("fakeKeyTTTT");
 		if (myStorage.getNumberOfData() != 3) return "Storage size should not have changed when deleting non-existent entry";
 
@@ -181,7 +182,7 @@ contract DataStorageTest {
 		bool result;
 
 		myStorage.setDataValueAsAddress(subStorageId, address(mySubDataStorage));
-		
+
 		// compare uints
 		myStorage.setDataValueAsUint(num10, tenVal);
 		mySubDataStorage.setDataValueAsUint("num2000", uint(2000));

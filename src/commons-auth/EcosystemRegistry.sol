@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-management/Upgradeable.sol";
 import "commons-management/ObjectFactory.sol";

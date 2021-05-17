@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/ErrorsLib.sol";
@@ -21,7 +22,7 @@ import "agreements/Agreements.sol";
  * @dev Creates and tracks archetypes
  */
 contract DefaultArchetypeRegistry is AbstractVersionedArtifact(1,1,1), AbstractObjectFactory, ArtifactsFinderEnabled, AbstractDbUpgradeable, ArchetypeRegistry {
-	
+
 	/**
 	 * @dev Creates a new archetype
 	 * REVERTS if:
@@ -38,15 +39,15 @@ contract DefaultArchetypeRegistry is AbstractVersionedArtifact(1,1,1), AbstractO
 	 * @return archetype - the new archetype's address, if successfully created
 	 */
 	function createArchetype(
-		uint _price, 
-		bool _isPrivate, 
-		bool _active, 
+		uint _price,
+		bool _isPrivate,
+		bool _active,
 		address _author,
 		address _owner,
-		address _formationProcess, 
-		address _executionProcess, 
-		bytes32 _packageId, 
-		address[] calldata _governingArchetypes) 
+		address _formationProcess,
+		address _executionProcess,
+		bytes32 _packageId,
+		address[] calldata _governingArchetypes)
 		external
 		returns (address archetype)
 	{

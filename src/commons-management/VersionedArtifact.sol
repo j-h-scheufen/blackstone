@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-standards/ERC165.sol";
 
@@ -38,7 +39,7 @@ contract VersionedArtifact {
      * @return the minor version
 	 */
     function getArtifactVersionMinor() external view returns (uint8);
-	
+
     /**
 	 * @dev returns the patch version number
      * @return the patch version

@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/SystemOwned.sol";
 import "commons-collections/Mappings.sol";
@@ -24,7 +25,7 @@ contract BpmServiceDb is SystemOwned {
             return;
         _;
     }
-    
+
     /**
      * @dev Creates a new BpmServiceDb and registers the msg.sender as the owner
      */

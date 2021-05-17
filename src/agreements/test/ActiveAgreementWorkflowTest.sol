@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/SystemOwned.sol";
@@ -472,7 +473,7 @@ contract ActiveAgreementWorkflowTest {
     /**
      * @dev Helper function that creates a new ProcessModel with a formation and execution ProcessDefinition
      * where both processes contain a simple "receive" task that results in the processes halting until
-     * the tasks are completed. 
+     * the tasks are completed.
      */
     function cancellationProcessModels(bytes32 processName) external returns (ProcessDefinition formationPD, ProcessDefinition executionPD, string memory result) {
         ProcessModel pm;
@@ -515,7 +516,7 @@ contract ActiveAgreementWorkflowTest {
         (uint error, address addr) = agreementRegistry.startProcessLifecycle(agreement);
         if (error != BaseErrors.NO_ERROR()) return (pis, "Error starting the formation process 1 on agreement");
         pis[0] = ProcessInstance(addr);
-        
+
         if (completeFormation) {
             // if the agreement is not executed, try to get it there, either by applying provided signatures ...
             if (agreement.getLegalState() != uint8(Agreements.LegalState.EXECUTED)) {

@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/Bytes32Identifiable.sol";
 import "commons-management/VersionedArtifact.sol";
@@ -116,14 +117,14 @@ contract ProcessDefinition is VersionedArtifact, Bytes32Identifiable {
 	 */
 	function createIntermediateEvent(
 		bytes32 _id,
-		BpmModel.EventType _eventType, 
-		BpmModel.IntermediateEventBehavior _eventBehavior, 
-		bytes32 _dataPath, 
-		bytes32 _dataStorageId, 
-		address _dataStorage, 
-		uint256 _timestampConstant, 
+		BpmModel.EventType _eventType,
+		BpmModel.IntermediateEventBehavior _eventBehavior,
+		bytes32 _dataPath,
+		bytes32 _dataStorageId,
+		address _dataStorage,
+		uint256 _timestampConstant,
 		string calldata _durationConstant) external;
-	
+
 	/**
 	 * Configures a datetime conditional data and offset conditional data for the given intermediate event.
 	 * These two can be used together to determine the timer target from a datetime + offset pair stored in
@@ -145,7 +146,7 @@ contract ProcessDefinition is VersionedArtifact, Bytes32Identifiable {
 	 * @param _offsetDataStorage dataStorage that identifies a data storage directly
 	 */
 	function setIntermediateEventDatetimeAndOffset(
-		bytes32 _id, 
+		bytes32 _id,
 		bytes32 _datetimeDataPath,
 		bytes32 _datetimeDataStorageId,
 		address _datetimeDataStorage,
@@ -169,7 +170,7 @@ contract ProcessDefinition is VersionedArtifact, Bytes32Identifiable {
 
 	/**
 	 * @dev Addes a boundary event to the specified activity using the provided ID, parameters, conditional (DataStorage-based)
-	 * data or constant uint value. If a constant value is provided, the conditional data will be ignored! 
+	 * data or constant uint value. If a constant value is provided, the conditional data will be ignored!
 	 * @param _activityId the activity for which the boundary event is added
 	 * @param _id an ID unique within the context of the activity, e.g. a name like "deadline"
 	 * @param _eventType a BpmModel.EventType
@@ -461,7 +462,7 @@ contract ProcessDefinition is VersionedArtifact, Bytes32Identifiable {
 	 * @param _id the ID of the intermediate event
 	 * @return eventType - the BpmModel.EventType of the event
 	 * @return eventBehavior - the BpmModel.IntermediateEventBehavior of the event
-	 * @return predecessor - the ID of the prodecessor element 
+	 * @return predecessor - the ID of the prodecessor element
 	 * @return successor - the ID of the successor element, if there is one
 	 */
 	function getIntermediateEventGraphDetails(bytes32 _id) external view returns (BpmModel.EventType eventType, BpmModel.IntermediateEventBehavior eventBehavior, bytes32 predecessor, bytes32 successor);
@@ -482,7 +483,7 @@ contract ProcessDefinition is VersionedArtifact, Bytes32Identifiable {
 	 * @return dataStorageId - an optional key to identify a DataStorage as basis for the data path to find the escalation target
 	 * @return dataStorage - an optional address of a DataStorage as basis for the data path to find the escalation target
 	 * @return timeStampConstant - unix epoch time at which this timer expires if absolute timer
-	 * @return durationConstant - duration after which this timer should expire 
+	 * @return durationConstant - duration after which this timer should expire
 	 */
 	function getTimerEventDetails(bytes32 _id) external view returns (bytes32 dataPath, bytes32 dataStorageId, address dataStorage, uint timestampConstant, string memory durationConstant);
 

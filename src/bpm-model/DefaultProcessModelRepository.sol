@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-utils/ArrayUtilsLib.sol";
@@ -20,7 +21,7 @@ import "bpm-model/ProcessModelRepositoryDb.sol";
  * @dev Default implementation of the ProcessModelRepository interface
  */
 contract DefaultProcessModelRepository is AbstractVersionedArtifact(1,0,0), AbstractObjectFactory, ArtifactsFinderEnabled, AbstractDbUpgradeable, ProcessModelRepository {
-	
+
 	/**
 	 * @dev Modifier to only allow calls to this ProcessModelRepository from a registered ProcessModel
 	 */
@@ -28,7 +29,7 @@ contract DefaultProcessModelRepository is AbstractVersionedArtifact(1,0,0), Abst
 		if (!ProcessModelRepositoryDb(database).modelIsRegistered(msg.sender)) return;
 		_;
 	}
-	
+
 	/**
 	 * @dev Factory function to instantiate a ProcessModel. The model is automatically added to this repository.
 	 * @param _id the model ID
@@ -69,7 +70,7 @@ contract DefaultProcessModelRepository is AbstractVersionedArtifact(1,0,0), Abst
 	 * REVERTS if:
 	 * - the given ProcessModel ID and version are not registered in this ProcessModelRepository
 	 * - there is a registered model with the same ID and version, but the address differs from the given ProcessModel
-	 * - 
+	 * -
 	 */
 	function activateModel(ProcessModel _model) external returns (uint error) {
 		// check if there is an address registered for the model ID and version
@@ -103,12 +104,12 @@ contract DefaultProcessModelRepository is AbstractVersionedArtifact(1,0,0), Abst
 	 * @param _id the model ID
 	 * @param _version the model version
 	 * @return the model address, if found
-	 */	
+	 */
 	function getModelByVersion(bytes32 _id, uint8[3] calldata _version) external view returns (uint error, address modelAddress) {
 		modelAddress = ProcessModelRepositoryDb(database).getModel(_id, _version);
 		error = (modelAddress == address(0)) ? BaseErrors.RESOURCE_NOT_FOUND() : BaseErrors.NO_ERROR();
 	}
-	
+
 	/**
 	 * @dev Returns the number of models in this repository.
 	 * @return size - the number of models
