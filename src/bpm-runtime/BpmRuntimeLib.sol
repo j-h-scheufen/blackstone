@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/ErrorsLib.sol";
 import "commons-base/BaseErrors.sol";
@@ -23,7 +24,7 @@ import "bpm-runtime/TransitionConditionResolver.sol";
 library BpmRuntimeLib {
 
     using TypeUtilsLib for bytes32;
-    
+
     // NOTE: some of the following event definitions are duplicates of events defined in ProcessInstance.sol
 
 	event LogProcessInstanceStateUpdate(
@@ -160,7 +161,7 @@ library BpmRuntimeLib {
     bytes32 public constant EVENT_ID_TIMER_EVENTS = "AN://timer-events";
 
     function getERC165IdOrganization() internal pure returns (bytes4) {
-        return (bytes4(keccak256(abi.encodePacked("addUser(address)"))) ^ 
+        return (bytes4(keccak256(abi.encodePacked("addUser(address)"))) ^
                 bytes4(keccak256(abi.encodePacked("removeUser(address)"))) ^
                 bytes4(keccak256(abi.encodePacked("authorizeUser(address,bytes32)"))));
     }
@@ -391,7 +392,7 @@ library BpmRuntimeLib {
                     );
                     return (error);
                 }
-                
+
                 completeActivityInstance(_activityInstance, _activityInstance.performer);
             }
             // ### EVENT ###
@@ -521,7 +522,7 @@ library BpmRuntimeLib {
             // unknown activity type. Should not happen!
             revert(ErrorsLib.format(ErrorsLib.INVALID_INPUT(), "BpmRuntimeLib.executeActivity(BpmRuntime.ActivityInstance,DataStorage,ProcessDefinition,BpmService)", "Unknown BpmModel.ActivityType"));
         }
-        
+
         return BaseErrors.NO_ERROR();
     }
 
@@ -539,23 +540,23 @@ library BpmRuntimeLib {
             ErrorsLib.INVALID_PARAMETER_STATE(), "BpmRuntimeLib.executeEvent", "The ActivityInstance for the intermediate event is not in the correct state");
 
         (BpmModel.EventType eventType, BpmModel.IntermediateEventBehavior eventBehavior, , ) = _processDefinition.getIntermediateEventGraphDetails(_eventInstance.eventId);
-        
-        // If datetime and offset conditional data are set then those take precedence over 
+
+        // If datetime and offset conditional data are set then those take precedence over
         // timestampConstant and durationConstant. Retrieve and emit datetime and offset
         // such that external entities can use that to determine the actual timerTarget.
-        // Also set timerTarget to 0 since the actual value will be set by external entity 
+        // Also set timerTarget to 0 since the actual value will be set by external entity
         // by invoking setIntermediateEventTimerTarget.
         if (findAndEmitDatetimeAndOffset(_eventInstance, _rootDataStorage, _processDefinition)) {
             _eventInstance.timerTarget = 0;
         }
         else {
             (
-                bytes32 dataPath, 
-                bytes32 dataStorageId, 
-                address dataStorage, 
+                bytes32 dataPath,
+                bytes32 dataStorageId,
+                address dataStorage,
                 uint timestampConstant,
                 string memory durationConstant
-            ) = _processDefinition.getTimerEventDetails(_eventInstance.eventId); 
+            ) = _processDefinition.getTimerEventDetails(_eventInstance.eventId);
 
             address dataStorageAddress = DataStorageUtils
                 .resolveDataStorageAddress(dataStorageId, dataStorage, _rootDataStorage);
@@ -572,7 +573,7 @@ library BpmRuntimeLib {
                 }
 
                 _eventInstance.timerTarget = timerTarget;
-                
+
                 emit LogIntermediateEventActivationWithConstants(
                     EVENT_ID_INTERM_EVENT_ACTIVATIONS,
                     _eventInstance.id,
@@ -642,8 +643,8 @@ library BpmRuntimeLib {
     }
 
     function findAndEmitDatetimeAndOffset(
-        BpmRuntime.IntermediateEventInstance storage _eventInstance, 
-        DataStorage _rootDataStorage, 
+        BpmRuntime.IntermediateEventInstance storage _eventInstance,
+        DataStorage _rootDataStorage,
         ProcessDefinition _processDefinition
     ) public returns (bool) {
         (
@@ -709,7 +710,7 @@ library BpmRuntimeLib {
     function completeActivityInstance(BpmRuntime.ActivityInstance storage _activityInstance, address _completedBy) public {
         ErrorsLib.revertIf(_activityInstance.state == BpmRuntime.ActivityInstanceState.COMPLETED || _activityInstance.state == BpmRuntime.ActivityInstanceState.ABORTED,
             ErrorsLib.INVALID_PARAMETER_STATE(), "BpmRuntimeLib.completeActivityInstance", "The provided ActivityInstance is already in a final state, COMPLETED or ABORTED");
-   
+
         _activityInstance.state = BpmRuntime.ActivityInstanceState.COMPLETED;
         _activityInstance.completedBy = _completedBy;
         _activityInstance.performer = address(0);
@@ -865,7 +866,7 @@ library BpmRuntimeLib {
                 }
 
                 BpmModel.ModelElementType elementType = _processInstance.processDefinition.getElementType(activityId);
-                // ACTIVITY 
+                // ACTIVITY
                 if (elementType == BpmModel.ModelElementType.ACTIVITY) {
                     ( , taskType, , assignee, multiInstance, , , ) = _processInstance.processDefinition.getActivityData(activityId);
                     if (multiInstance) {
@@ -1101,7 +1102,7 @@ library BpmRuntimeLib {
             return (dataStorage, dataPath);
         }
         else if (dataStorageId != "") {
-            // retrieve the target by looking for the dataStorageId in the context of this ProcessInstance's dataStorage 
+            // retrieve the target by looking for the dataStorageId in the context of this ProcessInstance's dataStorage
             dataStorage = DataStorage(_processInstance.addr).getDataValueAsAddress(dataStorageId);
         }
         else {
@@ -1155,7 +1156,7 @@ library BpmRuntimeLib {
         else
             target = address(_dataStorage);
     }
-    
+
     /**
      * @dev Creates a new BpmRuntime.ActivityInstance with the specified parameters and adds it to the given ProcessInstance
      * @param _processInstance the ProcessInstance to which the ActivityInstance is added
@@ -1200,7 +1201,7 @@ library BpmRuntimeLib {
     function createIntermediateEventInstance(BpmRuntime.ProcessInstance storage _processInstance, bytes32 _eventId) public returns (bytes32 eiId) {
         eiId = keccak256(abi.encodePacked(_processInstance.addr, _eventId));
         uint created = block.timestamp;
-        
+
         BpmRuntime.IntermediateEventInstance memory iei = BpmRuntime.IntermediateEventInstance({id: eiId,
                                                                                                eventId: _eventId,
                                                                                                processInstance: _processInstance.addr,
@@ -1580,7 +1581,7 @@ library BpmRuntimeLib {
                         _graph.activities[_graph.transitions[_transitionId].defaultOutput].ready = true;
                     }
                     else {
-                        revert(ErrorsLib.format(ErrorsLib.RUNTIME_ERROR(), "BpmRuntimeLib.fireTransition(BpmRuntime.ProcessGraph,bytes32)", "Firing XOR transition resulted in no traversable output and no default output configured.")); // no transition is true and no default output ... 
+                        revert(ErrorsLib.format(ErrorsLib.RUNTIME_ERROR(), "BpmRuntimeLib.fireTransition(BpmRuntime.ProcessGraph,bytes32)", "Firing XOR transition resulted in no traversable output and no default output configured.")); // no transition is true and no default output ...
                     }
                 }
             }

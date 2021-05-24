@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-utils/DataTypes.sol";
 
@@ -41,7 +42,7 @@ contract FullDataStorage is AbstractDataStorage {
   /*****************************************************************
    *                          UINTARRAY
    *****************************************************************/
-  
+
   function setDataValueAsUint8Array (bytes32 _id, uint8[] memory _value) public {
     DataStorageUtils.Data memory data;
     data.id = _id;
@@ -91,7 +92,7 @@ contract FullDataStorage is AbstractDataStorage {
   /*****************************************************************
    *                          INTARRAY
    *****************************************************************/
-  
+
   function setDataValueAsInt8Array (bytes32 _id, int8[] memory _value) public {
     DataStorageUtils.Data memory data;
     data.id = _id;
@@ -223,5 +224,5 @@ contract FullDataStorage is AbstractDataStorage {
   function getDataValueAsBytes20Array (bytes32 _id) external view returns (bytes20[] memory) { return dataStorageMap.get(_id).bytes20ArrayValue; }
   function getDataValueAsBytes24Array (bytes32 _id) external view returns (bytes24[] memory) { return dataStorageMap.get(_id).bytes24ArrayValue; }
   function getDataValueAsBytes28Array (bytes32 _id) external view returns (bytes28[] memory) { return dataStorageMap.get(_id).bytes28ArrayValue; }
-  
+
 }

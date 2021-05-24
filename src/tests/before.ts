@@ -1,7 +1,7 @@
+import { Client } from '@hyperledger/burrow';
 import { config } from 'dotenv';
 import { resolve } from 'path';
 import { Deploy } from '../deploy';
-import { Client } from '../lib/client';
 import { Contracts, NewContracts } from '../lib/contracts';
 
 const minute = 60_000;

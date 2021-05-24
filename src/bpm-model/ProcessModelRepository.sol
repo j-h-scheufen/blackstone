@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-management/Upgradeable.sol";
 import "commons-management/ObjectFactory.sol";
@@ -11,7 +12,7 @@ import "bpm-model/BpmModel.sol";
  * @dev Manages registered ProcessModel instances with their past and active versions.
  */
 contract ProcessModelRepository is ObjectFactory, Upgradeable {
-	
+
 	event LogProcessModelActivation(
 		bytes32 indexed eventId,
 		address modelAddress,
@@ -45,7 +46,7 @@ contract ProcessModelRepository is ObjectFactory, Upgradeable {
 	 * @return an error indicating success or failure
 	 */
 	function activateModel(ProcessModel _model) external returns (uint error);
-	
+
 	/**
 	 * @dev Returns the address of the activated model with the given ID, if it exists and is activated
 	 * @param _id the model ID
@@ -58,7 +59,7 @@ contract ProcessModelRepository is ObjectFactory, Upgradeable {
 	 * @param _id the model ID
 	 * @param _version the model version
 	 * @return the model address, if found
-	 */	
+	 */
 	function getModelByVersion(bytes32 _id, uint8[3] calldata _version) external view returns (uint error, address modelAddress);
 
 	/**
@@ -98,7 +99,7 @@ contract ProcessModelRepository is ObjectFactory, Upgradeable {
 	function getProcessDefinitionAtIndex(address _model, uint _idx) external view returns (address);
 
 	/**
-	 * @dev Returns the number of Activity Definitions in the specified Process 
+	 * @dev Returns the number of Activity Definitions in the specified Process
 	 * @param _model the model address
 	 * @param _processDefinition a Process Definition address
 	 * @return uint - the number of Activity Definitions

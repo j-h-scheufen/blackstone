@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-management/ObjectFactory.sol";
 import "commons-management/Upgradeable.sol";
@@ -52,15 +53,15 @@ contract ArchetypeRegistry is ObjectFactory, Upgradeable {
 	 * @return archetype - the new archetype's address, if successfully created
 	 */
 	function createArchetype(
-		uint _price, 
-		bool _isPrivate, 
-		bool _active, 
-		address _author, 
-		address _owner, 
-		address _formationProcess, 
-		address _executionProcess, 
-		bytes32 _packageId, 
-		address[] calldata _governingArchetypes) 
+		uint _price,
+		bool _isPrivate,
+		bool _active,
+		address _author,
+		address _owner,
+		address _formationProcess,
+		address _executionProcess,
+		bytes32 _packageId,
+		address[] calldata _governingArchetypes)
 		external returns (address archetype);
 
 	/**
@@ -285,7 +286,7 @@ contract ArchetypeRegistry is ObjectFactory, Upgradeable {
 	 * @return the number of governing archetypes
 	 */
 	function getNumberOfGoverningArchetypes(address _archetype) external view returns (uint size);
-	
+
 	/**
 	 * @dev Retrieves the address of governing archetype at the specified index
 	 * @param _archetype the address of the archetype
@@ -293,5 +294,5 @@ contract ArchetypeRegistry is ObjectFactory, Upgradeable {
 	 * @return the address for the governing archetype
 	 */
 	function getGoverningArchetypeAtIndex(address _archetype, uint _index) external view returns (address archetype);
-	
+
 }

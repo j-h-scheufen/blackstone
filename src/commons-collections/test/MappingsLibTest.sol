@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 
@@ -11,7 +12,7 @@ contract MappingsLibTest {
     using MappingsLib for Mappings.Bytes32StringMap;
     using MappingsLib for Mappings.Bytes32AddressArrayMap;
     using MappingsLib for Mappings.Bytes32Bytes32Map;
-    using MappingsLib for Mappings.Bytes32UintMap;    
+    using MappingsLib for Mappings.Bytes32UintMap;
     using MappingsLib for Mappings.AddressBytes32Map;
     using MappingsLib for Mappings.AddressBoolMap;
     using MappingsLib for Mappings.AddressBytes32ArrayMap;
@@ -27,7 +28,7 @@ contract MappingsLibTest {
     Mappings.Bytes32StringMap b32StringMap;
     Mappings.Bytes32AddressArrayMap b32AddrArrayMap;
     Mappings.Bytes32Bytes32Map b32b32Map;
-    Mappings.Bytes32UintMap b32UintMap;    
+    Mappings.Bytes32UintMap b32UintMap;
     Mappings.AddressBytes32Map addrB32Map;
     Mappings.AddressBoolMap addrBoolMap;
     Mappings.AddressBytes32ArrayMap addrB32ArrayMap;
@@ -491,7 +492,7 @@ contract MappingsLibTest {
 
     /**
      * @dev Tests functions belonging to Bytes32AddressArrayMap in Mappings.
-     * TODO: test functions that return dynamic arrays. 
+     * TODO: test functions that return dynamic arrays.
      */
     function testBytes32AddressArrayMap() external returns (string memory) {
 
@@ -808,7 +809,7 @@ contract MappingsLibTest {
         // reusable variables during test
         uint error;
         address key;
-    
+
         // clear test arrays
         clearBytes32Arrays();
         bytes32Array1.push(bytes32_1);
@@ -888,7 +889,7 @@ contract MappingsLibTest {
         if (lenBefore+1 != lenAfter) { return "Size of inner array returned from addToArray function does not have expected value"; }
         if (lenBefore+1 != addrB32ArrayMap.rows[addr2].value.length) { return "Adding to inner array did not increase length"; }
         if (addrB32ArrayMap.rows[addr2].value[lenAfter-1] != "newValue") { return "Value added to inner array not correct"; }
-        
+
         // test with unknown key
         lenAfter = addrB32ArrayMap.addToArray(addr4, "myValue", false);
         if (1 != lenAfter) { return "Size of newly created inner array should be 1"; }

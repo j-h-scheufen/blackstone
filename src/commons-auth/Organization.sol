@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-management/VersionedArtifact.sol";
 
@@ -30,7 +31,7 @@ contract Organization is VersionedArtifact {
         int __DELETE__,
         address organizationAddress,
         address userAddress
-    ); 
+    );
 
     event LogDepartmentUserUpdate(
         bytes32 indexed eventId,
@@ -51,7 +52,7 @@ contract Organization is VersionedArtifact {
         bytes32 indexed eventId,
         address organizationAddress,
         bytes32 departmentId,
-        uint userCount     
+        uint userCount
     );
 
     event LogOrganizationDepartmentRemoval(
@@ -104,7 +105,7 @@ contract Organization is VersionedArtifact {
 	function getDepartmentAtIndex(uint _index) external view returns (bytes32 id);
 
 	function getDepartmentData(bytes32 _id) external view returns (uint userCount);
-	
+
 	function departmentExists(bytes32 _id) external view returns (bool);
 
 	/**
@@ -112,7 +113,7 @@ contract Organization is VersionedArtifact {
 	 * @return the number of approvers
 	 */
 	function getNumberOfApprovers() external view returns (uint);
-	
+
 	/**
 	 * @dev Returns the approver's address at the given index position.
 	 * @param _pos the index position

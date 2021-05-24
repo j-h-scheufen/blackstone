@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/SystemOwned.sol";
 import "commons-base/BaseErrors.sol";
@@ -15,10 +16,10 @@ contract ActiveAgreementRegistryDb is SystemOwned {
 
   Mappings.AddressBoolMap activeAgreements;
   Agreements.AgreementCollectionMap collections;
-  
+
   // Tracks the formation and execution workflows per agreement
   mapping(address => address[2]) agreementProcesses;
-  
+
   constructor() public {
     systemOwner = msg.sender;
   }

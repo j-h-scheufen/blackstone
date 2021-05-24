@@ -1,12 +1,13 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-standards/IsoCountries.sol";
-    
+
 //** Country: https://en.wikipedia.org/wiki/ISO_3166-1
 //** Regions: https://en.wikipedia.org/wiki/ISO_3166-2
 
 contract IsoCountries100 is VersionLinkedAppendOnly([1,0,0]), IsoCountries {
-    // Country keys are held as dedicated bytes2 values. 
+    // Country keys are held as dedicated bytes2 values.
     // The key matches the ISO 3166-1 Alpha2 code of the country.
     // The key will also match the country code of the region struct.
     // This key is to be used by other contracts as the primary key to reference the country.

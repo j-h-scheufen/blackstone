@@ -1,4 +1,3 @@
-import { CallTx } from '@hyperledger/burrow/proto/payload_pb';
 import { expect } from 'chai';
 import { config } from 'dotenv';
 import { resolve } from 'path';
@@ -7,14 +6,14 @@ import { Strings } from '../commons-utils/Strings.abi';
 import { Migrations } from '../migrations/Migrations.abi';
 
 describe('Migrations', () => {
-  let migrations: Migrations.Contract<CallTx>;
+  let migrations: Migrations.Contract['functions'];
 
   before(async () => {
     config({ path: resolve(__dirname, '../../.env') });
     const signingaddress = process.env.SIGNING_ADDRESS;
     const client = new Client(process.env.CHAIN_URL_GRPC, signingaddress);
-    const stringsAddress = await Strings.Deploy(client);
-    migrations = new Migrations.Contract(client, await Migrations.Deploy(client, stringsAddress));
+    const stringsAddress = await Strings.deploy(client);
+    migrations = Migrations.contract(client, await Migrations.deploy(client, stringsAddress)).functions;
   });
 
   it('migrates', async () => {

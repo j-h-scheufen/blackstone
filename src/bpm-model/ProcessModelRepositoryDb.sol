@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/SystemOwned.sol";
 import "commons-base/BaseErrors.sol";
@@ -7,7 +8,7 @@ import "commons-collections/MappingsLib.sol";
 import "commons-utils/ArrayUtilsLib.sol";
 
 contract ProcessModelRepositoryDb is SystemOwned {
-  
+
   using MappingsLib for Mappings.Bytes32AddressMap;
   using ArrayUtilsLib for address[];
 

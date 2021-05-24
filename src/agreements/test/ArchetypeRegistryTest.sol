@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/SystemOwned.sol";
 import "commons-utils/TypeUtilsLib.sol";
@@ -48,7 +49,7 @@ contract ArchetypeRegistryTest {
 
 	DefaultArchetype defaultArchetypeImpl = new DefaultArchetype();
 	ArtifactsRegistry artifactsRegistry;
-	
+
 	constructor (address _isoCountries) public {
 		require(_isoCountries != address(0), "The test contract requires an instance of IsoCountries");
 		isoCountries = IsoCountries100(_isoCountries);
@@ -165,13 +166,13 @@ contract ArchetypeRegistryTest {
 		error = registry.addJurisdiction(archetype, "CA", region);
 		if (error != BaseErrors.NO_ERROR()) return "Adding CAN_ON jurisdiction to archetype failed unexpectedly";
 		if (registry.getNumberOfJurisdictionsForArchetype(archetype) != 3) return "Jurisdictions on archetype exptected to be 3";
-		if (registry.getJurisdictionAtIndexForArchetype(archetype, 2) != region) return "jurisdiction key at index 2 not returned correctly";		
+		if (registry.getJurisdictionAtIndexForArchetype(archetype, 2) != region) return "jurisdiction key at index 2 not returned correctly";
 		// test overwriting (cleaning) a country/region with country-ONLY jurisdiction
 		error = registry.addJurisdiction(archetype, "CA", EMPTY);
 		if (error != BaseErrors.NO_ERROR()) return "Adding CAN jurisdiction country overwrite to archetype failed unexpectedly";
 
 		if (registry.getNumberOfJurisdictionsForArchetype(archetype) != 2) return "Jurisdictions on archetype exptected to be 2 after country overwrite";
-		if (registry.getJurisdictionAtIndexForArchetype(archetype, 2) != "") return "jurisdiction key at index 2 should return empty after country overwrite";		
+		if (registry.getJurisdictionAtIndexForArchetype(archetype, 2) != "") return "jurisdiction key at index 2 should return empty after country overwrite";
 		if (registry.getJurisdictionAtIndexForArchetype(archetype, 1) != keccak256(abi.encodePacked("CA"))) return "jurisdiction key at index 1 should return country hash after country overwrite";
 
 		// test archetype upgrade scenarios < 1.1.0 to retrofit the owner permission
@@ -231,7 +232,7 @@ contract ArchetypeRegistryTest {
 		uint error;
 		bool active;
 		bool success;
-	
+
 		(success, ) = address(registry).call(abi.encodeWithSignature(functionRegistryCreateArchetypePackage, address(0), fakePackageId, droneArchetype));
 		if (success)
 			return "Creating an archetype package with an empty author should revert";
@@ -291,7 +292,7 @@ contract ArchetypeRegistryTest {
 		addrArrayWithDupes.push(archetype);
 		archetype = registry.createArchetype(10, false, true, falseAddress, falseAddress, falseAddress, falseAddress, EMPTY, emptyArray);
 		addrArrayWithDupes.push(archetype);
-		
+
 		(success, ) = address(registry).call(abi.encodeWithSignature(functionRegistryCreateArchetype, uint256(0), false, true, address(this), falseAddress, falseAddress, EMPTY, addrArrayWithDupes));
 		if (success)
 			return "Creating archetype with duplicate governing archetypes should revert";
@@ -315,7 +316,7 @@ contract ArchetypeRegistryTest {
 
 		if (registry.getNumberOfGoverningArchetypes(ndaArchetype) != 1) return "ndaArchetype should have 1 governing archetype";
 		if (registry.getGoverningArchetypeAtIndex(ndaArchetype, 0) != employmentArchetype) return "ndaArchetype's governing archetype should be set to employmentArchetype";
-		
+
 		return SUCCESS;
 	}
 }

@@ -25,5 +25,4 @@ jobs:
         git config --global user.email "${GITHUB_ACTOR}"
         git config --global user.name "${GITHUB_ACTOR}"
         yarn install
-        make dist
         make publish

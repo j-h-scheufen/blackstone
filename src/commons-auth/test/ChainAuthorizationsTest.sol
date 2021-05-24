@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 
@@ -33,7 +34,7 @@ contract ChainAuthorizationsTest {
      * @return error string or "success"
      */
     function testFunctions() external returns (string memory) {
-    	    	
+
         // Test `hasRole`
         if (chainAuthorizations.hasRole(this, ROLE)) return "Expected hasRole on start: false";
 

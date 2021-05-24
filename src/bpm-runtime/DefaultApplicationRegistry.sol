@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "bpm-model/BpmModel.sol";
@@ -49,7 +50,7 @@ contract DefaultApplicationRegistry is AbstractVersionedArtifact(1,0,0), Abstrac
 	 * @param _dataType a DataTypes code
 	 * @param _direction the BpmModel.Direction (IN/OUT) of the data flow
    * @return BaseErrors.RESOURCE_NOT_FOUND() if the application does not exist
-	 *				 BaseBaseErrors.RESOUCE_ALREADY_EXISTS() if the access point already exists 
+	 *				 BaseBaseErrors.RESOUCE_ALREADY_EXISTS() if the access point already exists
 	 *				 BaseBaseErrors.NO_ERROR() if no errors
 	 */
 	function addAccessPoint(bytes32 _id, bytes32 _accessPointId, uint8 _dataType, BpmModel.Direction _direction) external returns (uint error) {

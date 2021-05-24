@@ -1,11 +1,11 @@
 import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import rid from 'random-id';
 import { NewSync, SyncContracts } from '../lib/contracts';
 import { Agreement, Archetype, Model } from '../lib/types';
-import { SHA3 } from '../lib/utils';
+import { sha3 } from '../lib/utils';
 import { VentListener } from '../lib/vent';
 import { contracts } from './before';
-import rid = require('random-id');
 
 chai.use(chaiAsPromised);
 const { expect, assert } = chai;
@@ -127,7 +127,7 @@ describe('CONTRACTS', () => {
 
   it('Should create a user', async () => {
     const res = await contracts.createUser({
-      username: SHA3(rid(16, 'aA0')),
+      username: sha3(rid(16, 'aA0')),
     });
     expect(res).to.match(/[0-9A-Fa-f]{40}/);
     pAccount.address = res;

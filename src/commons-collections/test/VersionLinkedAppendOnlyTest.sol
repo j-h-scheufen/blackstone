@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 
@@ -8,7 +9,7 @@ import "commons-collections/VersionLinkedAppendOnly.sol";
  * @dev Auxiliary factory contract to create a VersionLinked instance with this ForeignOwner being the owner.
  */
 contract ForeignOwner {
-	
+
 	function createLink(uint8[3] calldata _v) external returns (VersionLinkedAppendOnly) {
 		return new VersionLinkedAppendOnly(_v);
 	}
@@ -18,27 +19,27 @@ contract ForeignOwner {
  * @dev Special VersionLinked contract to be able to call another VersionLinked instance through this contract, i.e. as this msg.sender
  */
 contract DelegateVersionLinked is VersionLinkedAppendOnly {
-	
+
 	constructor(uint8[3] memory _v) VersionLinkedAppendOnly(_v) public {}
-	
+
 	function delegateAcceptVersionLink(VersionLinkedAppendOnly _target, VersionLinkedAppendOnly _link) external returns (uint) {
 		return _target.appendNewVersion(_link);
 	}
 }
 
 contract VersionLinkedAppendOnlyTest {
-	
+
 	ForeignOwner otherLinkList = new ForeignOwner();
 
 	// function in order to test setPredecessor()
 	function getOwner() public pure returns (address) {}
-	
+
 	function testAppendOnlyLinking() external returns (string memory) {
 		VersionLinkedAppendOnly v100 = new VersionLinkedAppendOnly([1,0,0]);
 		VersionLinkedAppendOnly v100_1 = new VersionLinkedAppendOnly([1,0,0]);
 		VersionLinkedAppendOnly v110 = new VersionLinkedAppendOnly([1,1,0]);
 		VersionLinkedAppendOnly v250 = new VersionLinkedAppendOnly([2,5,0]);
-		VersionLinkedAppendOnly v115 = new VersionLinkedAppendOnly([1,1,5]);		
+		VersionLinkedAppendOnly v115 = new VersionLinkedAppendOnly([1,1,5]);
 		VersionLinkedAppendOnly v300 = new VersionLinkedAppendOnly([3,0,0]);
 		VersionLinkedAppendOnly v350 = new VersionLinkedAppendOnly([3,5,0]);
 		VersionLinkedAppendOnly v350_2 = new VersionLinkedAppendOnly([3,5,0]);
@@ -64,14 +65,14 @@ contract VersionLinkedAppendOnlyTest {
 		}
 		if (v110.getSuccessor() != address(0)) {
 			return "Successor to v110 should be empty!";
-		} 
+		}
 		if (v100.getSuccessor() != address(v110)) {
 			return "v110 should be successor to v100.";
 		}
 		if (v110.getPredecessor() != address(v100)) {
 			return "v100 should be predecessor to v110.";
 		}
-		
+
 		if (v100.appendNewVersion(v250) != BaseErrors.NO_ERROR()) {
 			return "Failed to link versions 250 into existing 100->110";
 		}
@@ -129,14 +130,14 @@ contract VersionLinkedAppendOnlyTest {
 			return "attempting to change predecessor from external contract should fail";
 		}
 		if (tempPre != v350.getPredecessor()) { return "attempting to set predecessor from external contract should have no effect"; }
-		
+
 		address tempLatest = v100.getLatest();
 		if (v100.setLatest(v110)) { return "should not be able to set latest by a non-successor"; }
 		if (tempLatest != v100.getLatest()) { return "attempting to set latest by a non-successor should have no effect"; }
-		
+
 		// current chain = 100 -> 110 -> 250 -> 350
 		address addr;
-		
+
 		addr = v100.getTargetVersion([2,5,0]);
 		if (addr != address(v250)) {
 			return "v250 was not found in version chain";

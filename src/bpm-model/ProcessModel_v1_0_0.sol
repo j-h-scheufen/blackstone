@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/Versioned.sol";
 import "commons-base/Bytes32Identifiable.sol";
@@ -8,7 +9,7 @@ import "bpm-model/BpmModel.sol";
 
 /**
  * @title ProcessModel Interface
- * @dev Versionized container providing a namespace for a set of business process definitions and their artifacts. 
+ * @dev Versionized container providing a namespace for a set of business process definitions and their artifacts.
  */
 contract ProcessModel_v1_0_0 is VersionedArtifact, Versioned, Bytes32Identifiable {
 
@@ -57,7 +58,7 @@ contract ProcessModel_v1_0_0 is VersionedArtifact, Versioned, Bytes32Identifiabl
 	 * @return the address of the new ProcessDefinition when successful
 	 */
 	function createProcessDefinition(bytes32 _id, address _artifactsFinder) external returns (address newAddress);
-	
+
 	/**
 	 * @dev Returns the address of the ProcessDefinition with the specified ID
 	 * @param _id the process ID
@@ -109,7 +110,7 @@ contract ProcessModel_v1_0_0 is VersionedArtifact, Versioned, Bytes32Identifiabl
 	 * @return the ID of a participant or an empty bytes32, if no matching participant exists
 	 */
 	function getConditionalParticipant(bytes32 _dataPath, bytes32 _dataStorageId, address _dataStorage) external view returns (bytes32);
-	
+
 	/**
 	 * @dev Returns the number of process interfaces declared in this ProcessModel
 	 * @return the number of process interfaces

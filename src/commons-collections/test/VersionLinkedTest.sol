@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 
@@ -8,7 +9,7 @@ import "commons-collections/VersionLinked.sol";
  * @dev Auxiliary factory contract to create a VersionLinked instance with this ForeignOwner being the owner.
  */
 contract ForeignOwner {
-	
+
 	function createLink(uint8[3] calldata _v) external returns (VersionLinked) {
 		return new VersionLinked(_v);
 	}
@@ -18,18 +19,18 @@ contract ForeignOwner {
  * @dev Special VersionLinked contract to be able to call another VersionLinked instance through this contract, i.e. as this msg.sender
  */
 contract DelegateVersionLinked is VersionLinked {
-	
+
 	constructor(uint8[3] memory _v) VersionLinked(_v) public {}
-	
+
 	function delegateAcceptVersionLink(VersionLinked _target, VersionLinked _link) external returns (uint) {
 		return _target.acceptVersionLink(_link);
 	}
 }
 
 contract VersionLinkedTest {
-	
+
 	ForeignOwner otherLinkList = new ForeignOwner();
-		
+
 	function testVersionLinking() external returns (string memory) {
 
 		VersionLinked v100 = new VersionLinked([1,0,0]);
@@ -49,7 +50,7 @@ contract VersionLinkedTest {
 		if (v110.getSuccessor() != address(0)) return "Successor to v110 should be empty!";
 		if (v100.getSuccessor() != address(v110)) return "v110 should be successor to v100.";
 		if (v110.getPredecessor() != address(v100)) return "v100 should be predecessor to v110.";
-		
+
 		if (v100.acceptVersionLink(v327) != BaseErrors.NO_ERROR()) return "Failed to link versions 327 into existing 100->110";
 		if (v100.getSuccessor() != address(v110) ||
 			v110.getSuccessor() != address(v327) ||
@@ -63,7 +64,7 @@ contract VersionLinkedTest {
 			v327.getPredecessor() != address(v301) ||
 			v301.getPredecessor() != address(v110) ||
 			v110.getPredecessor() != address(v100)) return "v301 and existing 100->110->327 did not link as expected.";
-		
+
 		if (v327.acceptVersionLink(v250) != BaseErrors.NO_ERROR()) return "Failed to link versions 250 into existing 100->110->301->327";
 		if (v100.getSuccessor() != address(v110) ||
 			v110.getSuccessor() != address(v250) ||
@@ -73,7 +74,7 @@ contract VersionLinkedTest {
 			v301.getPredecessor() != address(v250) ||
 			v250.getPredecessor() != address(v110) ||
 			v110.getPredecessor() != address(v100)) return "v250 and existing 100->110->301->327 did not link as expected.";
-		
+
 		if (v250.acceptVersionLink(v302) != BaseErrors.NO_ERROR()) return "Failed to link versions 302 into existing 100->110->250->301->327";
 		if (v100.getSuccessor() != address(v110) ||
 			v110.getSuccessor() != address(v250) ||

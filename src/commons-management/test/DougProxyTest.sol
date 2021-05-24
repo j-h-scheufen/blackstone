@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-management/DOUG.sol";
 import "commons-management/DefaultDoug.sol";
@@ -31,7 +32,7 @@ contract DougProxyTest {
         uint currentSize = artifactsRegistry.getNumberOfArtifacts();
         DOUG(address(proxy)).deploy("agreements-network/libraries/BaseErrors", address(this));
         if (artifactsRegistry.getNumberOfArtifacts() != currentSize+1) return "ArtifactsRegistry size should be +1 after adding library via DOUG proxy";
-        
+
         TestService s1 = new TestService([1,0,0], "");
         s1.transferUpgradeOwnership(address(proxy));
         DOUG(address(proxy)).deploy("agreements-network/services/ProxyDelegateTest1", address(s1));
@@ -39,7 +40,7 @@ contract DougProxyTest {
         if (DOUG(address(proxy)).lookup("agreements-network/services/ProxyDelegateTest1") != address(s1)) return "service should be retrievable via the DOUG proxy";
 
         // TODO test upgrades of Doug and ArtifactsRegistry itself
-        
+
         return SUCCESS;
     }
 

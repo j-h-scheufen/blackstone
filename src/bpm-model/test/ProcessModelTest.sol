@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-utils/DataTypes.sol";
@@ -9,7 +10,7 @@ import "bpm-model/DefaultProcessModel.sol";
 import "bpm-model/DefaultProcessDefinition.sol";
 
 contract ProcessModelTest {
-	
+
 	// test data
 	bytes32 formHash = "8c7yb387ybtcnqf89y348t072q34fchg";
 	bytes32 participant1Id = "Participant1";
@@ -24,7 +25,7 @@ contract ProcessModelTest {
 	ProcessDefinition defaultProcessDefinitionImpl = new DefaultProcessDefinition();
 
 	function testProcessModel() external returns (string memory) {
-		
+
 		uint error;
 		address newAddress;
 
@@ -57,7 +58,7 @@ contract ProcessModelTest {
 
 		newAddress = pm.createProcessDefinition("p1", address(artifactsRegistry));
 		ProcessDefinition pd = ProcessDefinition(newAddress);
-		
+
 		if (pm.getProcessDefinition("p1") != address(pd)) return "Returned ProcessDefinition address does not match.";
 
 		// test process interface handling

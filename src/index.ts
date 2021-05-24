@@ -1,8 +1,6 @@
-export { Client } from './lib/client';
-export { Contracts, NewContracts } from './lib/contracts'
-export { VentListener } from './lib/vent';
-export { Deploy } from './deploy';
-export { BytesFromString, BytesToString } from './lib/utils';
+export { Client } from '@hyperledger/burrow';
 export { CallTx } from '@hyperledger/burrow/proto/payload_pb';
-export {SyncContracts} from "./lib/contracts";
-export {NewSync} from "./lib/contracts";
+export { Deploy } from './deploy';
+export { Contracts, NewContracts, NewSync, SyncContracts } from './lib/contracts';
+export { bytesFromString, bytesToString } from './lib/utils';
+export { VentListener } from './lib/vent';

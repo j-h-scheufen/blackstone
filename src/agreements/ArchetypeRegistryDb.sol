@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/SystemOwned.sol";
@@ -31,7 +32,7 @@ contract ArchetypeRegistryDb is SystemOwned {
   function getNumberOfArchetypes() external view returns (uint) {
     return archetypes.keys.length;
   }
-  
+
   function getArchetypeAtIndex(uint _index) external view returns (uint error, address archetype) {
     (error, archetype) = archetypes.keyAtIndex(_index);
   }
@@ -49,7 +50,7 @@ contract ArchetypeRegistryDb is SystemOwned {
 
   function addArchetypeToPackage(bytes32 _id, address _archetype) external pre_onlyBySystemOwner returns (uint) {
     if (!packages.rows[_id].exists) return BaseErrors.RESOURCE_NOT_FOUND();
-    if (!packages.rows[_id].value.archetypes.contains(_archetype)) 
+    if (!packages.rows[_id].value.archetypes.contains(_archetype))
       packages.rows[_id].value.archetypes.push(_archetype);
     return BaseErrors.NO_ERROR();
   }

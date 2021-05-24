@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/Owned.sol";
@@ -11,7 +12,7 @@ import "bpm-model/ProcessModelRepositoryDb.sol";
 import "bpm-model/DefaultProcessModel.sol";
 
 contract ProcessModelRepositoryTest {
-	
+
 	address author = 0x9d7fDE63776AaB9E234d656E654ED9876574C54C;
 	uint error;
 	string dummyModelFileReference = "{json grant}";
@@ -39,21 +40,21 @@ contract ProcessModelRepositoryTest {
 	function testRepository() external returns (string memory) {
 
 		ProcessModelRepository repo = createNewProcessModelRepository();
-		
+
 		( ,address pm1) = repo.createProcessModel("testModel", [1,0,0], author, false, dummyModelFileReference);
 		( ,address pm2) = repo.createProcessModel("testModel", [2,0,0], author, false, dummyModelFileReference);
 		( ,address pm3) = repo.createProcessModel("testModel", [3,0,0], author, false, dummyModelFileReference);
-				
+
 		if (repo.getModel("testModel") != pm1) return "Version 1.0.0 should be the active one.";
 
 		error = repo.activateModel(ProcessModel(pm2));
-		if (error != BaseErrors.NO_ERROR()) return "Error activating model 2."; 
+		if (error != BaseErrors.NO_ERROR()) return "Error activating model 2.";
 		if (repo.getModel("testModel") != pm2) return "Version 2.0.0 should be the active one.";
-		
+
 		error = repo.activateModel(ProcessModel(pm3));
-		if (error != BaseErrors.NO_ERROR()) return "Error activating model 3."; 
+		if (error != BaseErrors.NO_ERROR()) return "Error activating model 3.";
 		if (repo.getModel("testModel") != pm3) return "Version 3.0.0 should be the active one.";
-				
+
 		return "success";
 	}
 }

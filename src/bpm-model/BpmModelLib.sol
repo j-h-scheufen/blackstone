@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/ErrorsLib.sol";
 import "commons-collections/DataStorageUtils.sol";
@@ -59,7 +60,7 @@ library BpmModelLib {
      * @dev Resolves the given TransitionCondition value as a bool using the provided DataStorage.
      * REVERTS: if the given condition does not have a right-hand side value (conditional or primitive)
      * @param _condition a BpmModel.TransitionCondition
-     * @param _dataStorage the address of a DataStorage contract (only used for right-hand side conditional evaluation, not right-hand side primitive) 
+     * @param _dataStorage the address of a DataStorage contract (only used for right-hand side conditional evaluation, not right-hand side primitive)
      * @return the result of resolving the TransitionCondition as bool value
      */
     function resolveRightHandValueAsBool(BpmModel.TransitionCondition storage _condition, address _dataStorage)
@@ -80,7 +81,7 @@ library BpmModelLib {
      * @dev Resolves the given TransitionCondition value as an address using the provided DataStorage.
      * REVERTS: if the given condition does not have a right-hand side value (conditional or primitive)
      * @param _condition a BpmModel.TransitionCondition
-     * @param _dataStorage the address of a DataStorage contract (only used for right-hand side conditional evaluation, not right-hand side primitive) 
+     * @param _dataStorage the address of a DataStorage contract (only used for right-hand side conditional evaluation, not right-hand side primitive)
      * @return the result of resolving the TransitionCondition asn address value
      */
     function resolveRightHandValueAsAddress(BpmModel.TransitionCondition storage _condition, address _dataStorage)
@@ -101,7 +102,7 @@ library BpmModelLib {
      * @dev Resolves the given TransitionCondition value as a bytes32 using the provided DataStorage.
      * REVERTS: if the given condition does not have a right-hand side value (conditional or primitive)
      * @param _condition a BpmModel.TransitionCondition
-     * @param _dataStorage the address of a DataStorage contract (only used for right-hand side conditional evaluation, not right-hand side primitive) 
+     * @param _dataStorage the address of a DataStorage contract (only used for right-hand side conditional evaluation, not right-hand side primitive)
      * @return the result of resolving the TransitionCondition as bytes32 value
      */
     function resolveRightHandValueAsBytes32(BpmModel.TransitionCondition storage _condition, address _dataStorage)
@@ -122,7 +123,7 @@ library BpmModelLib {
      * @dev Resolves the given TransitionCondition value as a string using the provided DataStorage.
      * REVERTS: if the given condition does not have a right-hand side value (conditional or primitive)
      * @param _condition a BpmModel.TransitionCondition
-     * @param _dataStorage the address of a DataStorage contract (only used for right-hand side conditional evaluation, not right-hand side primitive) 
+     * @param _dataStorage the address of a DataStorage contract (only used for right-hand side conditional evaluation, not right-hand side primitive)
      * @return the result of resolving the TransitionCondition as string value
      */
     function resolveRightHandValueAsString(BpmModel.TransitionCondition storage _condition, address _dataStorage)
@@ -143,7 +144,7 @@ library BpmModelLib {
      * @dev Resolves the given TransitionCondition value as a uint using the provided DataStorage.
      * REVERTS: if the given condition does not have a right-hand side value (conditional or primitive)
      * @param _condition a BpmModel.TransitionCondition
-     * @param _dataStorage the address of a DataStorage contract (only used for right-hand side conditional evaluation, not right-hand side primitive) 
+     * @param _dataStorage the address of a DataStorage contract (only used for right-hand side conditional evaluation, not right-hand side primitive)
      * @return the result of resolving the TransitionCondition as uint value
      */
     function resolveRightHandValueAsUint(BpmModel.TransitionCondition storage _condition, address _dataStorage)
@@ -164,7 +165,7 @@ library BpmModelLib {
      * @dev Resolves the given TransitionCondition value as a int using the provided DataStorage.
      * REVERTS: if the given condition does not have a right-hand side value (conditional or primitive)
      * @param _condition a BpmModel.TransitionCondition
-     * @param _dataStorage the address of a DataStorage contract (only used for right-hand side conditional evaluation, not right-hand side primitive) 
+     * @param _dataStorage the address of a DataStorage contract (only used for right-hand side conditional evaluation, not right-hand side primitive)
      * @return the result of resolving the TransitionCondition as int value
      */
     function resolveRightHandValueAsInt(BpmModel.TransitionCondition storage _condition, address _dataStorage)

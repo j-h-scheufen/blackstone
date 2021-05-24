@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/SystemOwned.sol";
@@ -22,7 +23,7 @@ contract ActiveAgreementRegistryTest {
 	string constant functionRegistryCreateAgreement = "createAgreement(address,address,address,string,bool,address[],bytes32,address[])";
 	string constant functionRegistryAddAgreementToCollection = "addAgreementToCollection(bytes32,address)";
 	string constant functionRegistryAddArchetypeToPackage = "addArchetypeToPackage(bytes32,address)";
-	
+
 	address public activeAgreement;
 	address public activeAgreement2;
 	address public archetypeAddr;
@@ -42,7 +43,7 @@ contract ActiveAgreementRegistryTest {
 	bytes32 realPackageId = "";
 
 	address[] emptyArray;
-	
+
 	address employmentArchetype;
 	address employmentAgreement;
 	address ndaArchetype;
@@ -120,7 +121,7 @@ contract ActiveAgreementRegistryTest {
 		string memory returnedFileRef;
 		bool retIsPrivate;
 		(retArchetype, retCreator, returnedFileRef, , , retIsPrivate, , , ) = agreementRegistry.getActiveAgreementData(activeAgreement);
-		
+
 		if (retArchetype != archetypeAddr) return "getActiveAgreementData returned wrong archetype";
 		if (retCreator != address(this)) return "getActiveAgreementData returned wrong creator";
 		if (keccak256(abi.encodePacked(returnedFileRef)) != keccak256(abi.encodePacked(dummyPrivateParametersFileRef))) return "getActiveAgreementData returned wrong private parameters file reference";
@@ -142,7 +143,7 @@ contract ActiveAgreementRegistryTest {
 		bool success;
 
 		ActiveAgreementRegistry agreementRegistry = createNewAgreementRegistry();
-	
+
 		archetypeAddr = archetypeRegistry.createArchetype(10, false, true, falseAddress, falseAddress, falseAddress, falseAddress, EMPTY, emptyArray);
 		if (archetypeAddr == address(0)) return "Archetype creation returned empty address";
 
@@ -155,7 +156,7 @@ contract ActiveAgreementRegistryTest {
 
 		(error, leaseCollectionId) = agreementRegistry.createAgreementCollection(address(0), Agreements.CollectionType.MATTER, fakePackageId);
 		if (error != BaseErrors.NULL_PARAM_NOT_ALLOWED()) return "Expected failure due to no author address";
-		
+
 		(error, leaseCollectionId) = agreementRegistry.createAgreementCollection(falseAddress, Agreements.CollectionType.MATTER, EMPTY);
 		if (error != BaseErrors.NULL_PARAM_NOT_ALLOWED()) return "Expected failure due to no archetype package id";
 
@@ -187,7 +188,7 @@ contract ActiveAgreementRegistryTest {
 
 		if (agreementRegistry.getNumberOfAgreementsInCollection(leaseCollectionId2) != 1) return "Lease collection 2 should have 1 agreement";
 		if (agreementRegistry.getAgreementAtIndexInCollection(leaseCollectionId2, 0) != activeAgreement) return "Agreement at index 0 of lease collection 2 should match activeAgreement";
-		
+
 		if (agreementRegistry.getNumberOfAgreementCollections() != 2) return "Registry should have 2 collections";
 
 		activeAgreement2 = agreementRegistry.createAgreement(archetypeAddr, address(this), address(this), dummyPrivateParametersFileRef, false, parties, leaseCollectionId2, emptyArray);
@@ -200,7 +201,7 @@ contract ActiveAgreementRegistryTest {
 	}
 
 	function testGoverningAgreements() external returns (string memory) {
-		
+
 		bool success;
 
 		ActiveAgreementRegistry agreementRegistry = createNewAgreementRegistry();
@@ -236,7 +237,7 @@ contract ActiveAgreementRegistryTest {
 		governingAgreements.push(employmentAgreement);
 		ndaAgreement = agreementRegistry.createAgreement(ndaArchetype, address(this), address(this), dummyPrivateParametersFileRef, false, parties, EMPTY, governingAgreements);
 		if (ndaAgreement == address(0)) return "Failed to create ndaAgreement with expected governing agreement employmentAgreement";
-		
+
 		return SUCCESS;
 	}
 }

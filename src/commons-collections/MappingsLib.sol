@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 // Libraries
 import "commons-base/BaseErrors.sol";
@@ -11,13 +12,13 @@ import "commons-collections/Mappings.sol";
  * @title Mappings API Library
  * @dev Public API to offer convenience around collections based on Mappings by supporting
  * easier key and value access as well as iteration capabilities.
- * 
+ *
  * The following Mapping combinations are currently available:
  * - Bytes32AddressMap:      bytes32 -> address
  * - Bytes32StringMap:       bytes32 -> string
  * - Bytes32UintMap:         bytes32 -> uint
  * - Bytes32AddressArrayMap: bytes32 -> address[]
- * - Bytes32Bytes32Map:      bytes32 -> bytes32 
+ * - Bytes32Bytes32Map:      bytes32 -> bytes32
  * - AddressBytes32Map:      address -> bytes32
  * - AddressStringMap:       address -> string
  * - AddressBoolMap:         address -> bool
@@ -35,7 +36,7 @@ library MappingsLib {
 	using TypeUtilsLib for bytes32;
     using ArrayUtilsLib for bytes32[];
     using ArrayUtilsLib for address[];
-    
+
     /**
      * ---------> Bytes32AddressMap <---------
      */
@@ -487,7 +488,7 @@ library MappingsLib {
      */
     function insertOrUpdate(Mappings.Bytes32Bytes32Map storage _map, bytes32 _key, bytes32 _value) public returns (uint) {
         if (_map.rows[_key].exists) {
-            _map.rows[_key].value = _value; 
+            _map.rows[_key].value = _value;
         } else {
             _map.rows[_key].keyIdx = (_map.keys.push(_key)-1);
             _map.rows[_key].value = _value;

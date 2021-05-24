@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/ErrorsLib.sol";
@@ -14,7 +15,7 @@ import "bpm-model/DefaultProcessDefinition.sol";
 
 /**
  * @title DefaultProcessModel
- * @dev Default implementation of the ProcessModel interface 
+ * @dev Default implementation of the ProcessModel interface
  */
 contract DefaultProcessModel is AbstractVersionedArtifact(1,1,0), AbstractDelegateTarget, AbstractVersioned, ProcessModel {
 
@@ -63,7 +64,7 @@ contract DefaultProcessModel is AbstractVersionedArtifact(1,1,0), AbstractDelega
 			_modelFileReference
 		);
 	}
-	
+
 	/**
 	 * @dev Creates a new process definition with the given parameters in this ProcessModel.
 	 * REVERTS if:
@@ -81,7 +82,7 @@ contract DefaultProcessModel is AbstractVersionedArtifact(1,1,0), AbstractDelega
 		ErrorsLib.revertIf(processDefinitions.insert(_processDefinitionId, newAddress) != BaseErrors.NO_ERROR(),
 			ErrorsLib.INVALID_STATE(), "DefaultProcessModel.createProcessDefinition", "Unable to add the new ProcessDefinition to the collection");
 	}
-	
+
 	/**
 	 * @dev Returns the address of the ProcessDefinition with the specified ID
 	 * @param _id the process ID
@@ -195,7 +196,7 @@ contract DefaultProcessModel is AbstractVersionedArtifact(1,1,0), AbstractDelega
 			      participants.rows[participants.keys[i]].value.conditionalPerformer.dataStorageId == _dataStorageId) ||
 			     (participants.rows[participants.keys[i]].value.conditionalPerformer.dataStorage != address(0) &&
 			      participants.rows[participants.keys[i]].value.conditionalPerformer.dataStorage == _dataStorage))) {
-					  
+
 					return participants.rows[participants.keys[i]].value.id;
 				}
 		}

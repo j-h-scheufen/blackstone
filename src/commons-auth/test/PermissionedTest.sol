@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-collections/AbstractDataStorage.sol";
 import "commons-collections/AbstractAddressScopes.sol";
@@ -7,7 +8,7 @@ import "commons-auth/DefaultOrganization.sol";
 import "commons-standards/AbstractERC165.sol";
 
 contract PermissionedTest {
-	
+
 	string constant SUCCESS = "success";
 
 	bytes32 constant permission1 = "test.permission1";

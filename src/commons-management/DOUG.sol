@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 /**
  * @title DOUG - Decentralized Organization Upgrade Guy
@@ -7,7 +8,7 @@ pragma solidity ^0.5;
  * Doug is a marmot that lives in Connecticut. We have named our smart contract kernel after this marmot.
  */
 contract DOUG {
-    
+
     /**
      * @dev Registers the contract with the given address under the specified ID and performs a deployment
      * procedure which involves dependency injection and upgrades from previously deployed contracts with

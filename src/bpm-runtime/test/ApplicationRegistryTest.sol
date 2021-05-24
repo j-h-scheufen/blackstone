@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/SystemOwned.sol";
@@ -51,7 +52,7 @@ contract ApplicationRegistryTest {
         if (error != BaseErrors.NO_ERROR()) return "Unexpected error adding access point app1OutData to ServiceApp1";
         error = registry.addAccessPoint(serviceApp1Id, app1AccessPoint1, DataTypes.UINT(), BpmModel.Direction.IN);
         if (error != BaseErrors.RESOURCE_ALREADY_EXISTS()) return "Expected error when trying to add duplicate access point";
-        
+
         if (registry.getNumberOfAccessPoints(serviceApp1Id) != 2) return "Wrong access point count for ServiceApp1";
 
         uint8 dataType;
@@ -83,7 +84,7 @@ contract ApplicationRegistryTest {
 
         return SUCCESS;
     }
-    
+
 }
 
 contract TestApplication is Application {

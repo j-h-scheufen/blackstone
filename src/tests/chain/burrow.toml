@@ -122,15 +122,15 @@ ValidatorAddress = "0201EF325305ABD75E1FB8A8F539730F71547484"
 [Logging]
   Trace = false
   NonBlocking = false
-  [Logging.RootSink]
-    [Logging.RootSink.Transform]
-      TransformType = "filter"
-      [Logging.RootSink.Transform.FilterConfig]
-        FilterMode = "exclude_when_any_match"
-
-        [[Logging.RootSink.Transform.FilterConfig.Predicates]]
-          KeyRegex = "component"
-          ValueRegex = "tendermint"
-    [Logging.RootSink.Output]
-      OutputType = "stdout"
-      Format = "json"
+#  [Logging.RootSink]
+#    [Logging.RootSink.Transform]
+#      TransformType = "filter"
+#      [Logging.RootSink.Transform.FilterConfig]
+#        FilterMode = "exclude_when_any_match"
+#
+#        [[Logging.RootSink.Transform.FilterConfig.Predicates]]
+#          KeyRegex = "component"
+#          ValueRegex = "tendermint"
+#    [Logging.RootSink.Output]
+#      OutputType = "stdout"
+#      Format = "json"

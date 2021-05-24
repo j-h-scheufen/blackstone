@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-collections/VersionLinkedAppendOnly.sol";
 
@@ -25,14 +26,14 @@ contract IsoCountries is VersionLinkedAppendOnly {
 	bytes32 public constant EVENT_ID_ISO_REGIONS = "AN://standards/regions";
 
   // Struct representing ISO 3166-1 Country Codes
-	struct Country {			
+	struct Country {
 		bytes2 alpha2;												// 2-letter country code
 		bytes3 alpha3; 												// 3-letter country code
 		bytes3 m49; 													// 3-digit numeric code
 		string name;													// Short country name (EN)
 		bytes32[] regionKeys;									// regionKeys
 		mapping(bytes32 => Region) regions;		// regions
-		bool exists;	
+		bool exists;
 	}
 
 	// Struct representing ISO 3166-2 Region Codes
@@ -91,5 +92,5 @@ contract IsoCountries is VersionLinkedAppendOnly {
 		}
 		return false;
 	}
-    
+
 }

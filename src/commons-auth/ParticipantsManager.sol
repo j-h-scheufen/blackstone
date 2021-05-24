@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-management/Upgradeable.sol";
 import "commons-management/ObjectFactory.sol";
@@ -54,7 +55,7 @@ contract ParticipantsManager is ObjectFactory, Upgradeable {
 	 * @return the address of the organization
 	 */
     function getOrganizationAtIndex(uint _pos) external view returns (address organization);
-	
+
 	/**
 	 * @dev Returns the public data of the organization at the specified address
 	 * @param _organization the address of an organization
@@ -80,7 +81,7 @@ contract ParticipantsManager is ObjectFactory, Upgradeable {
 	 * @return the number of approvers
 	 */
     function getNumberOfApprovers(address _organization) external view returns (uint size);
-	
+
 	/**
 	 * @dev Returns the approver's address at the given index position of the specified organization.
 	 * @param _organization the organization's address

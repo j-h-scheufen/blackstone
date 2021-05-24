@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-collections/VersionLinkedAppendOnly.sol";
 
@@ -24,7 +25,7 @@ contract IsoCurrencies is VersionLinkedAppendOnly {
 	}
 
 	bytes3[] currencyKeys;
-	
+
 	mapping(bytes3 => Currency) public currencies;
 
 	function getNumberOfCurrencies() external view returns (uint size) {
@@ -44,5 +45,5 @@ contract IsoCurrencies is VersionLinkedAppendOnly {
   function isCurrency(bytes3 _alpha3) external view returns (bool) {
     return currencies[_alpha3].exists;
   }
-	
+
 }

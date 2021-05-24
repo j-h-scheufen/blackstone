@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-utils/DataTypes.sol";
 import "commons-management/VersionedArtifact.sol";
@@ -245,12 +246,12 @@ contract Archetype_v1_0_0 is VersionedArtifact {
 
 	/**
 	 * @dev Sets the successor this archetype. Setting a successor automatically deactivates this archetype.
-	 * Fails if given successor is the same address as itself. 
+	 * Fails if given successor is the same address as itself.
 	 * Fails if intended action will lead to two archetypes with their successors pointing to each other.
 	 * @param _successor address of successor archetype
 	 */
 	function setSuccessor(address _successor) external;
-	
+
 	/**
 	 * @dev Returns the successor of this archetype
 	 * @return address of successor archetype

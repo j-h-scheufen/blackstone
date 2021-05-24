@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-utils/DataTypes.sol";
 
@@ -27,7 +28,7 @@ contract AbstractDataStorage is DataStorage {
   function getDataType(bytes32 _id) external view returns (uint8) {
     return dataStorageMap.getDataType(_id);
   }
-  
+
   /**
    * @dev Returns the number of data fields in this DataStorage
    * @return uint the size
@@ -39,7 +40,7 @@ contract AbstractDataStorage is DataStorage {
   function getDataIdAtIndex(uint _index) external view returns (uint error, bytes32 id) {
     (error, id) = dataStorageMap.keyAtIndex(_index);
   }
-  
+
   /**
    * @dev Removes the Data identified by the id from the DataMap, if it exists.
    * @param _id the id of the data
@@ -128,7 +129,7 @@ contract AbstractDataStorage is DataStorage {
     dataStorageMap.insertOrUpdate(data);
     emit LogDataStorageUpdateUint(EVENT_ID_DATA_STORAGE, address(this), _id, _value);
   }
-  
+
   function getDataValueAsUintArray (bytes32 _id) external view returns (uint[] memory) {
     return dataStorageMap.get(_id).uint256ArrayValue;
   }
@@ -146,7 +147,7 @@ contract AbstractDataStorage is DataStorage {
    * INT
    */
   function getDataValueAsInt (bytes32 _id) external view returns (int) { return dataStorageMap.get(_id).intValue; }
- 
+
   function setDataValueAsInt (bytes32 _id, int _value) external {
     DataStorageUtils.Data memory data;
     data.id = _id;

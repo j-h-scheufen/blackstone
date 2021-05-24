@@ -1,33 +1,37 @@
-import { CallTx } from '@hyperledger/burrow/proto/payload_pb';
+import { Client, TxExecution } from '@hyperledger/burrow';
 import { getLogger, Logger } from 'log4js';
 import { ActiveAgreement } from '../agreements/ActiveAgreement.abi';
-import { AgreementDates } from '../agreements/AgreementDates.abi';
+import { ActiveAgreementRegistry } from '../agreements/ActiveAgreementRegistry.abi';
 import { Archetype } from '../agreements/Archetype.abi';
-import { Completables } from '../agreements/Completables.abi';
 import { RenewalWindowManager } from '../agreements/RenewalWindowManager.abi';
 import { ProcessDefinition } from '../bpm-model/ProcessDefinition.abi';
 import { ProcessModel } from '../bpm-model/ProcessModel.abi';
+import { BpmService } from '../bpm-runtime/BpmService.abi';
 import { ProcessInstance } from '../bpm-runtime/ProcessInstance.abi';
 import { Ecosystem_v1_0_1 as Ecosystem } from '../commons-auth/Ecosystem_v1_0_1.abi';
 import { Organization } from '../commons-auth/Organization.abi';
-import { Client } from './client';
 import { Direction, ErrorCode } from './constants';
 import { Manager, NewManager } from './manager';
 import { Agreement as agreement, Archetype as archetype, DataType, Parameter } from './types';
 import {
-  BytesFromString,
-  BytesToString,
-  CallOnBehalfOf,
-  DecodeHex,
-  GetFromNameRegistry,
-  SetToNameRegistry,
+  bytesFromString,
+  bytesToString,
+  callOnBehalfOf,
+  decodeHex,
+  getFromNameRegistry,
+  setInNameRegistry,
 } from './utils';
 import { BurrowWatcher, VentListener } from './vent';
 
-export async function RegisterEcosystem(client: Client, manager: Manager, account: string, name: string) {
+export async function RegisterEcosystem(
+  client: Client,
+  manager: Manager,
+  account: string,
+  name: string,
+): Promise<string> {
   const address = await manager.EcosystemRegistry.createEcosystem(name).then((data) => data[0]);
-  await new Ecosystem.Contract(client, address).addExternalAddress(account);
-  await SetToNameRegistry(client, name, address);
+  await Ecosystem.contract(client, address).functions.addExternalAddress(account);
+  await setInNameRegistry(client, name, address);
   return address;
 }
 
@@ -40,32 +44,23 @@ export class Contracts {
 
   constructor(client: Client, manager: Manager, ecosystem: string) {
     this.client = client;
-    this.account = client.burrow.account;
+    this.account = client.account;
     this.manager = manager;
     this.ecosystem = ecosystem;
     this.log = getLogger('contracts');
   }
 
-  async getFromNameRegistry(name: string) {
+  async getFromNameRegistry(name: string): Promise<string | void> {
     this.log.debug(`REQUEST: Get from name registry: ${name}`);
-    return GetFromNameRegistry(this.client, name);
+    return getFromNameRegistry(this.client, name);
   }
 
-  async setToNameRegistry(name: string, value: string) {
+  async setToNameRegistry(name: string, value: string): Promise<void> {
     this.log.debug(`REQUEST: Set to name registry: ${JSON.stringify({ name, value })}`);
-    return SetToNameRegistry(this.client, name, value);
+    return setInNameRegistry(this.client, name, value);
   }
 
-  async callOnBehalfOf(userAddress: string, targetAddress: string, payload: string) {
-    this.log.debug(`REQUEST: Call target ${targetAddress} on behalf of user ${userAddress} with payload: ${payload}`);
-    const data = await CallOnBehalfOf(this.client, userAddress, targetAddress, payload);
-    this.log.info(
-      `SUCCESS: ReturnData from target ${targetAddress} forwardCall on behalf of user ${userAddress}: ${data}`,
-    );
-    return data;
-  }
-
-  async createAgreement(agreement: agreement) {
+  async createAgreement(agreement: agreement): Promise<string> {
     const { archetype, creator, owner, privateParametersFileReference, parties, collectionId, governingAgreements } =
       agreement;
     const isPrivate = agreement.isPrivate || false;
@@ -77,7 +72,7 @@ export class Contracts {
       privateParametersFileReference,
       isPrivate,
       parties,
-      DecodeHex(collectionId),
+      decodeHex(collectionId),
       governingAgreements,
     ).then((data) => {
       this.log.info(`SUCCESS: Created agreement by ${creator} at address ${data.activeAgreement}`);
@@ -85,9 +80,9 @@ export class Contracts {
     });
   }
 
-  async setLegalState(agreementAddress: string, legalState: number) {
+  async setLegalState(agreementAddress: string, legalState: number): Promise<void> {
     this.log.debug(`REQUEST: Set legal state of agreement ${agreementAddress} to ${legalState}`);
-    const agreement = new ActiveAgreement.Contract(this.client, agreementAddress);
+    const agreement = ActiveAgreement.contract(this.client, agreementAddress).functions;
     const permissionId = await agreement.ROLE_ID_LEGAL_STATE_CONTROLLER().then((data) => data[0]);
     const hasPermission = (await agreement.hasPermission(permissionId, this.account))[0];
     if (!hasPermission) {
@@ -97,18 +92,18 @@ export class Contracts {
     await agreement.revokePermission(permissionId, this.account);
   }
 
-  async initializeObjectAdministrator(agreementAddress: string) {
+  async initializeObjectAdministrator(agreementAddress: string): Promise<void> {
     this.log.debug(`REQUEST: Initializing agreement admin role for agreement: ${agreementAddress}`);
-    const agreement = new ActiveAgreement.Contract(this.client, agreementAddress);
+    const agreement = ActiveAgreement.contract(this.client, agreementAddress).functions;
     await agreement.initializeObjectAdministrator(this.account);
     this.log.info(`SUCCESS: Initialized agreement admin role for agreement ${agreementAddress}`);
   }
 
-  async setMaxNumberOfAttachments(agreementAddress: string, maxNumberOfAttachments: number) {
+  async setMaxNumberOfAttachments(agreementAddress: string, maxNumberOfAttachments: number): Promise<void> {
     this.log.debug(
       `REQUEST: Set max number of events to ${maxNumberOfAttachments} for agreement at ${agreementAddress}`,
     );
-    const agreement = new ActiveAgreement.Contract(this.client, agreementAddress);
+    const agreement = ActiveAgreement.contract(this.client, agreementAddress).functions;
     await agreement.setMaxNumberOfEvents(maxNumberOfAttachments);
   }
 
@@ -117,15 +112,15 @@ export class Contracts {
     parameters: Array<{ name: string; value: string; scope: string }>,
   ) {
     this.log.debug(`REQUEST: Add scopes to agreement ${agreementAddress} parameters: ${JSON.stringify(parameters)}`);
-    const agreement = new ActiveAgreement.Contract(this.client, agreementAddress);
+    const agreement = ActiveAgreement.contract(this.client, agreementAddress).functions;
 
     const promises = parameters.map(async ({ name, value, scope }) => {
       return agreement.setAddressScope(
         value,
-        BytesFromString(name),
-        DecodeHex(scope),
-        BytesFromString(''),
-        BytesFromString(''),
+        bytesFromString(name),
+        decodeHex(scope),
+        bytesFromString(''),
+        bytesFromString(''),
         '0x0',
       );
     });
@@ -133,11 +128,11 @@ export class Contracts {
     this.log.info(`SUCCESS: Added scopes to agreement ${agreementAddress} parameters`);
   }
 
-  async updateAgreementFileReference(fileKey: string, agreementAddress: string, hoardGrant: string) {
+  async updateAgreementFileReference(fileKey: string, agreementAddress: string, hoardGrant: string): Promise<void> {
     this.log.debug(
       `REQUEST: Update reference for  ${fileKey} for agreement at ${agreementAddress} with new reference ${hoardGrant}`,
     );
-    const agreement = new ActiveAgreement.Contract(this.client, agreementAddress);
+    const agreement = ActiveAgreement.contract(this.client, agreementAddress).functions;
     switch (fileKey) {
       case 'EventLog':
         await agreement.setEventLogReference(hoardGrant);
@@ -167,11 +162,11 @@ export class Contracts {
               renewalCloseOffset,
               extensionOffset,
             })}`);
-    const agreement = new ActiveAgreement.Contract(this.client, agreementAddress);
+    const agreement = ActiveAgreement.contract(this.client, agreementAddress).functions;
     await agreement.defineRenewalTerms(franchisees, threshold, renewalOpenOffset, renewalCloseOffset, extensionOffset);
   }
 
-  async createAgreementCollection(author: string, collectionType: number, packageId: string) {
+  async createAgreementCollection(author: string, collectionType: number, packageId: string): Promise<Buffer> {
     this.log.debug(
       `REQUEST: Create agreement collection by ${author} with type ${collectionType} ` +
         `and packageId ${packageId} created by user at ${author}`,
@@ -179,7 +174,7 @@ export class Contracts {
     return this.manager.ActiveAgreementRegistry.createAgreementCollection(
       author,
       collectionType,
-      DecodeHex(packageId),
+      decodeHex(packageId),
     ).then((data) => {
       if (data.error !== 1) {
         throw new Error(`Error code adding agreement collection by ${author}: ${data.error}`);
@@ -189,16 +184,16 @@ export class Contracts {
     });
   }
 
-  async addAgreementToCollection(collectionId: string, agreement: string) {
+  async addAgreementToCollection(collectionId: string, agreement: string): Promise<void> {
     this.log.debug(`REQUEST: Add agreement at ${agreement} to collection ${collectionId}`);
-    return this.manager.ActiveAgreementRegistry.addAgreementToCollection(DecodeHex(collectionId), agreement);
+    return this.manager.ActiveAgreementRegistry.addAgreementToCollection(decodeHex(collectionId), agreement);
   }
 
-  async signAgreement(actingUserAddress: string, agreementAddress: string, partyAddress?: string) {
+  signAgreement(actingUserAddress: string, agreementAddress: string, partyAddress?: string): Promise<void> {
     this.log.debug(`REQUEST: Sign agreement ${agreementAddress} by user ${actingUserAddress}`);
-    const agreement = ActiveAgreement.Encode(this.client);
-    const payload = partyAddress ? agreement.signAsParty(partyAddress) : agreement.sign();
-    await this.callOnBehalfOf(actingUserAddress, agreementAddress, payload);
+    const agreement = ActiveAgreement.contract(this.client, agreementAddress).functions;
+    const caller = callOnBehalfOf(actingUserAddress);
+    return partyAddress ? agreement.signAsParty(partyAddress, caller) : agreement.sign(caller);
   }
 
   /**
@@ -216,59 +211,64 @@ export class Contracts {
     partyAddress?: string,
   ): Promise<boolean> {
     this.log.debug('REQUEST: Attest to completable %s by user %s', intervalId.toString('hex'), actingUserAddress);
-    const completables = Completables.Encode(this.client);
-    const payload = partyAddress
-      ? completables.attestAsParty(intervalId, timestamp, partyAddress)
-      : completables.attest(intervalId, timestamp);
-    const output = await this.callOnBehalfOf(actingUserAddress, this.manager.Completables.address, payload);
-    return Completables.Decode(this.client, DecodeHex(output)).attest()[0];
+    const completables = this.manager.Completables.functions;
+    const caller = callOnBehalfOf(actingUserAddress);
+    const { isRatified } = await (partyAddress
+      ? completables.attestAsParty(intervalId, timestamp, partyAddress, caller)
+      : completables.attest(intervalId, timestamp, caller));
+    return isRatified;
   }
 
-  async castRenewalVote(actingUserAddress: string, agreementAddress: string, renew: boolean) {
+  async castRenewalVote(actingUserAddress: string, agreementAddress: string, renew: boolean): Promise<void> {
     this.log.debug(
       `REQUEST: Cast agreement renewal vote by user ${actingUserAddress} for agreement ${agreementAddress}`,
     );
-    const payload = ActiveAgreement.Encode(this.client).castRenewalVote(renew);
-    await this.callOnBehalfOf(actingUserAddress, agreementAddress, payload);
+    return ActiveAgreement.contract(this.client, agreementAddress).functions.castRenewalVote(
+      renew,
+      callOnBehalfOf(actingUserAddress),
+    );
   }
 
-  async isAgreementSignedBy(agreementAddress: string, userAddress: string) {
+  async isAgreementSignedBy(agreementAddress: string, userAddress: string): Promise<boolean> {
     this.log.debug(`REQUEST: Checking if agreement at ${agreementAddress} has been signed by user at ${userAddress}`);
-    const payload = ActiveAgreement.Encode(this.client).isSignedBy(userAddress);
-    const response = await this.callOnBehalfOf(userAddress, agreementAddress, payload);
-    const data = ActiveAgreement.Decode(this.client, DecodeHex(response)).isSignedBy();
-    const isSignedBy = data[0].valueOf();
+    const [isSignedBy] = await ActiveAgreement.contract(this.client, agreementAddress).functions.isSignedBy(
+      userAddress,
+      callOnBehalfOf(userAddress),
+    );
     return isSignedBy;
   }
 
-  async cancelAgreement(actingUserAddress: string, agreementAddress: string, partyAddress?: string) {
+  async cancelAgreement(actingUserAddress: string, agreementAddress: string, partyAddress?: string): Promise<void> {
     this.log.debug('REQUEST: Cancel agreement %s by user %s', agreementAddress, actingUserAddress);
-    const agreement = ActiveAgreement.Encode(this.client);
-    const payload = partyAddress ? agreement.cancelAsParty(partyAddress) : agreement.cancel();
-    return this.callOnBehalfOf(actingUserAddress, agreementAddress, payload);
+    const caller = callOnBehalfOf(actingUserAddress);
+    const agreement = ActiveAgreement.contract(this.client, agreementAddress).functions;
+    return partyAddress ? agreement.cancelAsParty(partyAddress, caller) : agreement.cancel(caller);
   }
 
-  async redactAgreement(actingUserAddress: string, agreementAddress: string) {
+  async redactAgreement(actingUserAddress: string, agreementAddress: string): Promise<number> {
     this.log.debug('REQUEST: Redact agreement %s by user %s', agreementAddress, actingUserAddress);
-    const payload = ActiveAgreement.Encode(this.client).redact();
-    const data = await this.callOnBehalfOf(actingUserAddress, agreementAddress, payload);
-    return ActiveAgreement.Decode(this.client, DecodeHex(data)).redact()[0];
+    const [legalState] = await ActiveAgreement.contract(this.client, agreementAddress).functions.redact(
+      callOnBehalfOf(actingUserAddress),
+    );
+    return legalState;
   }
 
-  async getActiveAgreementData(agreementAddress: string) {
+  async getActiveAgreementData(
+    agreementAddress: string,
+  ): Promise<ReturnType<ActiveAgreementRegistry.Contract['functions']['getActiveAgreementData']>> {
     this.log.debug(`REQUEST: Get data for agreement at address ${agreementAddress}`);
     return this.manager.ActiveAgreementRegistry.getActiveAgreementData(agreementAddress);
   }
 
   getActiveAgreement(address: string) {
-    return new ActiveAgreement.Contract(this.client, address);
+    return ActiveAgreement.contract(this.client, address).functions;
   }
 
   getRenewalWindowManager(address: string) {
-    return new RenewalWindowManager.Contract(this.client, address);
+    return RenewalWindowManager.contract(this.client, address).functions;
   }
 
-  async startProcessFromAgreement(agreementAddress: string) {
+  async startProcessFromAgreement(agreementAddress: string): Promise<string> {
     this.log.debug(`REQUEST: Start formation process from agreement at address: ${agreementAddress}`);
     return this.manager.ActiveAgreementRegistry.startProcessLifecycle(agreementAddress).then(async (data) => {
       if (data.error && data.error !== 1) {
@@ -303,14 +303,13 @@ export class Contracts {
       agreementAdress,
       actingUserAddress,
     );
-    const payload = AgreementDates.Encode(this.client).setRelation(
+    return this.manager.AgreementDates.functions.setRelation(
       agreementAdress,
-      BytesFromString(derivedDate),
-      BytesFromString(baseDate),
+      bytesFromString(derivedDate),
+      bytesFromString(baseDate),
       offset,
+      callOnBehalfOf(actingUserAddress),
     );
-    const output = await this.callOnBehalfOf(actingUserAddress, this.manager.AgreementDates.address, payload);
-    return AgreementDates.Decode(this.client, DecodeHex(output)).setRelation();
   }
 
   /**
@@ -321,7 +320,7 @@ export class Contracts {
    */
   async setDateCycle(
     actingUserAddress: string,
-    agreementAdress: string,
+    agreementAddress: string,
     date: string,
     metadata: string,
     recurred: number,
@@ -330,35 +329,36 @@ export class Contracts {
       'REQUEST: Set date %s to recur with config %s on agreement %s by user %s',
       date,
       metadata,
-      agreementAdress,
+      agreementAddress,
       actingUserAddress,
     );
-    const payload = AgreementDates.Encode(this.client).setCycle(
-      agreementAdress,
-      BytesFromString(date),
+    return this.manager.AgreementDates.functions.setCycle(
+      agreementAddress,
+      bytesFromString(date),
       metadata,
       recurred,
+      callOnBehalfOf(actingUserAddress),
     );
-    const output = await this.callOnBehalfOf(actingUserAddress, this.manager.AgreementDates.address, payload);
-    return AgreementDates.Decode(this.client, DecodeHex(output)).setCycle();
   }
 
   /**
    * @param actingUserAddress user who is a franchisee or belongs to a franchisee party
-   * @param agreementAdress the agreement under which the date lives
+   * @param agreementAddress the agreement under which the date lives
    * @param date the identifier of the cycling date
    * @param recurred the number of times the cycle has recurred
    */
-  async removeDateCycle(actingUserAddress: string, agreementAdress: string, date: string): Promise<void> {
+  async removeDateCycle(actingUserAddress: string, agreementAddress: string, date: string): Promise<void> {
     this.log.debug(
       'REQUEST: Removing cycling of date %s on agreement %s by user %s',
       date,
-      agreementAdress,
+      agreementAddress,
       actingUserAddress,
     );
-    const payload = AgreementDates.Encode(this.client).removeCycle(agreementAdress, BytesFromString(date));
-    const output = await this.callOnBehalfOf(actingUserAddress, this.manager.AgreementDates.address, payload);
-    return AgreementDates.Decode(this.client, DecodeHex(output)).removeCycle();
+    return this.manager.AgreementDates.functions.removeCycle(
+      agreementAddress,
+      bytesFromString(date),
+      callOnBehalfOf(actingUserAddress),
+    );
   }
 
   /**
@@ -369,7 +369,10 @@ export class Contracts {
    */
   async incrementDateCycleRecurrences(agreementAdress: string, date: string): Promise<number> {
     this.log.debug('REQUEST: Increment recurrences of cycling date %s on agreement %s', date, agreementAdress);
-    const [recurred] = await this.manager.AgreementDates.incrementRecurrences(agreementAdress, BytesFromString(date));
+    const [recurred] = await this.manager.AgreementDates.functions.incrementRecurrences(
+      agreementAdress,
+      bytesFromString(date),
+    );
     return recurred;
   }
 
@@ -381,10 +384,10 @@ export class Contracts {
    */
   async setCycleMetadata(agreementAdress: string, date: string, metadata: string): Promise<void> {
     this.log.debug('REQUEST: Set metadata %s for cycling date %s on agreement %s', metadata, date, agreementAdress);
-    await this.manager.AgreementDates.setCycleMetadata(agreementAdress, BytesFromString(date), metadata);
+    await this.manager.AgreementDates.functions.setCycleMetadata(agreementAdress, bytesFromString(date), metadata);
   }
 
-  async createArchetype(archetype: archetype) {
+  async createArchetype(archetype: archetype): Promise<string> {
     const { price, active, author, owner, formationProcess, executionProcess, packageId, governingArchetypes } =
       archetype;
     const isPrivate = archetype.isPrivate || false;
@@ -397,59 +400,62 @@ export class Contracts {
       owner,
       formationProcess,
       executionProcess,
-      DecodeHex(packageId),
+      decodeHex(packageId),
       governingArchetypes,
     ).then((data) => data.archetype);
   }
 
-  async isActiveArchetype(archetypeAddress: string) {
+  async isActiveArchetype(archetypeAddress: string): Promise<boolean> {
     this.log.debug(`REQUEST: Determine if archetype at ${archetypeAddress} is active`);
-    return new Archetype.Contract(this.client, archetypeAddress).isActive().then((data) => {
-      this.log.info(
-        `SUCCESS: Archetype at ${archetypeAddress} has been found to be ${data[0] ? 'active' : 'inactive'}`,
-      );
-      return data[0];
-    });
+    return Archetype.contract(this.client, archetypeAddress)
+      .functions.isActive()
+      .then((data) => {
+        this.log.info(
+          `SUCCESS: Archetype at ${archetypeAddress} has been found to be ${data[0] ? 'active' : 'inactive'}`,
+        );
+        return data[0];
+      });
   }
 
-  async getArchetypeAuthor(archetypeAddress: string) {
+  async getArchetypeAuthor(archetypeAddress: string): Promise<string> {
     this.log.debug(`REQUEST: Get archetype author for archetype at ${archetypeAddress}`);
-    return new Archetype.Contract(this.client, archetypeAddress).getAuthor().then((value) => value.author);
+    return Archetype.contract(this.client, archetypeAddress)
+      .functions.getAuthor()
+      .then((value) => value.author);
   }
 
-  async activateArchetype(archetypeAddress: string, userAccount: string) {
+  async activateArchetype(archetypeAddress: string, userAccount: string): Promise<void> {
     this.log.debug(`REQUEST: Activate archetype at ${archetypeAddress} by user at ${userAccount}`);
-    const payload = Archetype.Encode(this.client).activate();
-    await this.callOnBehalfOf(userAccount, archetypeAddress, payload);
-    this.log.info(`SUCCESS: Archetype at ${archetypeAddress} activated by user at ${userAccount}`);
+    return Archetype.contract(this.client, archetypeAddress).functions.activate(callOnBehalfOf(userAccount));
   }
 
-  async deactivateArchetype(archetypeAddress: string, userAccount: string) {
+  async deactivateArchetype(archetypeAddress: string, userAccount: string): Promise<void> {
     this.log.debug(`REQUEST: Deactivate archetype at ${archetypeAddress} by user at ${userAccount}`);
-    const payload = Archetype.Encode(this.client).deactivate();
-    await this.callOnBehalfOf(userAccount, archetypeAddress, payload);
+    await Archetype.contract(this.client, archetypeAddress).functions.deactivate(callOnBehalfOf(userAccount));
     this.log.info(`SUCCESS: Archetype at ${archetypeAddress} deactivated by user at ${userAccount}`);
   }
 
-  async setArchetypeSuccessor(archetypeAddress: string, successorAddress: string, userAccount: string) {
+  async setArchetypeSuccessor(archetypeAddress: string, successorAddress: string, userAccount: string): Promise<void> {
     this.log.debug(
       `REQUEST: Set successor to ${successorAddress} for archetype at ${archetypeAddress} by user at ${userAccount}`,
     );
-    const payload = Archetype.Encode(this.client).setSuccessor(successorAddress);
-    await this.callOnBehalfOf(userAccount, archetypeAddress, payload);
+    return Archetype.contract(this.client, archetypeAddress).functions.setSuccessor(
+      successorAddress,
+      callOnBehalfOf(userAccount),
+    );
   }
 
-  async getArchetypeSuccessor(archetypeAddress: string) {
+  async getArchetypeSuccessor(archetypeAddress: string): Promise<string> {
     this.log.debug(`REQUEST: Get successor for archetype at ${archetypeAddress}`);
     return this.manager.ArchetypeRegistry.getArchetypeSuccessor(archetypeAddress).then((data) => data[0]);
   }
 
-  async addArchetypeParameters(address: string, parameters: Array<Parameter>) {
+  async addArchetypeParameters(address: string, parameters: Array<Parameter>): Promise<void> {
     const paramTypes: number[] = [];
     const paramNames: Buffer[] = [];
     for (let i = 0; i < parameters.length; i += 1) {
       paramTypes[i] = parameters[i].type;
-      paramNames[i] = BytesFromString(parameters[i].name);
+      paramNames[i] = bytesFromString(parameters[i].name);
     }
     this.log.debug(
       `REQUEST: Add archetype parameters to archetype at address ${address}. ` +
@@ -466,34 +472,31 @@ export class Contracts {
     });
   }
 
-  async addArchetypeDocument(address: string, fileReference: string) {
+  async addArchetypeDocument(address: string, fileReference: string): Promise<void> {
     this.log.debug(`REQUEST: Add document to archetype at ${address}`);
     return this.manager.ArchetypeRegistry.addDocument(address, fileReference);
   }
 
-  async addArchetypeDocuments(archetypeAddress: string, documents: Array<{ grant: string; name: string }>) {
+  async addArchetypeDocuments(
+    archetypeAddress: string,
+    documents: Array<{ grant: string; name: string }>,
+  ): Promise<void> {
     const names = documents.map((doc) => doc.name).join(', ');
     this.log.debug(`REQUEST: Add archetype documents to archetype at ${archetypeAddress}: ${names}`);
-    const resolvedDocs = await Promise.all(
-      documents.map(async ({ grant }) => {
-        const result = await this.addArchetypeDocument(archetypeAddress, grant);
-        return result;
-      }),
-    );
-    return resolvedDocs;
+    await Promise.all(documents.map(async ({ grant }) => this.addArchetypeDocument(archetypeAddress, grant)));
   }
 
-  async setArchetypePrice(address: string, price: number) {
+  async setArchetypePrice(address: string, price: number): Promise<void> {
     this.log.debug(`REQUEST: Set price to ${price} for archetype at ${address}`);
     const priceInCents = Math.floor(price * 100); // monetary unit conversion to cents which is the recorded unit on chain
     return this.manager.ArchetypeRegistry.setArchetypePrice(address, priceInCents);
   }
 
-  async upgradeOwnerPermission(address: string, owner: string) {
-    return new Archetype.Contract(this.client, address).upgradeOwnerPermission(owner);
+  async upgradeOwnerPermission(address: string, owner: string): Promise<void> {
+    return Archetype.contract(this.client, address).functions.upgradeOwnerPermission(owner);
   }
 
-  async createArchetypePackage(author: string, isPrivate: boolean, active: boolean) {
+  async createArchetypePackage(author: string, isPrivate: boolean, active: boolean): Promise<Buffer> {
     this.log.debug(
       `REQUEST: Create a ${isPrivate ? 'private' : 'public'}, ${
         active ? 'active' : 'inactive'
@@ -508,33 +511,36 @@ export class Contracts {
     });
   }
 
-  async activateArchetypePackage(packageId: string, userAccount: string) {
+  async activateArchetypePackage(packageId: string, userAccount: string): Promise<void> {
     this.log.debug(`REQUEST: Activate archetype package with id ${packageId} by user at ${userAccount}`);
-    return this.manager.ArchetypeRegistry.activatePackage(DecodeHex(packageId), userAccount);
+    return this.manager.ArchetypeRegistry.activatePackage(decodeHex(packageId), userAccount);
   }
 
-  async deactivateArchetypePackage(packageId: string, userAccount: string) {
+  async deactivateArchetypePackage(packageId: string, userAccount: string): Promise<void> {
     this.log.debug(`REQUEST: Deactivate archetype package with id ${packageId} by user at ${userAccount}`);
-    return this.manager.ArchetypeRegistry.deactivatePackage(DecodeHex(packageId), userAccount);
+    return this.manager.ArchetypeRegistry.deactivatePackage(decodeHex(packageId), userAccount);
   }
 
-  async addArchetypeToPackage(packageId: string, archetype: string) {
+  async addArchetypeToPackage(packageId: string, archetype: string): Promise<void> {
     this.log.debug(`REQUEST: Add archetype at ${archetype} to package ${packageId}`);
-    return this.manager.ArchetypeRegistry.addArchetypeToPackage(DecodeHex(packageId), archetype);
+    return this.manager.ArchetypeRegistry.addArchetypeToPackage(decodeHex(packageId), archetype);
   }
 
-  async addJurisdictions(address: string, jurisdictions: Array<{ country: string; regions: Array<string> }>) {
+  async addJurisdictions(
+    address: string,
+    jurisdictions: Array<{ country: string; regions: Array<string> }>,
+  ): Promise<{ error: number }> {
     const countries: Buffer[] = [];
     const regions: Buffer[] = [];
     jurisdictions.forEach((item) => {
       if (item.regions.length > 0) {
         item.regions.forEach((region) => {
-          countries.push(BytesFromString(item.country));
-          regions.push(BytesFromString(region));
+          countries.push(bytesFromString(item.country));
+          regions.push(bytesFromString(region));
         });
       } else {
-        countries.push(BytesFromString(item.country));
-        regions.push(BytesFromString(''));
+        countries.push(bytesFromString(item.country));
+        regions.push(bytesFromString(''));
       }
     });
 
@@ -546,7 +552,7 @@ export class Contracts {
     return this.manager.ArchetypeRegistry.addJurisdictions(address, countries, regions);
   }
 
-  async getArchetypeProcesses(archAddress: string) {
+  async getArchetypeProcesses(archAddress: string): Promise<{ formation: string; execution: string }> {
     this.log.debug(`REQUEST: Get formation and execution processes for archetype at address ${archAddress}`);
     const data = await this.manager.ArchetypeRegistry.getArchetypeData(archAddress);
     const formation = data.formationProcessDefinition;
@@ -566,7 +572,7 @@ export class Contracts {
     author: string,
     isPrivate: boolean,
     modelFileReference: string,
-  ) {
+  ): Promise<string> {
     this.log.debug(
       `REQUEST: Create process model with following data: ${JSON.stringify({
         modelId,
@@ -577,7 +583,7 @@ export class Contracts {
       })}`,
     );
     return this.manager.ProcessModelRepository.createProcessModel(
-      BytesFromString(modelId),
+      bytesFromString(modelId),
       modelVersion,
       author,
       isPrivate,
@@ -594,19 +600,19 @@ export class Contracts {
     },
   ) {
     this.log.debug(`REQUEST: Add data definition ${JSON.stringify(dataStoreField)} to process model ${pmAddress}`);
-    await new ProcessModel.Contract(this.client, pmAddress).addDataDefinition(
-      BytesFromString(dataStoreField.dataStorageId),
-      BytesFromString(dataStoreField.dataPath),
+    await ProcessModel.contract(this.client, pmAddress).functions.addDataDefinition(
+      bytesFromString(dataStoreField.dataStorageId),
+      bytesFromString(dataStoreField.dataPath),
       dataStoreField.parameterType,
     );
     this.log.info(`SUCCESS: Data definition ${JSON.stringify(dataStoreField)} added to Process Model at ${pmAddress}`);
     return dataStoreField;
   }
 
-  async addProcessInterface(pmAddress: string, interfaceId: string) {
+  async addProcessInterface(pmAddress: string, interfaceId: string): Promise<void> {
     this.log.debug(`REQUEST: Add process interface ${interfaceId} to process model at ${pmAddress}`);
-    return new ProcessModel.Contract(this.client, pmAddress)
-      .addProcessInterface(BytesFromString(interfaceId))
+    return ProcessModel.contract(this.client, pmAddress)
+      .functions.addProcessInterface(bytesFromString(interfaceId))
       .then((data) => {
         // interfaceId already registered to model
         if (data.error === 1002) {
@@ -636,12 +642,12 @@ export class Contracts {
         dataStorageAddress,
       })}`,
     );
-    await new ProcessModel.Contract(this.client, pmAddress)
-      .addParticipant(
-        BytesFromString(participantId),
+    await ProcessModel.contract(this.client, pmAddress)
+      .functions.addParticipant(
+        bytesFromString(participantId),
         accountAddress,
-        BytesFromString(dataPath),
-        BytesFromString(dataStorageId),
+        bytesFromString(dataPath),
+        bytesFromString(dataStorageId),
         dataStorageAddress,
       )
       .then((data) => {
@@ -652,20 +658,20 @@ export class Contracts {
       });
   }
 
-  async createProcessDefinition(modelAddress: string, processDefnId: string) {
+  async createProcessDefinition(modelAddress: string, processDefnId: string): Promise<string> {
     this.log.debug(`REQUEST: Create process definition with Id ${processDefnId} for process model ${modelAddress}`);
     return this.manager.ProcessModelRepository.createProcessDefinition(
       modelAddress,
-      BytesFromString(processDefnId),
+      bytesFromString(processDefnId),
     ).then((value) => value.newAddress);
   }
 
-  async addProcessInterfaceImplementation(pmAddress: string, pdAddress: string, interfaceId: string) {
+  async addProcessInterfaceImplementation(pmAddress: string, pdAddress: string, interfaceId: string): Promise<void> {
     this.log.debug(
       `REQUEST: Add process interface implementation ${interfaceId} to process definition ${pdAddress} for process model ${pmAddress}`,
     );
-    await new ProcessDefinition.Contract(this.client, pdAddress)
-      .addProcessInterfaceImplementation(pmAddress, BytesFromString(interfaceId))
+    await ProcessDefinition.contract(this.client, pdAddress)
+      .functions.addProcessInterfaceImplementation(pmAddress, bytesFromString(interfaceId))
       .then((data) => {
         if (data.error === 1001) {
           throw new Error(
@@ -707,17 +713,17 @@ export class Contracts {
       })}`,
     );
 
-    await new ProcessDefinition.Contract(this.client, processAddress)
-      .createActivityDefinition(
-        BytesFromString(activityId),
+    await ProcessDefinition.contract(this.client, processAddress)
+      .functions.createActivityDefinition(
+        bytesFromString(activityId),
         activityType,
         taskType,
         behavior,
-        BytesFromString(assignee),
+        bytesFromString(assignee),
         multiInstance,
-        BytesFromString(application),
-        BytesFromString(subProcessModelId),
-        BytesFromString(subProcessDefinitionId),
+        bytesFromString(application),
+        bytesFromString(subProcessModelId),
+        bytesFromString(subProcessDefinitionId),
       )
       .then((data) => {
         if (data.error !== 1) {
@@ -753,12 +759,12 @@ export class Contracts {
     );
 
     try {
-      await new ProcessDefinition.Contract(this.client, processAddress).createIntermediateEvent(
-        BytesFromString(eventId),
+      await ProcessDefinition.contract(this.client, processAddress).functions.createIntermediateEvent(
+        bytesFromString(eventId),
         eventType,
         eventBehavior,
-        BytesFromString(dataPath),
-        BytesFromString(dataStorageId),
+        bytesFromString(dataPath),
+        bytesFromString(dataStorageId),
         dataStorage,
         timestampConstant,
         durationConstant,
@@ -791,18 +797,18 @@ export class Contracts {
       })}`,
     );
 
-    await new ProcessDefinition.Contract(this.client, processAddress).setIntermediateEventDatetimeAndOffset(
-      BytesFromString(eventId),
-      BytesFromString(datetimeDataPath),
-      BytesFromString(datetimeDataStorageId),
+    await ProcessDefinition.contract(this.client, processAddress).functions.setIntermediateEventDatetimeAndOffset(
+      bytesFromString(eventId),
+      bytesFromString(datetimeDataPath),
+      bytesFromString(datetimeDataStorageId),
       datetimeDataStorage,
-      BytesFromString(offsetDataPath),
-      BytesFromString(offsetDataStorageId),
+      bytesFromString(offsetDataPath),
+      bytesFromString(offsetDataStorageId),
       offsetDataStorage,
     );
   }
 
-  async setIntermediateEventTimerTarget(piAddress: string, eventInstanceId: string, targetTime: number) {
+  async setIntermediateEventTimerTarget(piAddress: string, eventInstanceId: string, targetTime: number): Promise<void> {
     this.log.debug(
       `REQUEST: Setting intermediate timer target with data: ${JSON.stringify({
         piAddress,
@@ -811,13 +817,13 @@ export class Contracts {
       })}`,
     );
 
-    await new ProcessInstance.Contract(this.client, piAddress).setIntermediateEventTimerTarget(
-      DecodeHex(eventInstanceId),
+    await ProcessInstance.contract(this.client, piAddress).functions.setIntermediateEventTimerTarget(
+      decodeHex(eventInstanceId),
       targetTime,
     );
   }
 
-  async getIntermediateEventTimerTarget(piAddress: string, eventInstanceId: string) {
+  async getIntermediateEventTimerTarget(piAddress: string, eventInstanceId: string): Promise<{ timerTarget: number }> {
     this.log.debug(
       `REQUEST: Getting intermediate timer target with data: ${JSON.stringify({
         piAddress,
@@ -825,14 +831,15 @@ export class Contracts {
       })}`,
     );
 
-    const timerTarget = await new ProcessInstance.Contract(this.client, piAddress).getIntermediateEventTimerTarget(
-      DecodeHex(eventInstanceId),
-    );
+    const timerTarget = await ProcessInstance.contract(
+      this.client,
+      piAddress,
+    ).functions.getIntermediateEventTimerTarget(decodeHex(eventInstanceId));
 
     return timerTarget;
   }
 
-  async triggerIntermediateEvent(piAddress: string, eventInstanceId: string) {
+  async triggerIntermediateEvent(piAddress: string, eventInstanceId: string): Promise<void> {
     this.log.debug(
       `REQUEST: Triggering completion of Intermediate Event with data: ${JSON.stringify({
         piAddress,
@@ -842,8 +849,8 @@ export class Contracts {
 
     const bpmService = this.manager.BpmService.address;
 
-    await new ProcessInstance.Contract(this.client, piAddress).triggerIntermediateEvent(
-      DecodeHex(eventInstanceId),
+    await ProcessInstance.contract(this.client, piAddress).functions.triggerIntermediateEvent(
+      decodeHex(eventInstanceId),
       bpmService,
     );
   }
@@ -858,7 +865,7 @@ export class Contracts {
     dataStorage: string,
   ) {
     this.log.debug(
-      `REQUEST: Create data mapping with data: ${JSON.stringify({
+      `REQUEST: Create data mapping withthis data: ${JSON.stringify({
         processAddress,
         id,
         direction,
@@ -868,17 +875,17 @@ export class Contracts {
         dataStorage,
       })}`,
     );
-    await new ProcessDefinition.Contract(this.client, processAddress).createDataMapping(
-      BytesFromString(id),
+    await ProcessDefinition.contract(this.client, processAddress).functions.createDataMapping(
+      bytesFromString(id),
       direction,
-      BytesFromString(accessPath),
-      BytesFromString(dataPath),
-      BytesFromString(dataStorageId),
+      bytesFromString(accessPath),
+      bytesFromString(dataPath),
+      bytesFromString(dataStorageId),
       dataStorage,
     );
   }
 
-  async createGateway(processAddress: string, gatewayId: string, gatewayType: number) {
+  async createGateway(processAddress: string, gatewayId: string, gatewayType: number): Promise<void> {
     this.log.debug(
       `REQUEST: Create gateway with data: ${JSON.stringify({
         processAddress,
@@ -886,13 +893,17 @@ export class Contracts {
         gatewayType,
       })}`,
     );
-    await new ProcessDefinition.Contract(this.client, processAddress).createGateway(
-      BytesFromString(gatewayId),
+    await ProcessDefinition.contract(this.client, processAddress).functions.createGateway(
+      bytesFromString(gatewayId),
       gatewayType,
     );
   }
 
-  async createTransition(processAddress: string, sourceGraphElement: string, targetGraphElement: string) {
+  async createTransition(
+    processAddress: string,
+    sourceGraphElement: string,
+    targetGraphElement: string,
+  ): Promise<void> {
     this.log.debug(
       `REQUEST: Create transition with data: ${JSON.stringify({
         processAddress,
@@ -900,8 +911,8 @@ export class Contracts {
         targetGraphElement,
       })}`,
     );
-    await new ProcessDefinition.Contract(this.client, processAddress)
-      .createTransition(BytesFromString(sourceGraphElement), BytesFromString(targetGraphElement))
+    await ProcessDefinition.contract(this.client, processAddress)
+      .functions.createTransition(bytesFromString(sourceGraphElement), bytesFromString(targetGraphElement))
       .then((data) => {
         if (data.error !== 1) {
           throw new Error(
@@ -914,7 +925,7 @@ export class Contracts {
       });
   }
 
-  async setDefaultTransition(processAddress: string, gatewayId: string, activityId: string) {
+  async setDefaultTransition(processAddress: string, gatewayId: string, activityId: string): Promise<void> {
     this.log.debug(
       `REQUEST: Set default transition with data: ${JSON.stringify({
         processAddress,
@@ -922,9 +933,9 @@ export class Contracts {
         activityId,
       })}`,
     );
-    await new ProcessDefinition.Contract(this.client, processAddress).setDefaultTransition(
-      BytesFromString(gatewayId),
-      BytesFromString(activityId),
+    await ProcessDefinition.contract(this.client, processAddress).functions.setDefaultTransition(
+      bytesFromString(gatewayId),
+      bytesFromString(activityId),
     );
     this.log.info(
       `SUCCESS: Default transition set from gateway ${gatewayId} to activity ${activityId} in process at ${processAddress}`,
@@ -956,15 +967,15 @@ export class Contracts {
       })}`,
     );
 
-    const processDefinition = new ProcessDefinition.Contract(this.client, processAddress);
+    const processDefinition = ProcessDefinition.contract(this.client, processAddress).functions;
 
     switch (dataType) {
       case DataType.BOOLEAN:
         await processDefinition.createTransitionConditionForBool(
-          BytesFromString(gatewayId),
-          BytesFromString(activityId),
-          BytesFromString(dataPath),
-          BytesFromString(dataStorageId),
+          bytesFromString(gatewayId),
+          bytesFromString(activityId),
+          bytesFromString(dataPath),
+          bytesFromString(dataStorageId),
           dataStorage,
           operator,
           value === 'true',
@@ -972,10 +983,10 @@ export class Contracts {
         break;
       case DataType.STRING:
         await processDefinition.createTransitionConditionForString(
-          BytesFromString(gatewayId),
-          BytesFromString(activityId),
-          BytesFromString(dataPath),
-          BytesFromString(dataStorageId),
+          bytesFromString(gatewayId),
+          bytesFromString(activityId),
+          bytesFromString(dataPath),
+          bytesFromString(dataStorageId),
           dataStorage,
           operator,
           value,
@@ -983,21 +994,21 @@ export class Contracts {
         break;
       case DataType.BYTES32:
         await processDefinition.createTransitionConditionForBytes32(
-          BytesFromString(gatewayId),
-          BytesFromString(activityId),
-          BytesFromString(dataPath),
-          BytesFromString(dataStorageId),
+          bytesFromString(gatewayId),
+          bytesFromString(activityId),
+          bytesFromString(dataPath),
+          bytesFromString(dataStorageId),
           dataStorage,
           operator,
-          BytesFromString(value),
+          bytesFromString(value),
         );
         break;
       case DataType.UINT:
         await processDefinition.createTransitionConditionForUint(
-          BytesFromString(gatewayId),
-          BytesFromString(activityId),
-          BytesFromString(dataPath),
-          BytesFromString(dataStorageId),
+          bytesFromString(gatewayId),
+          bytesFromString(activityId),
+          bytesFromString(dataPath),
+          bytesFromString(dataStorageId),
           dataStorage,
           operator,
           parseInt(value, 10),
@@ -1005,10 +1016,10 @@ export class Contracts {
         break;
       case DataType.INT:
         await processDefinition.createTransitionConditionForInt(
-          BytesFromString(gatewayId),
-          BytesFromString(activityId),
-          BytesFromString(dataPath),
-          BytesFromString(dataStorageId),
+          bytesFromString(gatewayId),
+          bytesFromString(activityId),
+          bytesFromString(dataPath),
+          bytesFromString(dataStorageId),
           dataStorage,
           operator,
           parseInt(value, 10),
@@ -1016,10 +1027,10 @@ export class Contracts {
         break;
       case DataType.ADDRESS:
         await processDefinition.createTransitionConditionForAddress(
-          BytesFromString(gatewayId),
-          BytesFromString(activityId),
-          BytesFromString(dataPath),
-          BytesFromString(dataStorageId),
+          bytesFromString(gatewayId),
+          bytesFromString(activityId),
+          bytesFromString(dataPath),
+          bytesFromString(dataStorageId),
           dataStorage,
           operator,
           value,
@@ -1031,177 +1042,53 @@ export class Contracts {
     );
   }
 
-  async getModelAddressFromId(modelId: string) {
+  async getModelAddressFromId(modelId: string): Promise<string> {
     this.log.debug(`REQUEST: Get model address for model id ${modelId}`);
-    return this.manager.ProcessModelRepository.getModel(BytesFromString(modelId)).then((data) => data[0]);
+    return this.manager.ProcessModelRepository.getModel(bytesFromString(modelId)).then((data) => data[0]);
   }
 
-  async isValidProcess(processAddress: string) {
+  async isValidProcess(processAddress: string): Promise<boolean> {
     this.log.debug(`REQUEST: Validate process definition at address: ${processAddress}`);
-    return new ProcessDefinition.Contract(this.client, processAddress).validate().then((data) => {
-      if (!data.result) {
-        throw new Error(`Invalid process definition at ${processAddress}: ${BytesToString(data.errorMessage)}`);
-      } else {
-        return true;
-      }
-    });
+    return ProcessDefinition.contract(this.client, processAddress)
+      .functions.validate()
+      .then((data) => {
+        if (!data.result) {
+          throw new Error(`Invalid process definition at ${processAddress}: ${bytesToString(data.errorMessage)}`);
+        } else {
+          return true;
+        }
+      });
   }
 
-  async getStartActivity(processAddress: string) {
+  async getStartActivity(processAddress: string): Promise<string> {
     this.log.debug(`REQUEST: Get start activity id for process at address: ${processAddress}`);
-    return new ProcessDefinition.Contract(this.client, processAddress).getStartActivity().then((data) => {
-      const activityId = BytesToString(DecodeHex(BytesToString(data[0])));
-      this.log.info(`SUCCESS: Retrieved start activity id ${activityId} for process at ${processAddress}`);
-      return activityId;
-    });
+    return ProcessDefinition.contract(this.client, processAddress)
+      .functions.getStartActivity()
+      .then((data) => {
+        const activityId = bytesToString(data[0]);
+        this.log.info(`SUCCESS: Retrieved start activity id ${activityId} for process at ${processAddress}`);
+        return activityId;
+      });
   }
 
-  async getProcessInstanceCount() {
+  async getProcessInstanceCount(): Promise<number> {
     this.log.debug('REQUEST: Get process instance count');
-    return this.manager.BpmService.getNumberOfProcessInstances().then((data) => data.size);
+    return this.manager.BpmService.functions.getNumberOfProcessInstances().then((data) => data.size);
   }
 
-  async getProcessInstanceForActivity(activityInstanceId: string) {
+  async getProcessInstanceForActivity(activityInstanceId: string): Promise<string> {
     this.log.debug(`REQUEST: Get process instance for activity ${activityInstanceId}`);
-    return this.manager.BpmService.getProcessInstanceForActivity(DecodeHex(activityInstanceId)).then((data) => data[0]);
+    return this.manager.BpmService.functions
+      .getProcessInstanceForActivity(decodeHex(activityInstanceId))
+      .then((data) => data[0]);
   }
 
   getProcessInstance(piAddress: string) {
-    return new ProcessInstance.Contract(this.client, piAddress);
-  }
-
-  async getActivityInDataAsBool(userAddr: string, activityInstanceId: string, dataMappingId: string) {
-    const piAddress = await this.getProcessInstanceForActivity(activityInstanceId);
-    const payload = ProcessInstance.Encode(this.client).getActivityInDataAsBool(
-      DecodeHex(activityInstanceId),
-      BytesFromString(dataMappingId),
-    );
-    const response = await this.callOnBehalfOf(userAddr, piAddress, payload);
-    return ProcessInstance.Decode(this.client, DecodeHex(response)).getActivityInDataAsBool()[0];
-  }
-
-  async getActivityInDataAsString(userAddr: string, activityInstanceId: string, dataMappingId: string) {
-    const piAddress = await this.getProcessInstanceForActivity(activityInstanceId);
-    const payload = ProcessInstance.Encode(this.client).getActivityInDataAsString(
-      DecodeHex(activityInstanceId),
-      BytesFromString(dataMappingId),
-    );
-    const response = await this.callOnBehalfOf(userAddr, piAddress, payload);
-    return ProcessInstance.Decode(this.client, DecodeHex(response)).getActivityInDataAsString()[0];
-  }
-
-  async getActivityInDataAsBytes32(userAddr: string, activityInstanceId: string, dataMappingId: string) {
-    const piAddress = await this.getProcessInstanceForActivity(activityInstanceId);
-    const payload = ProcessInstance.Encode(this.client).getActivityInDataAsBytes32(
-      DecodeHex(activityInstanceId),
-      BytesFromString(dataMappingId),
-    );
-    const response = await this.callOnBehalfOf(userAddr, piAddress, payload);
-    return ProcessInstance.Decode(this.client, DecodeHex(response)).getActivityInDataAsBytes32()[0];
-  }
-
-  async getActivityInDataAsUint(userAddr: string, activityInstanceId: string, dataMappingId: string) {
-    const piAddress = await this.getProcessInstanceForActivity(activityInstanceId);
-    const payload = ProcessInstance.Encode(this.client).getActivityInDataAsUint(
-      DecodeHex(activityInstanceId),
-      BytesFromString(dataMappingId),
-    );
-    const response = await this.callOnBehalfOf(userAddr, piAddress, payload);
-    return ProcessInstance.Decode(this.client, DecodeHex(response)).getActivityInDataAsUint()[0];
-  }
-
-  async getActivityInDataAsInt(userAddr: string, activityInstanceId: string, dataMappingId: string) {
-    const piAddress = await this.getProcessInstanceForActivity(activityInstanceId);
-    const payload = ProcessInstance.Encode(this.client).getActivityInDataAsInt(
-      DecodeHex(activityInstanceId),
-      BytesFromString(dataMappingId),
-    );
-    const response = await this.callOnBehalfOf(userAddr, piAddress, payload);
-    return ProcessInstance.Decode(this.client, DecodeHex(response)).getActivityInDataAsInt()[0];
-  }
-
-  async getActivityInDataAsAddress(userAddr: string, activityInstanceId: string, dataMappingId: string) {
-    const piAddress = await this.getProcessInstanceForActivity(activityInstanceId);
-    const payload = ProcessInstance.Encode(this.client).getActivityInDataAsAddress(
-      DecodeHex(activityInstanceId),
-      BytesFromString(dataMappingId),
-    );
-    const response = await this.callOnBehalfOf(userAddr, piAddress, payload);
-    return ProcessInstance.Decode(this.client, DecodeHex(response)).getActivityInDataAsAddress()[0];
-  }
-
-  async setActivityOutDataAsBool(userAddr: string, activityInstanceId: string, dataMappingId: string, value: boolean) {
-    const piAddress = await this.getProcessInstanceForActivity(activityInstanceId);
-    const payload = ProcessInstance.Encode(this.client).setActivityOutDataAsBool(
-      DecodeHex(activityInstanceId),
-      BytesFromString(dataMappingId),
-      value,
-    );
-    await this.callOnBehalfOf(userAddr, piAddress, payload);
-  }
-
-  async setActivityOutDataAsString(userAddr: string, activityInstanceId: string, dataMappingId: string, value: string) {
-    const piAddress = await this.getProcessInstanceForActivity(activityInstanceId);
-    const payload = ProcessInstance.Encode(this.client).setActivityOutDataAsString(
-      DecodeHex(activityInstanceId),
-      BytesFromString(dataMappingId),
-      value,
-    );
-    await this.callOnBehalfOf(userAddr, piAddress, payload);
-  }
-
-  async setActivityOutDataAsBytes32(
-    userAddr: string,
-    activityInstanceId: string,
-    dataMappingId: string,
-    value: Buffer,
-  ) {
-    const piAddress = await this.getProcessInstanceForActivity(activityInstanceId);
-    const payload = ProcessInstance.Encode(this.client).setActivityOutDataAsBytes32(
-      DecodeHex(activityInstanceId),
-      BytesFromString(dataMappingId),
-      value,
-    );
-    await this.callOnBehalfOf(userAddr, piAddress, payload);
-  }
-
-  async setActivityOutDataAsUint(userAddr: string, activityInstanceId: string, dataMappingId: string, value: number) {
-    const piAddress = await this.getProcessInstanceForActivity(activityInstanceId);
-    const payload = ProcessInstance.Encode(this.client).setActivityOutDataAsUint(
-      DecodeHex(activityInstanceId),
-      BytesFromString(dataMappingId),
-      value,
-    );
-    await this.callOnBehalfOf(userAddr, piAddress, payload);
-  }
-
-  async setActivityOutDataAsInt(userAddr: string, activityInstanceId: string, dataMappingId: string, value: number) {
-    const piAddress = await this.getProcessInstanceForActivity(activityInstanceId);
-    const payload = ProcessInstance.Encode(this.client).setActivityOutDataAsInt(
-      DecodeHex(activityInstanceId),
-      BytesFromString(dataMappingId),
-      value,
-    );
-    await this.callOnBehalfOf(userAddr, piAddress, payload);
-  }
-
-  async setActivityOutDataAsAddress(
-    userAddr: string,
-    activityInstanceId: string,
-    dataMappingId: string,
-    value: string,
-  ) {
-    const piAddress = await this.getProcessInstanceForActivity(activityInstanceId);
-    const payload = ProcessInstance.Encode(this.client).setActivityOutDataAsString(
-      DecodeHex(activityInstanceId),
-      BytesFromString(dataMappingId),
-      value,
-    );
-    await this.callOnBehalfOf(userAddr, piAddress, payload);
+    return ProcessInstance.contract(this.client, piAddress).functions;
   }
 
   async getDataMappingKeys(
-    processDefinition: ProcessDefinition.Contract<CallTx>,
+    processDefinition: ProcessDefinition.Contract,
     activityId: string,
     direction: Direction,
   ): Promise<string[]> {
@@ -1209,11 +1096,13 @@ export class Contracts {
       `REQUEST: Get data mapping keys for process definition at ${processDefinition}, activity ${activityId} and direction ${direction}`,
     );
     const countPromise =
-      direction === Direction.IN ? processDefinition.getInDataMappingKeys : processDefinition.getOutDataMappingKeys;
+      direction === Direction.IN
+        ? processDefinition.functions.getInDataMappingKeys
+        : processDefinition.functions.getOutDataMappingKeys;
 
-    return countPromise(BytesFromString(activityId)).then((data) => {
+    return countPromise(bytesFromString(activityId)).then((data) => {
       if (data[0] && Array.isArray(data[0])) {
-        const keys = data[0].map((key) => BytesToString(key));
+        const keys = data[0].map((key) => bytesToString(key));
         this.log.info(
           `SUCCESS: Retrieved data mapping keys for process definition at ${processDefinition}, activity ${activityId} and direction ${direction}: ${JSON.stringify(
             keys,
@@ -1229,7 +1118,7 @@ export class Contracts {
   }
 
   async getDataMappingDetails(
-    processDefinition: ProcessDefinition.Contract<CallTx>,
+    processDefinition: ProcessDefinition.Contract,
     activityId: string,
     dataMappingIds: Array<string>,
     direction: Direction,
@@ -1249,9 +1138,9 @@ export class Contracts {
     dataMappingIds.forEach((dataMappingId) => {
       const getter =
         direction === Direction.IN
-          ? processDefinition.getInDataMappingDetails
-          : processDefinition.getOutDataMappingDetails;
-      dataPromises.push(getter(BytesFromString(activityId), BytesFromString(dataMappingId)));
+          ? processDefinition.functions.getInDataMappingDetails
+          : processDefinition.functions.getOutDataMappingDetails;
+      dataPromises.push(getter(bytesFromString(activityId), bytesFromString(dataMappingId)));
     });
     return Promise.all(dataPromises);
   }
@@ -1268,7 +1157,7 @@ export class Contracts {
       }data mapping details for activity ${activityId} in process definition at ${pdAddress}`,
     );
 
-    const processDefinition = new ProcessDefinition.Contract(this.client, pdAddress);
+    const processDefinition = ProcessDefinition.contract(this.client, pdAddress);
     // NOTE: activityId are hex converted inside getDataMappingKeys and not here
     const keys = dataMappingIds || (await this.getDataMappingKeys(processDefinition, activityId, direction));
     // NOTE: activityId and dataMappingIds are hex converted inside getDataMappingDetails and not here
@@ -1276,11 +1165,17 @@ export class Contracts {
     return details;
   }
 
-  async getActivityInstanceData(piAddress: string, activityInstanceId: string) {
+  async getActivityInstanceData(
+    piAddress: string,
+    activityInstanceId: string,
+  ): Promise<ReturnType<BpmService.Contract['functions']['getActivityInstanceData']>> {
     this.log.debug(
       `REQUEST: Get activity instance data for activity id ${activityInstanceId} in process instance at address ${piAddress}`,
     );
-    const data = await this.manager.BpmService.getActivityInstanceData(piAddress, DecodeHex(activityInstanceId));
+    const data = await this.manager.BpmService.functions.getActivityInstanceData(
+      piAddress,
+      decodeHex(activityInstanceId),
+    );
     return {
       activityId: data.activityId,
       created: data.created,
@@ -1291,164 +1186,77 @@ export class Contracts {
     };
   }
 
-  async getActivityInstanceIDAtIndex(piAddress: string, index: number) {
-    return new ProcessInstance.Contract(this.client, piAddress)
-      .getActivityInstanceAtIndex(index)
+  async getActivityInstanceIDAtIndex(piAddress: string, index: number): Promise<string> {
+    return ProcessInstance.contract(this.client, piAddress)
+      .functions.getActivityInstanceAtIndex(index)
       .then((data) => data[0])
-      .then((data) => BytesToString(data));
+      .then((data) => bytesToString(data));
   }
 
-  // TODO: type guard value
-  async completeActivity(
-    actingUserAddress: string,
-    activityInstanceId: string,
-    dataMappingId?: string | null,
-    dataType?: DataType,
-    value?: boolean | string | Buffer | number,
-  ) {
-    this.log.debug(`REQUEST: Complete task ${activityInstanceId} by user ${actingUserAddress}`);
-
-    const activityInstanceID = DecodeHex(activityInstanceId);
-
-    const piAddress = await this.manager.BpmService.getProcessInstanceForActivity(activityInstanceID).then(
-      (data) => data[0],
-    );
-    this.log.info(`Found process instance ${piAddress} for activity instance ID ${activityInstanceId}`);
-
-    const bpmService = this.manager.BpmService.address;
-    let payload: string;
-    if (dataMappingId) {
-      this.log.info(
-        `Completing activity with OUT data mapping ID:Value (${dataMappingId}:${value}) for activityInstance ${activityInstanceId} in process instance ${piAddress}`,
-      );
-      const hexDataMappingId = BytesFromString(dataMappingId);
-      switch (dataType) {
-        case DataType.BOOLEAN:
-          payload = ProcessInstance.Encode(this.client).completeActivityWithBoolData(
-            activityInstanceID,
-            bpmService,
-            hexDataMappingId,
-            value as boolean,
-          );
-          break;
-        case DataType.STRING:
-          payload = ProcessInstance.Encode(this.client).completeActivityWithStringData(
-            activityInstanceID,
-            bpmService,
-            hexDataMappingId,
-            value as string,
-          );
-          break;
-        case DataType.BYTES32:
-          payload = ProcessInstance.Encode(this.client).completeActivityWithBytes32Data(
-            activityInstanceID,
-            bpmService,
-            hexDataMappingId,
-            value as Buffer,
-          );
-          break;
-        case DataType.UINT:
-          payload = ProcessInstance.Encode(this.client).completeActivityWithUintData(
-            activityInstanceID,
-            bpmService,
-            hexDataMappingId,
-            value as number,
-          );
-          break;
-        case DataType.INT:
-          payload = ProcessInstance.Encode(this.client).completeActivityWithIntData(
-            activityInstanceID,
-            bpmService,
-            hexDataMappingId,
-            value as number,
-          );
-          break;
-        case DataType.ADDRESS:
-          payload = ProcessInstance.Encode(this.client).completeActivityWithAddressData(
-            activityInstanceID,
-            bpmService,
-            hexDataMappingId,
-            value as string,
-          );
-          break;
-        default:
-          throw new Error(`Unsupported dataType parameter: ${dataType}`);
-      }
-    } else {
-      payload = ProcessInstance.Encode(this.client).completeActivity(activityInstanceID, bpmService);
-    }
-    const returnData = await this.callOnBehalfOf(actingUserAddress, piAddress, payload);
-    const data = ProcessInstance.Decode(this.client, DecodeHex(returnData)).completeActivity();
-    const error = data.error.valueOf();
-
-    switch (error) {
-      case 1:
-        return;
-      case 1001:
-        throw new Error(`No activity instance found with ID ${activityInstanceId}`);
-      case 4103:
-        throw new Error(`User ${actingUserAddress} not authorized to complete activity ID ${activityInstanceId}`);
-      default:
-        throw new Error(
-          `Completing activity instance ID ${activityInstanceId} by user ${actingUserAddress} returned error code: ${error}`,
-        );
-    }
-  }
-
-  async addExternalAddressToEcosystem(externalAddress: string, ecosystemAddress: string) {
+  async addExternalAddressToEcosystem(externalAddress: string, ecosystemAddress: string): Promise<void> {
     this.log.debug(`REQUEST: Add external address ${externalAddress} to Ecosystem at ${ecosystemAddress}`);
-    await new Ecosystem.Contract(this.client, ecosystemAddress).addExternalAddress(externalAddress);
+    await Ecosystem.contract(this.client, ecosystemAddress).functions.addExternalAddress(externalAddress);
     this.log.info(`SUCCESS: Added external address ${externalAddress} to ecosystem at ${ecosystemAddress}`);
   }
 
-  async createUserInEcosystem(user: { username: string }, ecosystemAddress: string) {
-    this.log.debug(`REQUEST: Create a new user with ID: ${user.username} in ecosystem at ${ecosystemAddress}`);
-    return this.manager.ParticipantsManager.createUserAccount(DecodeHex(user.username), '0x0', ecosystemAddress).then(
-      (data) => {
-        this.log.info(`SUCCESS: Created new user ${user.username} at address ${data.userAccount}`);
-        return data.userAccount;
-      },
-    );
-  }
-
-  async createUser(user: { username: string }) {
-    return this.createUserInEcosystem(user, this.ecosystem);
-  }
-
-  async getUserByIdAndEcosystem(id: string, ecosystemAddress: string) {
-    this.log.trace(`REQUEST: Get user by id: ${id} in ecosystem at ${ecosystemAddress}`);
-    return new Ecosystem.Contract(this.client, ecosystemAddress).getUserAccount(DecodeHex(id)).then((data) => {
-      this.log.trace(`SUCCESS: Retrieved user address ${data._account} by id ${id} and ecosystem ${ecosystemAddress}`);
-      return data._account;
+  async createUserInEcosystem({ username }: { username: string }, ecosystemAddress: string): Promise<string> {
+    // FIXME[Silas]: I mean... this is a pretty weird dance, what we are expecting is not really much of a username is it?
+    if (!username) {
+      throw new Error('Username passed is empty');
+    }
+    if (!/^[0-9a-fA-F]+$/.test(username)) {
+      throw new Error(`createUserInEcosystem expects username to be hex-encoded, but got '${username}'`);
+    }
+    this.log.debug(`REQUEST: Create a new user with ID: ${username} in ecosystem at ${ecosystemAddress}`);
+    const id = decodeHex(username);
+    return this.manager.ParticipantsManager.createUserAccount(id, '0x0', ecosystemAddress).then((data) => {
+      this.log.info(`SUCCESS: Created new user ${username} at address ${data.userAccount}`);
+      return data.userAccount;
     });
   }
 
-  async getUserByUsername(username: string) {
+  async createUser(user: { username: string }): Promise<string> {
+    return this.createUserInEcosystem(user, this.ecosystem);
+  }
+
+  async getUserByIdAndEcosystem(id: string, ecosystemAddress: string): Promise<string> {
+    this.log.trace(`REQUEST: Get user by id: ${id} in ecosystem at ${ecosystemAddress}`);
+    return Ecosystem.contract(this.client, ecosystemAddress)
+      .functions.getUserAccount(decodeHex(id))
+      .then((data) => {
+        this.log.trace(
+          `SUCCESS: Retrieved user address ${data._account} by id ${id} and ecosystem ${ecosystemAddress}`,
+        );
+        return data._account;
+      });
+  }
+
+  async getUserByUsername(username: string): Promise<string> {
     return this.getUserByIdAndEcosystem(username, this.ecosystem);
   }
 
-  async getUserByUserId(userid: string) {
+  async getUserByUserId(userid: string): Promise<string> {
     return this.getUserByIdAndEcosystem(userid, this.ecosystem);
   }
 
-  async addUserToEcosystem(username: string, address: string) {
+  async addUserToEcosystem(username: string, address: string): Promise<void> {
     this.log.debug(`REQUEST: Add user ${username} with address ${address} to ecosystem at ${this.ecosystem}`);
-    await new Ecosystem.Contract(this.client, this.ecosystem).addUserAccount(DecodeHex(username), address);
+    await Ecosystem.contract(this.client, this.ecosystem).functions.addUserAccount(decodeHex(username), address);
     this.log.info(
       `SUCCESS: Successfully added user ${username} with address ${address} to ecosystem at ${this.ecosystem}`,
     );
   }
 
-  async migrateUserAccountInEcosystem(userAddress: string, migrateFromId: string, migrateToId: string) {
+  async migrateUserAccountInEcosystem(userAddress: string, migrateFromId: string, migrateToId: string): Promise<void> {
     this.log.debug(`REQUEST: Migrate user account ${userAddress} from id ${migrateFromId} to id ${migrateToId}`);
-    return new Ecosystem.Contract(this.client, this.ecosystem).migrateUserAccount(
+    return Ecosystem.contract(this.client, this.ecosystem).functions.migrateUserAccount(
       userAddress,
-      DecodeHex(migrateFromId),
-      DecodeHex(migrateToId),
+      decodeHex(migrateFromId),
+      decodeHex(migrateToId),
     );
   }
 
-  async createOrganization(org: { approvers: string[] }) {
+  async createOrganization(org: { approvers: string[] }): Promise<string> {
     this.log.debug(`REQUEST: Create organization with: ${JSON.stringify(org)}`);
     return this.manager.ParticipantsManager.createOrganization(org.approvers ? org.approvers : []).then((data) => {
       if (data[0] !== 1) {
@@ -1459,34 +1267,50 @@ export class Contracts {
     });
   }
 
-  async addUserToOrganization(userAddress: any, organizationAddress: any, actingUserAddress: any) {
+  async addUserToOrganization(
+    userAddress: string,
+    organizationAddress: string,
+    actingUserAddress: string,
+  ): Promise<void> {
     this.log.debug('REQUEST: Add user %s to organization %s', userAddress, organizationAddress);
-    const payload = Organization.Encode(this.client).addUser(userAddress);
-    const response = await this.callOnBehalfOf(actingUserAddress, organizationAddress, payload);
-    const data = Organization.Decode(this.client, DecodeHex(response)).addUser();
-    if (!data.successful) {
-      throw new Error(`Failed to add user ${userAddress} to organization ${organizationAddress}!: ${response}`);
+    const { successful } = await Organization.contract(this.client, organizationAddress).functions.addUser(
+      userAddress,
+      callOnBehalfOf(actingUserAddress),
+    );
+    if (!successful) {
+      throw new Error(`Failed to add user ${userAddress} to organization ${organizationAddress}!}`);
     } else {
       this.log.info(`SUCCESS: User ${userAddress} successfully added to organization ${organizationAddress}`);
     }
   }
 
-  async removeUserFromOrganization(userAddress: string, organizationAddress: string, actingUserAddress: string) {
+  async removeUserFromOrganization(
+    userAddress: string,
+    organizationAddress: string,
+    actingUserAddress: string,
+  ): Promise<void> {
     this.log.debug('REQUEST: Remove user %s from organization %s', userAddress, organizationAddress);
-    const payload = Organization.Encode(this.client).removeUser(userAddress);
-    const response = await this.callOnBehalfOf(actingUserAddress, organizationAddress, payload);
-    const data = Organization.Decode(this.client, DecodeHex(response)).removeUser();
-    if (!data.successful) {
-      throw new Error(`Failed to remove user ${userAddress} from organization ${organizationAddress}!: ${response}`);
+    const { successful } = await Organization.contract(this.client, organizationAddress).functions.removeUser(
+      userAddress,
+      callOnBehalfOf(actingUserAddress),
+    );
+    if (!successful) {
+      throw new Error(`Failed to remove user ${userAddress} from organization ${organizationAddress}!`);
     } else {
       this.log.info(`SUCCESS: User ${userAddress} successfully added to organization ${organizationAddress}`);
     }
   }
 
-  async addApproverToOrganization(approverAddress: string, organizationAddress: string, actingUserAddress: string) {
+  async addApproverToOrganization(
+    approverAddress: string,
+    organizationAddress: string,
+    actingUserAddress: string,
+  ): Promise<void> {
     this.log.debug(`REQUEST: Add approver ${approverAddress} to organization ${organizationAddress}`);
-    const payload = Organization.Encode(this.client).addApprover(approverAddress);
-    await this.callOnBehalfOf(actingUserAddress, organizationAddress, payload);
+    await Organization.contract(this.client, organizationAddress).functions.addApprover(
+      approverAddress,
+      callOnBehalfOf(actingUserAddress),
+    );
     this.log.info(`SUCCESS: Approver ${approverAddress} successfully added to organization ${organizationAddress}`);
   }
 
@@ -1496,43 +1320,53 @@ export class Contracts {
     actingUserAddress: string,
   ) {
     this.log.debug(`REQUEST: Remove approver ${approverAddress} from organization ${organizationAddress}`);
-    const payload = Organization.Encode(this.client).removeApprover(approverAddress);
-    await this.callOnBehalfOf(actingUserAddress, organizationAddress, payload);
-    this.log.info(`SUCCESS: Approver ${approverAddress} successfully removed from organization ${organizationAddress}`);
+    await Organization.contract(this.client, organizationAddress).functions.removeApprover(
+      approverAddress,
+      callOnBehalfOf(actingUserAddress),
+    );
   }
 
-  async createDepartment(organizationAddress: string, id: string, actingUserAddress: string) {
+  async createDepartment(organizationAddress: string, id: string, actingUserAddress: string): Promise<void> {
     this.log.debug(`REQUEST: Create department ${id} in organization ${organizationAddress}`);
-    const payload = Organization.Encode(this.client).addDepartment(DecodeHex(id));
-    const response = await this.callOnBehalfOf(actingUserAddress, organizationAddress, payload);
-    const data = Organization.Decode(this.client, DecodeHex(response)).addDepartment();
-    if (!data[0]) {
-      throw new Error(`Failed to create department ID ${id} in organization ${organizationAddress}!: ${response}`);
+    const [successful] = await Organization.contract(this.client, organizationAddress).functions.addDepartment(
+      decodeHex(id),
+      callOnBehalfOf(actingUserAddress),
+    );
+    if (!successful) {
+      throw new Error(`Failed to create department ID ${id} in organization ${organizationAddress}!`);
     } else {
       this.log.info(`SUCCESS: Department ID ${id} successfully created in organization ${organizationAddress}`);
     }
   }
 
-  async removeDepartment(organizationAddress: string, id: string, actingUserAddress: string) {
+  async removeDepartment(organizationAddress: string, id: string, actingUserAddress: string): Promise<void> {
     this.log.debug(`REQUEST: Remove department ${id} from organization ${organizationAddress}`);
-    const payload = Organization.Encode(this.client).removeDepartment(DecodeHex(id));
-    const response = await this.callOnBehalfOf(actingUserAddress, organizationAddress, payload);
-    const data = Organization.Decode(this.client, DecodeHex(response)).removeDepartment();
-    if (!data.successful) {
-      throw new Error(`Failed to remove department ID ${id} from organization ${organizationAddress}!: ${response}`);
+    const { successful } = await Organization.contract(this.client, organizationAddress).functions.removeDepartment(
+      decodeHex(id),
+      callOnBehalfOf(actingUserAddress),
+    );
+    if (!successful) {
+      throw new Error(`Failed to remove department ID ${id} from organization ${organizationAddress}!`);
     } else {
       this.log.info(`SUCCESS: Department ID ${id} successfully removed from organization ${organizationAddress}`);
     }
   }
 
-  async addDepartmentUser(organizationAddress: string, depId: string, userAddress: string, actingUserAddress: string) {
+  async addDepartmentUser(
+    organizationAddress: string,
+    depId: string,
+    userAddress: string,
+    actingUserAddress: string,
+  ): Promise<void> {
     this.log.debug(`REQUEST: Add user ${userAddress} to department ${depId} in organization ${organizationAddress}`);
-    const payload = Organization.Encode(this.client).addUserToDepartment(userAddress, DecodeHex(depId));
-    const response = await this.callOnBehalfOf(actingUserAddress, organizationAddress, payload);
-    const data = Organization.Decode(this.client, DecodeHex(response)).addUserToDepartment();
-    if (!data.successful) {
+    const { successful } = await Organization.contract(this.client, organizationAddress).functions.addUserToDepartment(
+      userAddress,
+      decodeHex(depId),
+      callOnBehalfOf(actingUserAddress),
+    );
+    if (!successful) {
       throw new Error(
-        `Failed to add user ${userAddress} to department ID ${depId} in organization ${organizationAddress}!: ${response}`,
+        `Failed to add user ${userAddress} to department ID ${depId} in organization ${organizationAddress}!`,
       );
     } else {
       this.log.info(
@@ -1546,16 +1380,17 @@ export class Contracts {
     depId: string,
     userAddress: string,
     actingUserAddress: string,
-  ) {
+  ): Promise<void> {
     this.log.debug(
       `REQUEST: Remove user ${userAddress} from department ${depId} in organization ${organizationAddress}`,
     );
-    const payload = Organization.Encode(this.client).removeUserFromDepartment(userAddress, DecodeHex(depId));
-    const response = await this.callOnBehalfOf(actingUserAddress, organizationAddress, payload);
-    const data = Organization.Decode(this.client, DecodeHex(response)).removeUserFromDepartment();
-    if (!data[0]) {
+    const [successful] = await Organization.contract(
+      this.client,
+      organizationAddress,
+    ).functions.removeUserFromDepartment(userAddress, decodeHex(depId), callOnBehalfOf(actingUserAddress));
+    if (!successful) {
       throw new Error(
-        `Failed to remove user ${userAddress} from department ID ${depId} in organization ${organizationAddress}!: ${response}`,
+        `Failed to remove user ${userAddress} from department ID ${depId} in organization ${organizationAddress}!`,
       );
     } else {
       this.log.info(
@@ -1569,7 +1404,7 @@ export async function NewContracts(url: string, account: string, ecosystemName: 
   const client = new Client(url, account);
   const manager = await NewManager(client);
 
-  let ecosystemAddress = await GetFromNameRegistry(client, ecosystemName);
+  let ecosystemAddress = await getFromNameRegistry(client, ecosystemName);
   if (!ecosystemAddress) {
     ecosystemAddress = await RegisterEcosystem(client, manager, account, ecosystemName);
   }
@@ -1599,12 +1434,12 @@ export class SyncContracts extends Contracts {
     return result;
   }
 
-  async sync() {
+  async sync(): Promise<TxExecution> {
     return this.watch.wait();
   }
 }
 
-export async function NewSync(contracts: Contracts, vent: VentListener) {
+export async function NewSync(contracts: Contracts, vent: VentListener): Promise<SyncContracts> {
   await vent.listen();
   return new SyncContracts(contracts, vent);
 }

@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-collections/VersionLinkedAppendOnly.sol";
 
@@ -190,7 +191,7 @@ contract IsoCurrencies100 is VersionLinkedAppendOnly([1,0,0]), IsoCurrencies {
 	bytes3 constant public ZAR = "ZAR";
 	bytes3 constant public ZMW = "ZMW";
 	bytes3 constant public ZWL = "ZWL";
-	
+
 	constructor() public {
 		//** Currency Initialization */
 		registerCurrency(AED, "784", "United Arab Emirates dirham");

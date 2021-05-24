@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "agreements/AgreementsAPI.sol";
 import "commons-base/ErrorsLib.sol";
@@ -26,7 +27,7 @@ contract CompletableOptions {
 // book keeping (e.g. metadata). This is by design (the idea was 'events are primary state'/don't store history twice -
 // sorry if that was a bad decision) and assumes that we can provide a mechanism (via Burrow or Vent DB)
 // to play back the events to a migration contract
-contract Completables is CompletableOptions, AbstractVersionedArtifact(1, 2, 0), AbstractUpgradeable {
+contract Completables is CompletableOptions, AbstractVersionedArtifact(2, 0, 0), AbstractUpgradeable {
   using Strings for *;
 
   bytes32 constant EVENT_ID_AGREEMENT_COMPLETABLE = "AN://agreement-completable";
@@ -38,7 +39,9 @@ contract Completables is CompletableOptions, AbstractVersionedArtifact(1, 2, 0),
     string namespace,
     string name,
     address controller,
+    uint franchisees,
     uint threshold,
+    uint options,
     string metadata
   );
 
@@ -60,8 +63,9 @@ contract Completables is CompletableOptions, AbstractVersionedArtifact(1, 2, 0),
     bytes32 indexed eventId,
     bytes32 indexed intervalId,
     address agreementAddress,
+    address actor,
     address franchisee,
-  // Is the completable ratified after this attestation?
+    // Is the completable ratified after this attestation?
     bool ratified,
     int timestamp
   );
@@ -114,19 +118,24 @@ contract Completables is CompletableOptions, AbstractVersionedArtifact(1, 2, 0),
 
   modifier completableExists(bytes32 intervalId) {
     if (!completables[intervalId].exists) {
-      revert("Completable ".concat(intervalId.quote(), " does not exist"));
+      revert("Completable ".concat(intervalId.toHex(), " does not exist"));
     }
     _;
   }
 
   modifier onlyController(bytes32 intervalId) {
     // Allow self calls for COMPLETE_ON_RATIFICATION
-    if (msg.sender != address(this) && completables[intervalId].controller != msg.sender) {
+    if (!isController(intervalId)) {
       revert(Strings.concat("caller is not Completable controller: ", msg.sender.toHex(),
         " (msg.sender) != ", completables[intervalId].controller.toHex(), " (controller) ",
         " for Completable ", intervalId.toHex()));
     }
     _;
+  }
+
+  function isController(bytes32 intervalId) internal view returns (bool) {
+    // Allow self calls for COMPLETE_ON_RATIFICATION
+    return msg.sender == address(this) || completables[intervalId].controller == msg.sender;
   }
 
   modifier intervalOpen(bytes32 intervalId, int instant) {
@@ -193,7 +202,9 @@ contract Completables is CompletableOptions, AbstractVersionedArtifact(1, 2, 0),
         namespace,
         name,
         msg.sender,
+        franchisees.length,
         threshold,
+        options,
         metadata);
     }
 
@@ -237,7 +248,7 @@ contract Completables is CompletableOptions, AbstractVersionedArtifact(1, 2, 0),
    */
   function attest(bytes32 intervalId, int timestamp)
   external
-  returns (bool)
+  returns (bool isRatified)
   {
     address actor;
     address party;
@@ -257,13 +268,20 @@ contract Completables is CompletableOptions, AbstractVersionedArtifact(1, 2, 0),
    */
   function attestAsParty(bytes32 intervalId, int timestamp, address party)
   external
-  returns (bool)
+  returns (bool isRatified)
   {
     address actor = AgreementsAPI.authorizeActorAsParty(completables[intervalId].agreementAddress, party);
 
-    ErrorsLib.revertIf(actor == address(0),
-      ErrorsLib.UNAUTHORIZED(), "Completables.attest()",
-      Strings.concat("The caller is not authorized to attest to ", intervalId.toHex(), " as party ", party.toHex()));
+    if (actor == address(0)) {
+      // Allow the controller to attest as an arbitrary party before the Completables are active (e.g. during migrations)
+      if (active || !isController(intervalId)) {
+        revert(ErrorsLib.format(ErrorsLib.UNAUTHORIZED(),
+          "Completables.attestAsParty()",
+          Strings.concat("The caller is not authorized to attest to ", intervalId.toHex(), " as party ", party.toHex())));
+      }
+
+      actor = tx.origin;
+    }
 
     return executeAttest(intervalId, timestamp, actor, party);
   }
@@ -272,7 +290,7 @@ contract Completables is CompletableOptions, AbstractVersionedArtifact(1, 2, 0),
   internal
   completableExists(intervalId)
   intervalOpen(intervalId, timestamp)
-  returns (bool)
+  returns (bool isRatified)
   {
     if (ratifyAndCount(intervalId, actor, party) >= completables[intervalId].threshold) {
       completables[intervalId].ratified = timestamp;
@@ -280,11 +298,12 @@ contract Completables is CompletableOptions, AbstractVersionedArtifact(1, 2, 0),
     // Avoid stack too deep issues with local variables
     Completable memory completable = completables[intervalId];
 
-    bool isRatified = completable.ratified != 0;
+    isRatified = completable.ratified != 0;
     if (active) {
       emit LogAgreementCompletableAttest(EVENT_ID_AGREEMENT_COMPLETABLE,
         intervalId,
         completable.agreementAddress,
+        actor,
         party,
         isRatified,
         timestamp);

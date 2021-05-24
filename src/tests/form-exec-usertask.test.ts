@@ -1,9 +1,9 @@
 import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import rid from 'random-id';
 import { Agreement, Archetype, Model, Parameter, ParameterType } from '../lib/types';
-import { SHA3 } from '../lib/utils';
-import rid = require('random-id');
-import {contracts} from "./before";
+import { sha3 } from '../lib/utils';
+import { contracts } from './before';
 chai.use(chaiAsPromised);
 const { expect, assert } = chai;
 
@@ -87,10 +87,10 @@ describe('FORMATION - EXECUTION with 1 User Task each', () => {
 
   it('Should create a buyer and a seller', async () => {
     const resBuyer = await contracts.createUser({
-      username: SHA3(buyer.username),
+      username: sha3(buyer.username),
     });
     const resSeller = await contracts.createUser({
-      username: SHA3(seller.username),
+      username: sha3(seller.username),
     });
     expect(resBuyer).to.match(/[0-9A-Fa-f]{40}/);
     expect(resSeller).to.match(/[0-9A-Fa-f]{40}/);

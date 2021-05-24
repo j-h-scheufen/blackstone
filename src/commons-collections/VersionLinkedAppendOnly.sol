@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/Owned.sol";
@@ -34,25 +35,25 @@ contract VersionLinkedAppendOnly is AbstractVersioned, Owned {
     if (_link.getOwner() != owner) { return BaseErrors.INVALID_PARAM_STATE(); }
 
     int comp = _link.compareVersion(address(this)); // -1 if _link > this
-    
+
     if (comp == 0 || address(_link) == address(this)) { // same version or same contract address
       return BaseErrors.INVALID_PARAM_STATE();
     }
 
     if (comp < 0) { // _link > this, accept _link
-      
+
       if (address(successor) != address(0) && _link.compareVersion(address(successor)) <= 0) {
         // there is a successor, and it's lower than or equal to _link, pass the request on
         return successor.appendNewVersion(_link);
       } else if (address(successor) != address(0) && _link.compareVersion(address(successor)) > 0) {
         // there is a successor, and it's higher than _link, reject _link
-        return BaseErrors.INVALID_PARAM_STATE(); 
+        return BaseErrors.INVALID_PARAM_STATE();
       }
 
-      if (address(predecessor) == address(0) || 
+      if (address(predecessor) == address(0) ||
          (address(predecessor) != address(0) && predecessor.setLatest(_link))) {
         _link.setPredecessor();
-        if (_link.getPredecessor() == address(this) && 
+        if (_link.getPredecessor() == address(this) &&
             _link.getLatest() == address(_link)) {
           successor = _link;
           latest = _link;
@@ -112,19 +113,19 @@ contract VersionLinkedAppendOnly is AbstractVersioned, Owned {
     */
   function getTargetVersion(uint8[3] calldata _targetVer) external view returns (address targetAddr) {
     int comp = this.compareVersion(_targetVer); // -1 if _targetVer < this
-    
+
     if (comp == 0) {
       return address(this);
     }
-    
+
     // target version is lower than this version and higher than predecessor version
     // OR
-    // target version is higher than this version and lower than successor version 
-    bool notFound = 
+    // target version is higher than this version and lower than successor version
+    bool notFound =
       (comp < 0 && address(predecessor) != address(0) && Versioned(predecessor).compareVersion(_targetVer) > 0) ||
       (comp > 0 && address(successor) != address(0) && Versioned(successor).compareVersion(_targetVer) < 0);
-    
-    if (notFound) { 
+
+    if (notFound) {
       return address(0);
     }
 

@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/BaseErrors.sol";
 import "commons-base/ErrorsLib.sol";
@@ -107,8 +108,8 @@ contract AbstractArchetype_v1_0_0 is AbstractDelegateTarget, Archetype_v1_0_0 {
 		);
 		for (uint i = 0; i < _governingArchetypes.length; i++) {
 			emit LogGoverningArchetypeUpdate(
-				EVENT_ID_GOVERNING_ARCHETYPES, 
-				address(this), 
+				EVENT_ID_GOVERNING_ARCHETYPES,
+				address(this),
 				_governingArchetypes[i]
 			);
 		}
@@ -207,7 +208,7 @@ contract AbstractArchetype_v1_0_0 is AbstractDelegateTarget, Archetype_v1_0_0 {
 
 	/**
 	 * @dev Private function to delete the regions of a country and also delete their "jurisdictionKeys" entries
-	 * @param _country the country code 
+	 * @param _country the country code
 	 */
 	function deleteRegionsForCountry(bytes2 _country) private {
 		uint lastPos;

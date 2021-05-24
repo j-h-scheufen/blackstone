@@ -1,9 +1,9 @@
 import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { SHA3 } from '../lib/utils';
-import rid = require('random-id');
-import nanoid = require('nanoid');
-import {contracts} from "./before";
+import nanoid from 'nanoid';
+import rid from 'random-id';
+import { sha3 } from '../lib/utils';
+import { contracts } from './before';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
@@ -17,7 +17,7 @@ describe('USER MIGRATION', () => {
   };
 
   it('Should create a user account', async () => {
-    user.usernameHash = SHA3(user.username);
+    user.usernameHash = sha3(user.username);
     const address = await contracts.createUser({
       username: user.usernameHash,
     });
@@ -26,7 +26,7 @@ describe('USER MIGRATION', () => {
   }).timeout(10000);
 
   it('Should migrate user account from username to userid', async () => {
-    user.useridHash = SHA3(user.userid);
+    user.useridHash = sha3(user.userid);
     await contracts.migrateUserAccountInEcosystem(user.address, user.usernameHash, user.useridHash);
     const address = await contracts.getUserByUserId(user.useridHash);
     expect(user.address).to.equal(address);

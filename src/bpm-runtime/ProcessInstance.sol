@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: Parity-6.0.0
+pragma solidity >=0.5;
 
 import "commons-base/OwnerTransferable.sol";
 import "commons-collections/DataStorage.sol";
@@ -59,7 +60,7 @@ contract ProcessInstance is VersionedArtifact, DataStorage, AddressScopes, Owner
 	function abort() external;
 
     /**
-	 * @dev Triggers the boundary event specified by the given ID and bound to the specified ActivityInstance. 
+	 * @dev Triggers the boundary event specified by the given ID and bound to the specified ActivityInstance.
 	 * @param _activityInstanceId the ID of an ActivityInstance
 	 * @param _eventInstanceId the ID of a BoundaryEventInstance bound to the activity
 	 */
@@ -358,7 +359,7 @@ contract ProcessInstance is VersionedArtifact, DataStorage, AddressScopes, Owner
 	 * @return created - the creation timestamp
 	 * @return completed - the completion timestamp
 	 * @return performer - the account who is performing the activity (for interactive activities only)
-	 * @return completedBy - the account who completed the activity (for interactive activities only) 
+	 * @return completedBy - the account who completed the activity (for interactive activities only)
 	 * @return state - the uint8 representation of the BpmRuntime.ActivityInstanceState of this activity instance
 	 */
 	function getActivityInstanceData(bytes32 _id) external view returns (bytes32 activityId, uint created, uint completed, address performer, address completedBy, uint8 state);
