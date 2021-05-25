@@ -1,7 +1,7 @@
 import { Client } from '@hyperledger/burrow';
 import { deployCompletables, migrateCompletables } from '../agreements/Completables';
 import { Completables } from '../agreements/Completables.abi';
-import { Completables as CompletablesV1 } from '../agreements/Completables_v1_1_0.abi';
+import { CompletablesV110 as CompletablesV1 } from '../agreements/Completables_v1_1_0.abi';
 import { DOUG } from '../commons-management/DOUG.abi';
 
 const client = new Client('127.0.0.1:10997', 'E49DE2603A7E5B02B7AE2F8C1B95E369F85DB4A2');

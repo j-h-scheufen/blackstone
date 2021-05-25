@@ -1,7 +1,7 @@
+import { Client } from '@hyperledger/burrow';
 import { expect } from 'chai';
 import { config } from 'dotenv';
 import { resolve } from 'path';
-import { Client } from '..';
 import { Strings } from '../commons-utils/Strings.abi';
 import { Migrations } from '../migrations/Migrations.abi';
 

@@ -104,7 +104,7 @@ library Strings {
         }
         while (value != 0) {
             uint digit = value % 10;
-            bigEndian[length++] = byte(uint8(ASCII_ZERO + digit));
+            bigEndian[length++] = bytes1(uint8(ASCII_ZERO + digit));
             value /= 10;
         }
         // Convert to little endian and trim on the way
