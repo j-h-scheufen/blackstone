@@ -9,7 +9,7 @@ import "commons-management/AbstractVersionedArtifact.sol";
 
 // This is the old version of the completable contract
 
-contract CompletableOptions {
+contract CompletableOptionsV110 {
     // Completable options
     uint public constant DEFAULT = 0;
     /**
@@ -28,7 +28,7 @@ contract CompletableOptions {
 // book keeping (e.g. metadata). This is by design (the idea was 'events are primary state'/don't store history twice -
 // sorry if that was a bad decision) and assumes that we can provide a mechanism (via Burrow or Vent DB)
 // to play back the events to a migration contract
-contract Completables is CompletableOptions, AbstractVersionedArtifact(1,1,0), AbstractUpgradeable {
+contract CompletablesV110 is CompletableOptionsV110, AbstractVersionedArtifact(1,1,0), AbstractUpgradeable {
     using Strings for *;
 
     bytes32 constant EVENT_ID_AGREEMENT_COMPLETABLE = "AN://agreement-completable";

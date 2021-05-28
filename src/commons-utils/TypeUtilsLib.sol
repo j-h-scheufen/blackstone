@@ -54,7 +54,7 @@ library TypeUtilsLib {
      * LICENSE: MIT - https://github.com/pipermerriam/ethereum-string-utils/blob/master/LICENSE
      * @dev Converts an unsigned integer to its string representation.
      * @param v The number to be converted.
-     * @return the bytes32 representation
+     * @return ret the bytes32 representation
      */
     function toBytes32(uint v) public pure returns (bytes32 ret) {
         if (v == 0) {
@@ -80,7 +80,7 @@ library TypeUtilsLib {
 	    uint charCount = 0;
         uint j;
 	    for (j = 0; j < 32; j++) {
-	        byte char = byte(bytes32(uint(x) * 2 ** (8 * j)));
+	        bytes1 char = bytes1(bytes32(uint(x) * 2 ** (8 * j)));
 	        if (char != 0) {
 	            bytesString[charCount] = char;
 	            charCount++;
@@ -97,7 +97,7 @@ library TypeUtilsLib {
      * @dev Converts the given string to bytes32. If the string is longer than
      * 32 bytes, it will be truncated.
      * @param s a string
-     * @return the bytes32 representation
+     * @return result the bytes32 representation
      */
     function toBytes32(string memory s) public pure returns (bytes32 result) {
 	    assembly {
@@ -109,7 +109,7 @@ library TypeUtilsLib {
      * @dev Converts the given bytes to bytes32. If the bytes are longer than
      * 32, it will be truncated.
      * @param b a byte[]
-     * @return the bytes32 representation
+     * @return result the bytes32 representation
      */
     function toBytes32(bytes memory b) public pure returns (bytes32 result) {
 	    assembly {
@@ -120,7 +120,7 @@ library TypeUtilsLib {
     /**
      * @dev Converts the given bytes into the corresponding uint representation
      * @param b a byte[]
-     * @return the uint representation
+     * @return number the uint representation
      */
 	function toUint(bytes memory b) public pure returns (uint256 number) {
         for (uint i=0; i<b.length; i++) {

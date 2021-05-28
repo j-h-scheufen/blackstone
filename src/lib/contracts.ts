@@ -1,4 +1,4 @@
-import { Client, TxExecution } from '@hyperledger/burrow';
+import { Client, Exec } from '@hyperledger/burrow';
 import { getLogger, Logger } from 'log4js';
 import { ActiveAgreement } from '../agreements/ActiveAgreement.abi';
 import { ActiveAgreementRegistry } from '../agreements/ActiveAgreementRegistry.abi';
@@ -1434,7 +1434,7 @@ export class SyncContracts extends Contracts {
     return result;
   }
 
-  async sync(): Promise<TxExecution> {
+  async sync(): Promise<Exec.TxExecution> {
     return this.watch.wait();
   }
 }

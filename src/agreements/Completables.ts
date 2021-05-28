@@ -6,7 +6,7 @@ import { ERC165Utils } from '../commons-standards/ERC165Utils.abi';
 import { Strings } from '../commons-utils/Strings.abi';
 import { AgreementsAPI } from './AgreementsAPI.abi';
 import { Completables } from './Completables.abi';
-import { Completables as CompletablesV1 } from './Completables_v1_1_0.abi';
+import { CompletablesV110 as CompletablesV1 } from './Completables_v1_1_0.abi';
 
 export type LogAgreementCompletableInit = CompletablesV1.SolidityEvent<'LogAgreementCompletableInit'>;
 export type LogAgreementCompletableInitFranchisee =
@@ -74,7 +74,7 @@ async function processEvent(
   log?: (...args: any[]) => void,
 ): Promise<void> {
   if (log) {
-    log(`Processing ${event.name} at height ${event.event.getHeader().getHeight()} (event ${index})`);
+    log(`Processing ${event.name} at height ${event.event.header.height} (event ${index})`);
   }
   switch (event.name) {
     case 'LogAgreementCompletableInit': {

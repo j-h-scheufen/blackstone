@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import { ActiveAgreement } from '../agreements/ActiveAgreement.abi';
 import { deployCompletables, migrateCompletables } from '../agreements/Completables';
 import { Completables } from '../agreements/Completables.abi';
-import { Completables as CompletablesV1 } from '../agreements/Completables_v1_1_0.abi';
+import { CompletablesV110 as CompletablesV1 } from '../agreements/Completables_v1_1_0.abi';
 import { padBytes } from '../bytes';
 import { Organization } from '../commons-auth/Organization.abi';
 import { UserAccount } from '../commons-auth/UserAccount.abi';
@@ -101,7 +101,7 @@ describe('Completables', () => {
       )
       .map((l) => ({
         // We can access the raw Burrow event and its metadata
-        height: l.event.getHeader().getHeight(),
+        height: l.event.header.height,
         // These are strongly typed LogAgreementCompletableAttest payloads
         payload: l.payload,
       }));

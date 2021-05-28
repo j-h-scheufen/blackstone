@@ -221,7 +221,7 @@ library Mappings {
      * moving the last element of the array into the position. In that case the key of that element is returned.
      * @param _array the keys
      * @param _index the index position to delete
-     * @return an empty bytes32 or the key of the element that was shuffled.
+     * @return swapKey an empty bytes32 or the key of the element that was shuffled.
      */
     function deleteInKeys(bytes32[] storage _array, uint _index) internal returns (bytes32 swapKey) {
         uint lastPos = _array.length - 1;
@@ -238,7 +238,7 @@ library Mappings {
      * moving the last element into the position. In that case the key of that element is returned.
      * @param _array the keys
      * @param _index the index position to delete
-     * @return an empty address or the key of the element that was shuffled.
+     * @return swapKey an empty address or the key of the element that was shuffled.
      */
     function deleteInKeys(address[] storage _array, uint _index) internal returns (address swapKey) {
         uint lastPos = _array.length - 1;
@@ -255,7 +255,7 @@ library Mappings {
      * moving the last element into the position. In that case the key of that element is returned.
      * @param _array the keys
      * @param _index the index position to delete
-     * @return a uint(-1) or the key of the element that was shuffled.
+     * @return swapKey a uint(-1) or the key of the element that was shuffled.
      */
     function deleteInKeys(uint[] storage _array, uint _index) internal returns (uint swapKey) {
         swapKey = uint(-1);
@@ -273,7 +273,7 @@ library Mappings {
      * moving the last element of the array into the position. In that case the key of that element is returned.
      * @param _array the keys
      * @param _index the index position to delete
-     * @return an empty bytes32 or the key of the element that was shuffled.
+     * @return swapKey an empty bytes32 or the key of the element that was shuffled.
      */
     function deleteInKeys(string[] storage _array, uint _index) internal returns (string memory swapKey) {
         uint lastPos = _array.length - 1;
@@ -283,5 +283,4 @@ library Mappings {
         }
         _array.length--;
     }
-
 }

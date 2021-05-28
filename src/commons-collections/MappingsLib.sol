@@ -153,7 +153,7 @@ library MappingsLib {
      * @param _index the index
      * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS()
      * @return key the key or ""
-     * @return nextindex the next index if there is one or 0
+     * @return nextIndex the next index if there is one or 0
      */
     function keyAtIndexHasNext(Mappings.Bytes32AddressMap storage _map, uint _index) public view returns (uint error, bytes32 key, uint nextIndex) {
         (error, key) = keyAtIndex(_map, _index);
@@ -167,7 +167,9 @@ library MappingsLib {
      *
      * @param _map the map
      * @param _index the index
-     * @return BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS(), value, and nextIndex
+     * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS(), value, and nextIndex
+     * @return value the value
+     * @return nextIndex the next index
      */
     function valueAtIndexHasNext(Mappings.Bytes32AddressMap storage _map, uint _index) public view returns (uint error, address value, uint nextIndex) {
         bytes32 key;
@@ -294,7 +296,7 @@ library MappingsLib {
      * @param _index the index
      * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS()
      * @return key the key or ""
-     * @return nextindex the next index if there is one or 0
+     * @return nextIndex the next index if there is one or 0
      */
     function keyAtIndexHasNext(Mappings.Bytes32StringMap storage _map, uint _index) public view returns (uint error, bytes32 key, uint nextIndex) {
         (error, key) = keyAtIndex(_map, _index);
@@ -308,7 +310,7 @@ library MappingsLib {
      *
      * @param _map the map
      * @param _index the index
-     * @return BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS(), value, and nextIndex
+     * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS(), value, and nextIndex
      */
     function valueAtIndexHasNext(Mappings.Bytes32StringMap storage _map, uint _index) public view returns (uint error, string memory value, uint nextIndex) {
         bytes32 key;
@@ -433,7 +435,7 @@ library MappingsLib {
      * @param _index the index
      * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS()
      * @return key the key or ""
-     * @return nextindex the next index if there is one or 0
+     * @return nextIndex the next index if there is one or 0
      */
     function keyAtIndexHasNext(Mappings.Bytes32UintMap storage _map, uint _index) public view returns (uint error, bytes32 key, uint nextIndex) {
         (error, key) = keyAtIndex(_map, _index);
@@ -447,7 +449,7 @@ library MappingsLib {
      *
      * @param _map the map
      * @param _index the index
-     * @return BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS(), value, and nextIndex
+     * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS(), value, and nextIndex
      */
     function valueAtIndexHasNext(Mappings.Bytes32UintMap storage _map, uint _index) public view returns (uint error, uint value, uint nextIndex) {
         bytes32 key;
@@ -570,7 +572,7 @@ library MappingsLib {
      * @param _index the index
      * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS()
      * @return key the key or ""
-     * @return nextindex the next index if there is one or 0
+     * @return nextIndex the next index if there is one or 0
      */
     function keyAtIndexHasNext(Mappings.Bytes32Bytes32Map storage _map, uint _index) public view returns (uint error, bytes32 key, uint nextIndex) {
         (error, key) = keyAtIndex(_map, _index);
@@ -584,7 +586,7 @@ library MappingsLib {
      *
      * @param _map the Bytes32Bytes32Map
      * @param _index the index
-     * @return BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS(), value, and nextIndex
+     * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS(), value, and nextIndex
      */
     function valueAtIndexHasNext(Mappings.Bytes32Bytes32Map storage _map, uint _index) public view returns (uint error, bytes32 value, uint nextIndex) {
         bytes32 key;
@@ -760,7 +762,7 @@ library MappingsLib {
      * @param _index the index
      * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS()
      * @return key the key or ""
-     * @return nextindex the next index if there is one or 0
+     * @return nextIndex the next index if there is one or 0
      */
     function keyAtIndexHasNext(Mappings.Bytes32AddressArrayMap storage _map, uint _index) public view returns (uint error, bytes32 key, uint nextIndex) {
         (error, key) = keyAtIndex(_map, _index);
@@ -900,7 +902,7 @@ library MappingsLib {
      * @param _index the index
      * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS()
      * @return key the key or 0x0
-     * @return nextindex the next index if there is one or 0
+     * @return nextIndex the next index if there is one or 0
      */
     function keyAtIndexHasNext(Mappings.AddressBytes32Map storage _map, uint _index) public view returns (uint error, address key, uint nextIndex) {
         (error, key) = keyAtIndex(_map, _index);
@@ -1040,7 +1042,7 @@ library MappingsLib {
      * @param _index the index
      * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS()
      * @return key the key or ""
-     * @return nextindex the next index if there is one or 0
+     * @return nextIndex the next index if there is one or 0
      */
     function keyAtIndexHasNext(Mappings.AddressStringMap storage _map, uint _index) public view returns (uint error, address key, uint nextIndex) {
         (error, key) = keyAtIndex(_map, _index);
@@ -1180,7 +1182,7 @@ library MappingsLib {
      * @param _index the index
      * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS()
      * @return key the key or 0x0
-     * @return nextindex the next index if there is one or 0
+     * @return nextIndex the next index if there is one or 0
      */
     function keyAtIndexHasNext(Mappings.AddressBoolMap storage _map, uint _index) public view returns (uint error, address key, uint nextIndex) {
         (error, key) = keyAtIndex(_map, _index);
@@ -1509,7 +1511,7 @@ library MappingsLib {
      * @param _index the index
      * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS()
      * @return key the key or 0x0
-     * @return nextindex the next index if there is one or 0
+     * @return nextIndex the next index if there is one or 0
      */
     function keyAtIndexHasNext(Mappings.AddressAddressMap storage _map, uint _index) public view returns (uint error, address key, uint nextIndex) {
         (error, key) = keyAtIndex(_map, _index);
@@ -1699,7 +1701,7 @@ library MappingsLib {
      * @param _index the index
      * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS()
      * @return key the key or 0x0
-     * @return nextindex the next index if there is one or 0
+     * @return nextIndex the next index if there is one or 0
      */
     function keyAtIndexHasNext(Mappings.AddressAddressArrayMap storage _map, uint _index) public view returns(uint error, address key, uint nextIndex) {
         (error, key) = keyAtIndex(_map, _index);
@@ -1843,7 +1845,7 @@ library MappingsLib {
      * @param _index the index
      * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS()
      * @return key the key or uint(-1)
-     * @return nextindex the next index if there is one or 0
+     * @return nextIndex the next index if there is one or 0
      */
     function keyAtIndexHasNext(Mappings.UintAddressMap storage _map, uint _index) public view returns (uint error, uint key, uint nextIndex) {
         (error, key) = keyAtIndex(_map, _index);
@@ -2034,7 +2036,7 @@ library MappingsLib {
      * @param _index the index
      * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS()
      * @return key the key or uint(-1)
-     * @return nextindex the next index if there is one or 0
+     * @return nextIndex the next index if there is one or 0
      */
     function keyAtIndexHasNext(Mappings.UintAddressArrayMap storage _map, uint _index) public view returns (uint error, uint key, uint nextIndex) {
         (error, key) = keyAtIndex(_map, _index);
@@ -2223,7 +2225,7 @@ library MappingsLib {
      * @param _index the index
      * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS()
      * @return key the key or uint(-1)
-     * @return nextindex the next index if there is one or 0
+     * @return nextIndex the next index if there is one or 0
      */
     function keyAtIndexHasNext(Mappings.UintBytes32ArrayMap storage _map, uint _index) public view returns (uint error, uint key, uint nextIndex) {
         (error, key) = keyAtIndex(_map, _index);
@@ -2364,7 +2366,7 @@ library MappingsLib {
      * @param _index the index
      * @return error BaseErrors.NO_ERROR() or BaseErrors.INDEX_OUT_OF_BOUNDS()
      * @return key the key or ""
-     * @return nextindex the next index if there is one or 0
+     * @return nextIndex the next index if there is one or 0
      */
     function keyAtIndexHasNext(Mappings.StringAddressMap storage _map, uint _index) public view returns (uint error, string memory key, uint nextIndex) {
         (error, key) = keyAtIndex(_map, _index);

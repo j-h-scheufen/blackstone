@@ -18,7 +18,6 @@ const contractsSolcV5 = [
   'agreements/RenewalWindowManager.sol',
   'agreements/RenewalInitializer.sol',
   'agreements/RenewalEvaluator.sol',
-  'agreements/Completables_v1_1_0.sol',
   'agreements/DateRelations.sol',
   'agreements/AgreementDates.sol',
 
@@ -95,10 +94,9 @@ const contractsSolcV5 = [
 
   'migrations/Migrations.sol',
 
+  'agreements/Completables_v1_1_0.sol',
   'agreements/Completables.sol',
 ];
-
-const contractsSolcV8 = [];
 
 const binPath = 'bin';
 
@@ -111,4 +109,7 @@ const binPath = 'bin';
  */
 // build(contractsSolcV8, { binPath, solcVersion: 'v8' });
 
-build(contractsSolcV5, { binPath, solcVersion: 'v5' });
+Promise.all([build(contractsSolcV5, { binPath, solcVersion: 'v5' })]).catch((err) => {
+  console.error(`Could not build contracts with Burrow: ${err}`);
+  process.exit(1);
+});

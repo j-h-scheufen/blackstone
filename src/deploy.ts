@@ -435,9 +435,15 @@ export async function RegisterAgreementClasses(
   await doug.functions.register(objectClassActiveAgreement, defaultActiveAgreementImplementationAddress);
 }
 
-export async function DeployLib(
+type StringsThenBool<T> = T extends [...(infer S)[], boolean]
+  ? S extends [...string[]]
+    ? [...S, boolean]
+    : never
+  : never;
+
+export async function deployLib(
   cli: Client,
-  call: (client: Client, ...arg1: string[]) => Promise<string>,
+  call: (client: Client, ...arg: (string | boolean)[]) => Promise<string>,
   ...addr: Promise<string>[]
 ): Promise<string> {
   const addresses = await Promise.all(addr);
@@ -479,7 +485,7 @@ export async function DeployCompletables(
   errorsLib: Promise<string>,
   stringsLib: Promise<string>,
 ) {
-  const completables = await DeployLib(client, Completables.deploy, agreementsApi, errorsLib, stringsLib);
+  const completables = await deployLib(client, Completables.deploy, agreementsApi, errorsLib, stringsLib);
   await UpgradeOwned.contract(client, completables).functions.transferUpgradeOwnership(doug.address);
   await doug.functions.deploy(Contracts.Completables, completables);
 }
@@ -491,7 +497,7 @@ export async function DeployAgreementDates(
   errorsLib: Promise<string>,
   stringsLib: Promise<string>,
 ) {
-  const agreementDates = await DeployLib(client, AgreementDates.deploy, agreementsApi, errorsLib, stringsLib);
+  const agreementDates = await deployLib(client, AgreementDates.deploy, agreementsApi, errorsLib, stringsLib);
   await UpgradeOwned.contract(client, agreementDates).functions.transferUpgradeOwnership(doug.address);
   await doug.functions.deploy(Contracts.AgreementDates, agreementDates);
 }
@@ -540,13 +546,13 @@ export async function Deploy(client: Client) {
   const errorsLib = ErrorsLib.deploy(client);
   const typeUtilsLib = TypeUtilsLib.deploy(client);
   const arrayUtilsLib = ArrayUtilsLib.deploy(client);
-  const mappingsLib = DeployLib(client, MappingsLib.deploy, arrayUtilsLib, typeUtilsLib);
+  const mappingsLib = deployLib(client, MappingsLib.deploy, arrayUtilsLib, typeUtilsLib);
   const stringsLib = Strings.deploy(client);
-  const dataStorageUtils = DeployLib(client, DataStorageUtils.deploy, errorsLib, typeUtilsLib);
+  const dataStorageUtils = deployLib(client, DataStorageUtils.deploy, errorsLib, typeUtilsLib);
   const eRC165Utils = ERC165Utils.deploy(client);
-  const bpmModelLib = DeployLib(client, BpmModelLib.deploy, errorsLib, dataStorageUtils);
-  const bpmRuntimeLib = DeployLib(client, BpmRuntimeLib.deploy, errorsLib, dataStorageUtils, eRC165Utils, typeUtilsLib);
-  const agreementsAPI = DeployLib(client, AgreementsAPI.deploy, eRC165Utils);
+  const bpmModelLib = deployLib(client, BpmModelLib.deploy, errorsLib, dataStorageUtils);
+  const bpmRuntimeLib = deployLib(client, BpmRuntimeLib.deploy, errorsLib, dataStorageUtils, eRC165Utils, typeUtilsLib);
+  const agreementsAPI = deployLib(client, AgreementsAPI.deploy, eRC165Utils);
   const dataTypesAccess = DataTypesAccess.deploy(client);
 
   const doug = await DeployDOUG(client, errorsLib, eRC165Utils);
@@ -608,8 +614,8 @@ export async function Deploy(client: Client) {
       agreementsAPI,
       dataStorageUtils,
     ),
-    DeployLib(client, IsoCountries100.deploy, errorsLib),
-    DeployLib(client, IsoCurrencies100.deploy, errorsLib),
+    deployLib(client, IsoCountries100.deploy, errorsLib),
+    deployLib(client, IsoCurrencies100.deploy, errorsLib),
   ]);
 
   // Applications
