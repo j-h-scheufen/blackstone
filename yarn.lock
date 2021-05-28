@@ -220,10 +220,10 @@
   dependencies:
     "@types/node" ">=12.12.47"
 
-"@hyperledger/burrow@0.33.1-dev.824d331ed":
-  version "0.33.1-dev.824d331ed"
-  resolved "https://registry.npmjs.org/@hyperledger/burrow/-/burrow-0.33.1-dev.824d331ed.tgz#83f7b20ac33d5a47402172f59b642cfa78c6f825"
-  integrity sha512-HJLFNEv8zQ6yfQKFiZ0OHJK/bwjfO/pjbE174FXC/ydu7Ir2bH0TuLKdpUjIpynRTTti4dTEKcZgYtiIHQG2IQ==
+"@hyperledger/burrow@0.34.0":
+  version "0.34.0"
+  resolved "https://registry.npmjs.org/@hyperledger/burrow/-/burrow-0.34.0.tgz#c4f09e5a8be81b54709149625bb2c36e48f6a53a"
+  integrity sha512-aNT3mVn2U46Upf+z6SBv0sa5XtRmaxU5EUYnsy/a/uGaVpEHvhzoSBeBvcdFoa/p0FDBONhljiE5THwlL//BGA==
   dependencies:
     "@ethersproject/abi" "^5.2.0"
     "@grpc/grpc-js" "^1.3.0"

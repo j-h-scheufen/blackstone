@@ -2,6 +2,7 @@
 
 ## Release History
 
+- Version [6.0.0](#v6.0.0)
 - Version [5.1.0](#v5.1.0)
 - Version [5.0.0](#v5.0.0)
 - Version [4.0.0](#v4.0.0)
@@ -22,6 +23,38 @@
 - Version [0.6.0](#v0.6.0)
 - Version [0.5.2](#v0.5.2)
 - Version [0.5.1](#v0.5.1)
+
+## <a name="v6.0.0">Release 6.0.0</a>
+
+### Changed
+- Codegen is now handled by Burrow (with solts being merged in there) and additional functionality provided for events
+
+### Added
+
+#### Acting as a party
+The ability to:
+
+- `signAsParty`
+- `cancelAsParty`
+- `attestAsParty`
+
+To support the corresponding actions where a user may belong to multiple organisations and therefore may act as multiple parties on an agreement to which multiple of that user's organisations are party. Previously in this case the first organisation found for a user would be used and so it would be impossible to act as another party for which the user was authorised.
+
+The previous functions that infer party are still available and function as before by inferring the party, namely:
+
+- `sign`
+- `cancel`
+- `attestAsParty`
+
+#### Completables
+Completables now provide some missing fields in events:
+
+- Number of franchisees and options code number now emitted from init event
+- Actor emitted from attest event
+
+To assist in migrations.
+
+- Added migration helper for migrating state to new Completables
 
 ## <a name="v5.1.0">Release 5.1.0</a>
 
